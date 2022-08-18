@@ -3,6 +3,7 @@ import 'package:vrc_ranks_app/Schema/Events.dart';
 import 'package:requests/requests.dart';
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'Request.dart' as Request;
 
 class EventPage extends StatefulWidget {
   const EventPage({Key? key, required this.title, required this.event_old})
@@ -30,19 +31,15 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
-    var headers = {
-      'Accept': 'application/json',
-      'Authorization': 'Bearer ${dotenv.env['API_KEY']}',
-    };
-    Requests.get(
-            "https://www.robotevents.com/api/v2/events/${widget.event_old.id}",
-            headers: headers)
-        .then((value) => {
-              event = Event.fromJson(jsonDecode(value.body)),
-              setState(() {
-                _event = event;
-              })
-            });
+    Request.getEventDetails(widget.event_old.id.toString()).then((value) {
+      if (this.mounted) {
+        setState(() {
+          _event = value;
+          event = value;
+        });
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -53,8 +50,12 @@ class _EventPageState extends State<EventPage> {
         margin: const EdgeInsets.all(4),
         child: Center(
             child: ListView(children: [
-          Text((event.name).toString()),
-          Text((event.divisions?[0].id).toString()),
+          Text((_event.name).toString()),
+          // Text((_event.divisions?[0].data?.data?[0].alliances?[0].teams?[0].team
+          //         ?.name)
+          //     .toString()),
+          for (var i = 0; i <= (event.divisions?.length ?? 0); i++)
+            Text("${event.divisions?[0].data?.data?[i].name} - $i"),
         ])),
       ),
     );

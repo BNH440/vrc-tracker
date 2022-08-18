@@ -183,7 +183,6 @@ class Division {
   int? id;
   String? name;
   Null? code;
-  Division.Div? data;
 
   Division({this.id, this.name, this.code});
 

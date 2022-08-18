@@ -1,3 +1,5 @@
+import 'package:vrc_ranks_app/Schema/Division.dart';
+
 class Events {
   Meta? meta;
   List<Event>? data;
@@ -281,7 +283,7 @@ class Divisions {
   int? id;
   String? name;
   int? order;
-  // TODO: add div data here
+  Div? data;
 
   Divisions({this.id, this.name, this.order});
 

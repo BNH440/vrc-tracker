@@ -82,10 +82,12 @@ class _MyHomePageState extends State<MyHomePage> {
             headers: headers)
         .then((value) => {
               events = Events.fromJson(jsonDecode(value.body)),
-              print(events),
-              setState(() {
-                _events = events;
-              })
+              if (this.mounted)
+                {
+                  setState(() {
+                    _events = events;
+                  })
+                }
             }); // TODO: make event data state for whole app
     return Scaffold(
       appBar: AppBar(
