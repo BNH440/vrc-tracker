@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart';
-import 'package:requests/requests.dart';
-import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'Request.dart' as Request;
 
 class EventPage extends StatefulWidget {
@@ -44,19 +41,25 @@ class _EventPageState extends State<EventPage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Container(
-        height: 50,
-        color: Colors.grey[300],
-        margin: const EdgeInsets.all(4),
-        child: Center(
-            child: ListView(children: [
-          Text((_event.name).toString()),
-          // Text((_event.divisions?[0].data?.data?[0].alliances?[0].teams?[0].team
-          //         ?.name)
-          //     .toString()),
-          for (var i = 0; i <= (event.divisions?.length ?? 0); i++)
-            Text("${event.divisions?[0].data?.data?[i].name} - $i"),
-        ])),
+      body: ListView(
+        padding: const EdgeInsets.all(8),
+        children: <Widget>[
+          for (var i = 0;
+              i <= (((event.divisions?[0].data?.data?.length ?? 1) - 1));
+              i++)
+            InkWell(
+              onTap: () {},
+              child: Container(
+                height: 50,
+                color: Colors.grey[300],
+                margin: const EdgeInsets.all(4),
+                child: Center(
+                  child: Text(
+                      (event.divisions?[0].data?.data?[i].name).toString()),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
