@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart';
 import 'Request.dart' as Request;
+import 'match.dart';
 
 class EventPage extends StatefulWidget {
   const EventPage({Key? key, required this.title, required this.event_old})
@@ -48,7 +49,16 @@ class _EventPageState extends State<EventPage> {
               i <= (((event.divisions?[0].data?.data?.length ?? 1) - 1));
               i++)
             InkWell(
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => MatchPage(
+                          title: (event.divisions?[0].data?.data?[i].name)
+                              .toString(),
+                          event_old: event, match_number: i)),
+                );
+              },
               child: Container(
                 height: 50,
                 color: Colors.grey[300],
