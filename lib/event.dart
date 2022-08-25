@@ -56,7 +56,8 @@ class _EventPageState extends State<EventPage> {
                       builder: (context) => MatchPage(
                           title: (event.divisions?[0].data?.data?[i].name)
                               .toString(),
-                          event_old: event, match_number: i)),
+                          event_old: event,
+                          match_number: i)),
                 );
               },
               child: Container(

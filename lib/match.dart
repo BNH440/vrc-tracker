@@ -46,11 +46,30 @@ class _MatchPageState extends State<MatchPage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Container(
-        padding: const EdgeInsets.all(8),
-        child: Text((event.divisions?[0].data?.data?[widget.match_number].id)
+      body: ListView(padding: const EdgeInsets.all(8), children: <Widget>[
+        Text((event.divisions?[0].data?.data?[widget.match_number].id)
             .toString()),
-      ),
+        for (var i = 0;
+            i <=
+                (((event.divisions?[0].data?.data?[widget.match_number]
+                                .alliances)
+                            ?.length ??
+                        1) -
+                    1);
+            i++)
+          for (var f = 0;
+              f <=
+                  (((event.divisions?[0].data?.data?[widget.match_number]
+                                  .alliances?[i])
+                              ?.teams
+                              ?.length ??
+                          1) -
+                      1);
+              i++)
+            Text((event.divisions?[0].data?.data?[widget.match_number]
+                    .alliances?[i].teams?[f])
+                .toString()),
+      ]),
     );
   }
 }

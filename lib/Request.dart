@@ -18,9 +18,21 @@ Future<events.Events> getEventList() async {
       headers: headers);
 
   var decoded = events.Events.fromJson(jsonDecode(response.body));
+  print("Requested events");
 
   return decoded;
 }
+
+// final throttledFunction = throttle(() async {
+//   var response = await Requests.get(
+//       "https://www.robotevents.com/api/v2/events?season[]=173&start=$utc",
+//       headers: headers);
+
+//   var decoded = events.Events.fromJson(jsonDecode(response.body));
+//   print("Requested events");
+
+//   return decoded;
+// }, const Duration(seconds: 2));
 
 Future<events.Event> getEventDetails(String eventId) async {
   var response = await Requests.get(
@@ -41,5 +53,6 @@ Future<events.Event> getEventDetails(String eventId) async {
       decoded.divisions![divId! - 1].data = divDecoded;
     }
   }
+  print("Requested event details");
   return decoded;
 }

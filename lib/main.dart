@@ -6,6 +6,7 @@ import 'event.dart';
 import 'Request.dart' as Request;
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:rate_limiter/rate_limiter.dart';
 
 Future main() async {
   await dotenv.load(fileName: ".env");
@@ -59,17 +60,20 @@ class _MyHomePageState extends State<MyHomePage> {
   Events _events = Events();
 
   Events events = Events();
-
   @override
   Widget build(BuildContext context) {
-    Request.getEventList().then((value) {
-      if (this.mounted) {
-        setState(() {
-          _events = value;
-          events = value;
-        });
-      }
-    });
+    Throttle getEventsThrottled = throttle(() {
+      Request.getEventList().then((value) {
+        if (this.mounted) {
+          setState(() {
+            _events = value;
+            events = value;
+          });
+        }
+      });
+    }, const Duration(seconds: 1));
+
+    getEventsThrottled();
 
     return Scaffold(
       appBar: AppBar(
