@@ -1,11 +1,9 @@
 import 'package:requests/requests.dart';
-import 'package:vrc_ranks_app/main.dart';
 import 'dart:convert';
 import 'Schema/Events.dart' as events;
 import 'Schema/Division.dart' as division;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:dart_date/dart_date.dart';
-import 'package:rate_limiter/rate_limiter.dart';
 
 var headers = {
   'Accept': 'application/json',
