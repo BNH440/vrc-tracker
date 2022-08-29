@@ -41,15 +41,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -60,13 +51,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Events _events = Events();
 
   Events events = Events();
-
-  // final getEventsThrottled = throttle(
-  //   () => {
-  //     Request.getEventList().then((value) => events = value),
-  //   },
-  //   const Duration(seconds: 2),
-  // );
 
   @override
   void initState() {
@@ -117,16 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
       body: ListView(
         padding: const EdgeInsets.all(8),
         children: <Widget>[
-          // Container(
-          //   height: 50,
-          //   margin: const EdgeInsets.all(4),
-          //   child: ElevatedButton(
-          //     onPressed: () {
-          //       printThrottled();
-          //     },
-          //     child: const Text('Refresh'),
-          //   ),
-          // ),
           if (_events.data != null)
             for (var event in _events.data!)
               InkWell(
