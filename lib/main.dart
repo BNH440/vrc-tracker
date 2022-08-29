@@ -134,8 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => EventPage(
-                            title: (event.name).toString(), event_old: event)),
+                        builder: (context) =>
+                            EventPage(title: (event.name).toString(), event_old: event)),
                   );
                 },
                 child: Container(

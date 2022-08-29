@@ -35,9 +35,8 @@ Future<events.Events> getEventList() async {
 // }, const Duration(seconds: 2));
 
 Future<events.Event> getEventDetails(String eventId) async {
-  var response = await Requests.get(
-      "https://www.robotevents.com/api/v2/events/$eventId",
-      headers: headers);
+  var response =
+      await Requests.get("https://www.robotevents.com/api/v2/events/$eventId", headers: headers);
 
   var decoded = events.Event.fromJson(jsonDecode(response.body));
 
