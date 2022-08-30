@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart';
+import 'package:vrc_ranks_app/team.dart';
 import 'Request.dart' as Request;
 
 class MatchPage extends StatefulWidget {
@@ -66,7 +67,28 @@ class _MatchPageState extends State<MatchPage> {
           if (event.divisions?[0].data?.data?[widget.match_number].alliances?.length != null)
             for (var prop in (event.divisions![0].data!.data![widget.match_number].alliances!))
               if (prop.teams != null)
-                for (var prop2 in prop.teams!) Text((prop2.team?.name).toString()),
+                for (var prop2 in prop.teams!)
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TeamPage(
+                                title: (event.divisions?[0].data?.data?[i].name).toString(),
+                                event_old: event,
+                                match_number: i,
+                                team_number: i)),
+                      );
+                    },
+                    child: Container(
+                      height: 50,
+                      color: Colors.grey[300],
+                      margin: const EdgeInsets.all(4),
+                      child: Center(
+                        child: Text((prop2.team?.name).toString()),
+                      ),
+                    ),
+                  ),
       ]),
     );
   }
