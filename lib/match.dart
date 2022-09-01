@@ -74,10 +74,18 @@ class _MatchPageState extends State<MatchPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => TeamPage(
-                                title: (event.divisions?[0].data?.data?[i].name).toString(),
+                                title: (prop2.team?.name).toString(),
                                 event_old: event,
-                                match_number: i,
-                                team_number: i)),
+                                match_number: widget.match_number,
+                                alliance_number: event.divisions?[0].data
+                                            ?.data?[widget.match_number].alliances ==
+                                        null
+                                    ? 0
+                                    : event
+                                        .divisions![0].data!.data![widget.match_number].alliances!
+                                        .indexOf(prop),
+                                team_number: prop.teams == null ? 0 : prop.teams!.indexOf(prop2),
+                                team_id: (prop2.team?.id).toString())),
                       );
                     },
                     child: Container(

@@ -1,4 +1,5 @@
 import 'package:requests/requests.dart';
+import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'dart:convert';
 import 'Schema/Events.dart' as events;
 import 'Schema/Division.dart' as division;
@@ -42,5 +43,16 @@ Future<events.Event> getEventDetails(String eventId) async {
     }
   }
   print("Requested event details");
+  return decoded;
+}
+
+Future<Team> getTeamDetails(String teamId) async {
+  var response =
+      await Requests.get("https://www.robotevents.com/api/v2/teams/$teamId", headers: headers);
+
+  var decoded = Team.fromJson(jsonDecode(response.body));
+
+  print("Requested team details: $teamId");
+  print(decoded);
   return decoded;
 }
