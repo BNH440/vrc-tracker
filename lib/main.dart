@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 
+import 'Components/Button.dart';
 import 'Schema/Events.dart';
 import 'event.dart';
 
@@ -116,7 +117,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 50,
                   color: Colors.grey[300],
                   margin: const EdgeInsets.all(4),
-                  child: Center(child: Text((event.name).toString())),
+                  child: CustomButton(
+                    key: Key(event.id.toString()),
+                    title: (event.name).toString(),
+                  ),
                 ),
               ),
         ],
