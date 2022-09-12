@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.red,
       ),
       home: const MyHomePage(title: 'VEX Ranks App'),
     );
@@ -99,32 +99,50 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(8),
-        children: <Widget>[
-          if (_events.data != null)
-            for (var event in _events.data!)
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            EventPage(title: (event.name).toString(), event_old: event)),
-                  );
-                },
-                child: Container(
-                  height: 50,
-                  color: Colors.grey[300],
-                  margin: const EdgeInsets.all(4),
-                  child: CustomButton(
-                    key: Key(event.id.toString()),
-                    title: (event.name).toString(),
-                  ),
+      body: (_events.data).toString() == "null"
+          ? const Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(
+                  color: Colors.red,
                 ),
               ),
-        ],
-      ),
+            )
+          : ListView(
+              padding: const EdgeInsets.all(8),
+              children: <Widget>[
+                if (_events.data != null)
+                  for (var event in _events.data!)
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  EventPage(title: (event.name).toString(), event_old: event)),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey[300],
+                        ),
+                        height: 50,
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        margin: const EdgeInsets.all(4),
+                        child: Center(
+                          child: Text(
+                            (event.name).toString(),
+                            overflow: TextOverflow.fade,
+                            maxLines: 1,
+                            softWrap: false,
+                          ),
+                        ),
+                      ),
+                    ),
+              ],
+            ),
     );
   }
 }

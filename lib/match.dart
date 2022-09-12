@@ -62,42 +62,66 @@ class _MatchPageState extends State<MatchPage> {
           ),
         ],
       ),
-      body: ListView(padding: const EdgeInsets.all(8), children: <Widget>[
-        if (event.divisions != null)
-          if (event.divisions?[0].data?.data?[widget.match_number].alliances?.length != null)
-            for (var prop in (event.divisions![0].data!.data![widget.match_number].alliances!))
-              if (prop.teams != null)
-                for (var prop2 in prop.teams!)
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => TeamPage(
-                                title: (prop2.team?.name).toString(),
-                                event_old: event,
-                                match_number: widget.match_number,
-                                alliance_number: event.divisions?[0].data
-                                            ?.data?[widget.match_number].alliances ==
-                                        null
-                                    ? 0
-                                    : event
-                                        .divisions![0].data!.data![widget.match_number].alliances!
-                                        .indexOf(prop),
-                                team_number: prop.teams == null ? 0 : prop.teams!.indexOf(prop2),
-                                team_id: (prop2.team?.id).toString())),
-                      );
-                    },
-                    child: Container(
-                      height: 50,
-                      color: Colors.grey[300],
-                      margin: const EdgeInsets.all(4),
-                      child: Center(
-                        child: Text((prop2.team?.name).toString()),
-                      ),
-                    ),
-                  ),
-      ]),
+      body: (event.divisions?[0].data?.data).toString() == "null"
+          ? const Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(
+                  color: Colors.red,
+                ),
+              ),
+            )
+          : ListView(padding: const EdgeInsets.all(8), children: <Widget>[
+              if (event.divisions != null)
+                if (event.divisions?[0].data?.data?[widget.match_number].alliances?.length != null)
+                  for (var prop
+                      in (event.divisions![0].data!.data![widget.match_number].alliances!))
+                    if (prop.teams != null)
+                      for (var prop2 in prop.teams!)
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TeamPage(
+                                      title: (prop2.team?.name).toString(),
+                                      event_old: event,
+                                      match_number: widget.match_number,
+                                      alliance_number: event.divisions?[0].data
+                                                  ?.data?[widget.match_number].alliances ==
+                                              null
+                                          ? 0
+                                          : event.divisions![0].data!.data![widget.match_number]
+                                              .alliances!
+                                              .indexOf(prop),
+                                      team_number:
+                                          prop.teams == null ? 0 : prop.teams!.indexOf(prop2),
+                                      team_id: (prop2.team?.id).toString())),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.grey[300],
+                              border: Border.all(
+                                color: prop.color == 'red'
+                                    ? Colors.red
+                                    : prop.color == 'blue'
+                                        ? Colors.blue
+                                        : Colors.grey,
+                                width: 1,
+                              ),
+                            ),
+                            height: 50,
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            margin: const EdgeInsets.all(4),
+                            child: Center(
+                              child: Text((prop2.team?.name).toString()),
+                            ),
+                          ),
+                        ),
+            ]),
     );
   }
 }
