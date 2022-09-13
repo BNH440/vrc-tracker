@@ -70,45 +70,46 @@ class _TeamPageState extends State<TeamPage> {
     );
     final getTeamDetailsThrottled = throttle(
       () async => {
-        event = await Request.getEventDetails(widget.event_old.id.toString()),
+        team = await Request.getTeamDetails((widget.team_id).toString()),
         if (this.mounted)
           {
             setState(() {
-              _event = event;
-              event = event;
+              _team = team;
+              team = team;
             }),
           },
       },
       const Duration(seconds: 2),
     );
 
-    return (team.teamName).toString() == "null"
-        ? const Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: CircularProgressIndicator(
-                color: Colors.red,
-              ),
-            ),
-          )
-        : Scaffold(
-            appBar: AppBar(
-              title: Text(widget.title),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: () {
-                    getEventDetailsThrottled();
-                  },
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              getEventDetailsThrottled();
+              getTeamDetailsThrottled();
+            },
+          ),
+        ],
+      ),
+      body: (team.teamName).toString() == "null"
+          ? const Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(
+                  color: Colors.red,
                 ),
-              ],
-            ),
-            body: ListView(padding: const EdgeInsets.all(8), children: <Widget>[
+              ),
+            )
+          : ListView(padding: const EdgeInsets.all(8), children: <Widget>[
               Text('Team Number: ${team.number}'),
               Text('Team Name: ${team.teamName}'),
               Text('Team Organization: ${team.organization}'),
             ]),
-          );
+    );
   }
 }

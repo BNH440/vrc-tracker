@@ -52,7 +52,6 @@ Future<Team> getTeamDetails(String teamId) async {
 
   var decoded = Team.fromJson(jsonDecode(response.body));
 
-  print("Requested team details: $teamId");
-  print(decoded);
+  print("Requested team details");
   return decoded;
 }
