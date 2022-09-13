@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 
@@ -117,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          CupertinoPageRoute(
                               builder: (context) =>
                                   EventPage(title: (event.name).toString(), event_old: event)),
                         );

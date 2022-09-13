@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart';
@@ -83,7 +84,7 @@ class _MatchPageState extends State<MatchPage> {
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
+                              CupertinoPageRoute(
                                   builder: (context) => TeamPage(
                                       title: (prop2.team?.name).toString(),
                                       event_old: event,

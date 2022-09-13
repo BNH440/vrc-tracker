@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart';
@@ -77,7 +78,7 @@ class _EventPageState extends State<EventPage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
+                        CupertinoPageRoute(
                             builder: (context) => MatchPage(
                                 title: (event.divisions?[0].data?.data?[i].name).toString(),
                                 event_old: event,
