@@ -5,6 +5,7 @@ import 'package:vrc_ranks_app/Schema/Events.dart';
 import 'Request.dart' as Request;
 import 'match.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EventPage extends StatefulWidget {
   const EventPage({Key? key, required this.title, required this.event_old}) : super(key: key);
@@ -144,7 +145,8 @@ class _EventPageState extends State<EventPage> {
                               children: [
                                 InkWell(
                                   onTap: () {
-                                    // launch("https://flutter.io");
+                                    launchUrl(Uri.parse(
+                                        "https://www.robotevents.com/robot-competitions/vex-robotics-competition/${event.sku}.html"));
                                     print("Redirect to web browser with comp link");
                                   },
                                   child: Container(
