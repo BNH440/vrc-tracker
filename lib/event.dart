@@ -73,6 +73,45 @@ class _EventPageState extends State<EventPage> {
           : ListView(
               padding: const EdgeInsets.all(8),
               children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.grey[300],
+                  ),
+                  height: 200,
+                  padding: const EdgeInsets.all(8),
+                  margin: const EdgeInsets.all(4),
+                  child: ListView(padding: const EdgeInsets.all(8), children: <Widget>[
+                    Text(
+                      event.name.toString(),
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                    Text(
+                      "Ongoing: ${event.ongoing.toString() == "true" ? "Yes" : "No"}",
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    Text(
+                      "Address: ${event.location?.address1.toString()}",
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    Align(
+                      alignment: FractionalOffset.bottomRight,
+                      child: InkWell(
+                        onTap: () {
+                          print("Redirect to navigation app");
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey[400],
+                          ),
+                          padding: const EdgeInsets.all(10),
+                          child: const Icon(Icons.navigation_rounded, size: 30),
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
                 for (var i = 0; i <= (((event.divisions?[0].data?.data?.length ?? 1) - 1)); i++)
                   InkWell(
                     onTap: () {
