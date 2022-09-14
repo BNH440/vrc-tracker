@@ -11,7 +11,7 @@ var headers = {
   'Authorization': 'Bearer ${dotenv.env['API_KEY']}',
 };
 
-var utc = "${DateTime.now().format("yyyy-MM-dd")}T00:00:00Z";
+var utc = "${DateTime.now().addDays(-1).toUtc().format("yyyy-MM-dd")}T00:00:00Z";
 
 Future<events.Events> getEventList() async {
   var response = await Requests.get(
