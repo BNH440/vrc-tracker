@@ -1,16 +1,25 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:vrc_ranks_app/Schema/MatchListByTeam.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
+import 'package:vrc_ranks_app/Schema/Events.dart' as Events;
 import 'Request.dart' as Request;
+import 'match.dart';
 
 class TeamPage extends StatefulWidget {
-  const TeamPage({Key? key, required this.title, required this.team_id, required this.match_id})
+  const TeamPage(
+      {Key? key,
+      required this.title,
+      required this.team_id,
+      required this.match_id,
+      required this.event_old})
       : super(key: key);
 
   final String title;
   final String team_id;
   final String match_id;
+  final Events.Event event_old;
 
   @override
   State<TeamPage> createState() => _TeamPageState();
@@ -25,7 +34,8 @@ class _TeamPageState extends State<TeamPage> {
   @override
   void initState() {
     super.initState();
-    Request.getTeamDetails((widget.team_id).toString(), (widget.match_id).toString()).then((value) {
+    Request.getTeamDetails((widget.team_id).toString(), (widget.event_old.id).toString())
+        .then((value) {
       if (this.mounted) {
         setState(() {
           _team = value[0];
@@ -42,8 +52,8 @@ class _TeamPageState extends State<TeamPage> {
     List list;
     final getTeamDetailsThrottled = throttle(
       () async => {
-        list =
-            await Request.getTeamDetails((widget.team_id).toString(), (widget.match_id).toString()),
+        list = await Request.getTeamDetails(
+            (widget.team_id).toString(), (widget.event_old.id).toString()),
         if (this.mounted)
           {
             setState(() {
@@ -121,6 +131,32 @@ class _TeamPageState extends State<TeamPage> {
                     )
                   ]),
                 ),
+                if (matches.data != null)
+                  for (var i = 0; i <= (((matches.data?.length ?? 1) - 1)); i++)
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                              builder: (context) => MatchPage(
+                                  title: (matches.data?[i].name).toString(),
+                                  event_old: widget.event_old,
+                                  match_number: i)),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey[300],
+                        ),
+                        height: 50,
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        margin: const EdgeInsets.all(4),
+                        child: Center(
+                          child: Text((matches.data?[i].name).toString()),
+                        ),
+                      ),
+                    ),
               ]),
               onRefresh: () async {
                 await getTeamDetailsThrottled();

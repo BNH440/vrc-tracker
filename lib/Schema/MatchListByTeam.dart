@@ -44,7 +44,7 @@ class Meta {
   int? _from;
   int? _lastPage;
   String? _lastPageUrl;
-  String? _nextPageUrl;
+  Null? _nextPageUrl;
   String? _path;
   int? _perPage;
   Null? _prevPageUrl;
@@ -57,7 +57,7 @@ class Meta {
       int? from,
       int? lastPage,
       String? lastPageUrl,
-      String? nextPageUrl,
+      Null? nextPageUrl,
       String? path,
       int? perPage,
       Null? prevPageUrl,
@@ -108,8 +108,8 @@ class Meta {
   set lastPage(int? lastPage) => _lastPage = lastPage;
   String? get lastPageUrl => _lastPageUrl;
   set lastPageUrl(String? lastPageUrl) => _lastPageUrl = lastPageUrl;
-  String? get nextPageUrl => _nextPageUrl;
-  set nextPageUrl(String? nextPageUrl) => _nextPageUrl = nextPageUrl;
+  Null? get nextPageUrl => _nextPageUrl;
+  set nextPageUrl(Null? nextPageUrl) => _nextPageUrl = nextPageUrl;
   String? get path => _path;
   set path(String? path) => _path = path;
   int? get perPage => _perPage;
@@ -154,231 +154,144 @@ class Meta {
 
 class Data {
   int? _id;
-  String? _number;
-  String? _teamName;
-  String? _robotName;
-  String? _organization;
-  Location? _location;
-  bool? _registered;
-  Program? _program;
-  String? _grade;
+  Event? _event;
+  Division? _division;
+  int? _round;
+  int? _instance;
+  int? _matchnum;
+  String? _scheduled;
+  String? _started;
+  String? _field;
+  bool? _scored;
+  String? _name;
+  List<Alliances>? _alliances;
 
   Data(
       {int? id,
-      String? number,
-      String? teamName,
-      String? robotName,
-      String? organization,
-      Location? location,
-      bool? registered,
-      Program? program,
-      String? grade}) {
+      Event? event,
+      Division? division,
+      int? round,
+      int? instance,
+      int? matchnum,
+      String? scheduled,
+      String? started,
+      String? field,
+      bool? scored,
+      String? name,
+      List<Alliances>? alliances}) {
     if (id != null) {
       this._id = id;
     }
-    if (number != null) {
-      this._number = number;
+    if (event != null) {
+      this._event = event;
     }
-    if (teamName != null) {
-      this._teamName = teamName;
+    if (division != null) {
+      this._division = division;
     }
-    if (robotName != null) {
-      this._robotName = robotName;
+    if (round != null) {
+      this._round = round;
     }
-    if (organization != null) {
-      this._organization = organization;
+    if (instance != null) {
+      this._instance = instance;
     }
-    if (location != null) {
-      this._location = location;
+    if (matchnum != null) {
+      this._matchnum = matchnum;
     }
-    if (registered != null) {
-      this._registered = registered;
+    if (scheduled != null) {
+      this._scheduled = scheduled;
     }
-    if (program != null) {
-      this._program = program;
+    if (started != null) {
+      this._started = started;
     }
-    if (grade != null) {
-      this._grade = grade;
+    if (field != null) {
+      this._field = field;
+    }
+    if (scored != null) {
+      this._scored = scored;
+    }
+    if (name != null) {
+      this._name = name;
+    }
+    if (alliances != null) {
+      this._alliances = alliances;
     }
   }
 
   int? get id => _id;
   set id(int? id) => _id = id;
-  String? get number => _number;
-  set number(String? number) => _number = number;
-  String? get teamName => _teamName;
-  set teamName(String? teamName) => _teamName = teamName;
-  String? get robotName => _robotName;
-  set robotName(String? robotName) => _robotName = robotName;
-  String? get organization => _organization;
-  set organization(String? organization) => _organization = organization;
-  Location? get location => _location;
-  set location(Location? location) => _location = location;
-  bool? get registered => _registered;
-  set registered(bool? registered) => _registered = registered;
-  Program? get program => _program;
-  set program(Program? program) => _program = program;
-  String? get grade => _grade;
-  set grade(String? grade) => _grade = grade;
+  Event? get event => _event;
+  set event(Event? event) => _event = event;
+  Division? get division => _division;
+  set division(Division? division) => _division = division;
+  int? get round => _round;
+  set round(int? round) => _round = round;
+  int? get instance => _instance;
+  set instance(int? instance) => _instance = instance;
+  int? get matchnum => _matchnum;
+  set matchnum(int? matchnum) => _matchnum = matchnum;
+  String? get scheduled => _scheduled;
+  set scheduled(String? scheduled) => _scheduled = scheduled;
+  String? get started => _started;
+  set started(String? started) => _started = started;
+  String? get field => _field;
+  set field(String? field) => _field = field;
+  bool? get scored => _scored;
+  set scored(bool? scored) => _scored = scored;
+  String? get name => _name;
+  set name(String? name) => _name = name;
+  List<Alliances>? get alliances => _alliances;
+  set alliances(List<Alliances>? alliances) => _alliances = alliances;
 
   Data.fromJson(Map<String, dynamic> json) {
     _id = json['id'];
-    _number = json['number'];
-    _teamName = json['team_name'];
-    _robotName = json['robot_name'];
-    _organization = json['organization'];
-    _location = json['location'] != null ? new Location.fromJson(json['location']) : null;
-    _registered = json['registered'];
-    _program = json['program'] != null ? new Program.fromJson(json['program']) : null;
-    _grade = json['grade'];
+    _event = json['event'] != null ? new Event.fromJson(json['event']) : null;
+    _division = json['division'] != null ? new Division.fromJson(json['division']) : null;
+    _round = json['round'];
+    _instance = json['instance'];
+    _matchnum = json['matchnum'];
+    _scheduled = json['scheduled'];
+    _started = json['started'];
+    _field = json['field'];
+    _scored = json['scored'];
+    _name = json['name'];
+    if (json['alliances'] != null) {
+      _alliances = <Alliances>[];
+      json['alliances'].forEach((v) {
+        _alliances!.add(new Alliances.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this._id;
-    data['number'] = this._number;
-    data['team_name'] = this._teamName;
-    data['robot_name'] = this._robotName;
-    data['organization'] = this._organization;
-    if (this._location != null) {
-      data['location'] = this._location!.toJson();
+    if (this._event != null) {
+      data['event'] = this._event!.toJson();
     }
-    data['registered'] = this._registered;
-    if (this._program != null) {
-      data['program'] = this._program!.toJson();
+    if (this._division != null) {
+      data['division'] = this._division!.toJson();
     }
-    data['grade'] = this._grade;
-    return data;
-  }
-}
-
-class Location {
-  Null? _venue;
-  String? _address1;
-  Null? _address2;
-  String? _city;
-  String? _region;
-  String? _postcode;
-  String? _country;
-  Coordinates? _coordinates;
-
-  Location(
-      {Null? venue,
-      String? address1,
-      Null? address2,
-      String? city,
-      String? region,
-      String? postcode,
-      String? country,
-      Coordinates? coordinates}) {
-    if (venue != null) {
-      this._venue = venue;
-    }
-    if (address1 != null) {
-      this._address1 = address1;
-    }
-    if (address2 != null) {
-      this._address2 = address2;
-    }
-    if (city != null) {
-      this._city = city;
-    }
-    if (region != null) {
-      this._region = region;
-    }
-    if (postcode != null) {
-      this._postcode = postcode;
-    }
-    if (country != null) {
-      this._country = country;
-    }
-    if (coordinates != null) {
-      this._coordinates = coordinates;
-    }
-  }
-
-  Null? get venue => _venue;
-  set venue(Null? venue) => _venue = venue;
-  String? get address1 => _address1;
-  set address1(String? address1) => _address1 = address1;
-  Null? get address2 => _address2;
-  set address2(Null? address2) => _address2 = address2;
-  String? get city => _city;
-  set city(String? city) => _city = city;
-  String? get region => _region;
-  set region(String? region) => _region = region;
-  String? get postcode => _postcode;
-  set postcode(String? postcode) => _postcode = postcode;
-  String? get country => _country;
-  set country(String? country) => _country = country;
-  Coordinates? get coordinates => _coordinates;
-  set coordinates(Coordinates? coordinates) => _coordinates = coordinates;
-
-  Location.fromJson(Map<String, dynamic> json) {
-    _venue = json['venue'];
-    _address1 = json['address_1'];
-    _address2 = json['address_2'];
-    _city = json['city'];
-    _region = json['region'];
-    _postcode = json['postcode'];
-    _country = json['country'];
-    _coordinates =
-        json['coordinates'] != null ? new Coordinates.fromJson(json['coordinates']) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['venue'] = this._venue;
-    data['address_1'] = this._address1;
-    data['address_2'] = this._address2;
-    data['city'] = this._city;
-    data['region'] = this._region;
-    data['postcode'] = this._postcode;
-    data['country'] = this._country;
-    if (this._coordinates != null) {
-      data['coordinates'] = this._coordinates!.toJson();
+    data['round'] = this._round;
+    data['instance'] = this._instance;
+    data['matchnum'] = this._matchnum;
+    data['scheduled'] = this._scheduled;
+    data['started'] = this._started;
+    data['field'] = this._field;
+    data['scored'] = this._scored;
+    data['name'] = this._name;
+    if (this._alliances != null) {
+      data['alliances'] = this._alliances!.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
-class Coordinates {
-  double? _lat;
-  double? _lon;
-
-  Coordinates({double? lat, double? lon}) {
-    if (lat != null) {
-      this._lat = lat;
-    }
-    if (lon != null) {
-      this._lon = lon;
-    }
-  }
-
-  double? get lat => _lat;
-  set lat(double? lat) => _lat = lat;
-  double? get lon => _lon;
-  set lon(double? lon) => _lon = lon;
-
-  Coordinates.fromJson(Map<String, dynamic> json) {
-    _lat = json['lat'];
-    _lon = json['lon'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['lat'] = this._lat;
-    data['lon'] = this._lon;
-    return data;
-  }
-}
-
-class Program {
+class Event {
   int? _id;
   String? _name;
   String? _code;
 
-  Program({int? id, String? name, String? code}) {
+  Event({int? id, String? name, String? code}) {
     if (id != null) {
       this._id = id;
     }
@@ -397,7 +310,7 @@ class Program {
   String? get code => _code;
   set code(String? code) => _code = code;
 
-  Program.fromJson(Map<String, dynamic> json) {
+  Event.fromJson(Map<String, dynamic> json) {
     _id = json['id'];
     _name = json['name'];
     _code = json['code'];
@@ -408,6 +321,124 @@ class Program {
     data['id'] = this._id;
     data['name'] = this._name;
     data['code'] = this._code;
+    return data;
+  }
+}
+
+class Division {
+  int? _id;
+  String? _name;
+  Null? _code;
+
+  Division({int? id, String? name, Null? code}) {
+    if (id != null) {
+      this._id = id;
+    }
+    if (name != null) {
+      this._name = name;
+    }
+    if (code != null) {
+      this._code = code;
+    }
+  }
+
+  int? get id => _id;
+  set id(int? id) => _id = id;
+  String? get name => _name;
+  set name(String? name) => _name = name;
+  Null? get code => _code;
+  set code(Null? code) => _code = code;
+
+  Division.fromJson(Map<String, dynamic> json) {
+    _id = json['id'];
+    _name = json['name'];
+    _code = json['code'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this._id;
+    data['name'] = this._name;
+    data['code'] = this._code;
+    return data;
+  }
+}
+
+class Alliances {
+  String? _color;
+  int? _score;
+  List<Teams>? _teams;
+
+  Alliances({String? color, int? score, List<Teams>? teams}) {
+    if (color != null) {
+      this._color = color;
+    }
+    if (score != null) {
+      this._score = score;
+    }
+    if (teams != null) {
+      this._teams = teams;
+    }
+  }
+
+  String? get color => _color;
+  set color(String? color) => _color = color;
+  int? get score => _score;
+  set score(int? score) => _score = score;
+  List<Teams>? get teams => _teams;
+  set teams(List<Teams>? teams) => _teams = teams;
+
+  Alliances.fromJson(Map<String, dynamic> json) {
+    _color = json['color'];
+    _score = json['score'];
+    if (json['teams'] != null) {
+      _teams = <Teams>[];
+      json['teams'].forEach((v) {
+        _teams!.add(new Teams.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['color'] = this._color;
+    data['score'] = this._score;
+    if (this._teams != null) {
+      data['teams'] = this._teams!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class Teams {
+  Division? _team;
+  bool? _sitting;
+
+  Teams({Division? team, bool? sitting}) {
+    if (team != null) {
+      this._team = team;
+    }
+    if (sitting != null) {
+      this._sitting = sitting;
+    }
+  }
+
+  Division? get team => _team;
+  set team(Division? team) => _team = team;
+  bool? get sitting => _sitting;
+  set sitting(bool? sitting) => _sitting = sitting;
+
+  Teams.fromJson(Map<String, dynamic> json) {
+    _team = json['team'] != null ? new Division.fromJson(json['team']) : null;
+    _sitting = json['sitting'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this._team != null) {
+      data['team'] = this._team!.toJson();
+    }
+    data['sitting'] = this._sitting;
     return data;
   }
 }

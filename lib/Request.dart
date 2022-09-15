@@ -37,7 +37,7 @@ Future<events.Event> getEventDetails(String eventId) async {
       var divId = div.id;
       var divResponse = await Requests.get(
           // "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches",
-          "https://www.robotevents.com/api/v2/events/48087/divisions/$divId/matches",
+          "https://www.robotevents.com/api/v2/events/48126/divisions/$divId/matches",
           headers: headers);
       var divDecoded = division.Div.fromJson(jsonDecode(divResponse.body));
       decoded.divisions![divId! - 1].data = divDecoded;
@@ -56,10 +56,12 @@ Future<List> getTeamDetails(String teamId, String compId) async {
 
   var decoded = Team.fromJson(jsonDecode(response.body));
 
-  var response2 = await Requests.get("https://www.robotevents.com/api/v2/event/$compId/teams",
+  var response2 = await Requests.get(
+      // "https://www.robotevents.com/api/v2/teams/128201/matches?event[]=$compId",
+      "https://www.robotevents.com/api/v2/teams/$teamId/matches?event[]=48126",
       headers: headers);
 
-  var decoded2 = MatchListByTeam.fromJson(jsonDecode(response.body));
+  var decoded2 = MatchListByTeam.fromJson(jsonDecode(response2.body));
 
   print("Requested team details");
   return [decoded, decoded2];
