@@ -41,6 +41,7 @@ dependencies:
     adobe_xd: ^2.0.0
     intl:
     url_launcher: ^6.0.0-nullsafety.1
+    maps_launcher: ^2.0.1
 
 dev_dependencies:
     flutter_test:

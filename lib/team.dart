@@ -87,10 +87,9 @@ class _TeamPageState extends State<TeamPage> {
         title: Text(widget.title),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.star_border_outlined),
             onPressed: () {
-              getEventDetailsThrottled();
-              getTeamDetailsThrottled();
+              // TODO: Add favorite code
             },
           ),
         ],
@@ -105,11 +104,17 @@ class _TeamPageState extends State<TeamPage> {
                 ),
               ),
             )
-          : ListView(padding: const EdgeInsets.all(8), children: <Widget>[
-              Text('Team Number: ${team.number}'),
-              Text('Team Name: ${team.teamName}'),
-              Text('Team Organization: ${team.organization}'),
-            ]),
+          : RefreshIndicator(
+              child: ListView(padding: const EdgeInsets.all(8), children: <Widget>[
+                Text('Team Number: ${team.number}'),
+                Text('Team Name: ${team.teamName}'),
+                Text('Team Organization: ${team.organization}'),
+              ]),
+              onRefresh: () async {
+                await getEventDetailsThrottled();
+                await getTeamDetailsThrottled();
+              },
+            ),
     );
   }
 }

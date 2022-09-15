@@ -90,14 +90,6 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              getEventsThrottled();
-            },
-          ),
-        ],
       ),
       body: (_events.data).toString() == "null"
           ? const Align(
@@ -109,39 +101,44 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             )
-          : ListView(
-              padding: const EdgeInsets.all(8),
-              children: <Widget>[
-                if (_events.data != null)
-                  for (var event in _events.data!)
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                              builder: (context) =>
-                                  EventPage(title: (event.name).toString(), event_old: event)),
-                        );
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.grey[300],
-                        ),
-                        height: 50,
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
-                        margin: const EdgeInsets.all(4),
-                        child: Center(
-                          child: Text(
-                            (event.name).toString(),
-                            overflow: TextOverflow.fade,
-                            maxLines: 1,
-                            softWrap: false,
+          : RefreshIndicator(
+              child: ListView(
+                padding: const EdgeInsets.all(8),
+                children: <Widget>[
+                  if (_events.data != null)
+                    for (var event in _events.data!)
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                                builder: (context) =>
+                                    EventPage(title: (event.name).toString(), event_old: event)),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey[300],
+                          ),
+                          height: 50,
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          margin: const EdgeInsets.all(4),
+                          child: Center(
+                            child: Text(
+                              (event.name).toString(),
+                              overflow: TextOverflow.fade,
+                              maxLines: 1,
+                              softWrap: false,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-              ],
+                ],
+              ),
+              onRefresh: () async {
+                await getEventsThrottled();
+              },
             ),
     );
   }

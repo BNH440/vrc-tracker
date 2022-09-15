@@ -42,6 +42,9 @@ Future<events.Event> getEventDetails(String eventId) async {
       decoded.divisions![divId! - 1].data = divDecoded;
     }
   }
+
+  // TODO: get team list
+
   print("Requested event details");
   return decoded;
 }
