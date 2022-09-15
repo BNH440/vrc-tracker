@@ -6,7 +6,7 @@ import 'Request.dart' as Request;
 import 'match.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:maps_launcher/maps_launcher.dart';
+import 'dart:io' show Platform;
 
 class EventPage extends StatefulWidget {
   const EventPage({Key? key, required this.title, required this.event_old}) : super(key: key);
@@ -130,8 +130,17 @@ class _EventPageState extends State<EventPage> {
                                   children: [
                                     InkWell(
                                       onTap: () {
-                                        MapsLauncher.launchQuery(
-                                            "${event.location?.address1}, ${event.location?.city}, ${event.location?.country}");
+                                        if (Platform.isAndroid) {
+                                          launchUrl(
+                                              Uri.parse(
+                                                  "https://maps.google.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
+                                              mode: LaunchMode.externalApplication);
+                                        } else if (Platform.isIOS) {
+                                          launchUrl(
+                                              Uri.parse(
+                                                  "https://maps.apple.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
+                                              mode: LaunchMode.externalApplication);
+                                        }
                                         print("Redirect to navigation app");
                                       },
                                       child: Container(

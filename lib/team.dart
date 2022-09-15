@@ -1,53 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:rate_limiter/rate_limiter.dart';
-import 'package:vrc_ranks_app/Schema/Events.dart';
+import 'package:vrc_ranks_app/Schema/MatchListByTeam.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'Request.dart' as Request;
 
 class TeamPage extends StatefulWidget {
-  const TeamPage(
-      {Key? key,
-      required this.title,
-      required this.event_old,
-      required this.match_number,
-      required this.alliance_number,
-      required this.team_number,
-      required this.team_id})
+  const TeamPage({Key? key, required this.title, required this.team_id, required this.match_id})
       : super(key: key);
 
   final String title;
-  final Event event_old;
-  final int match_number;
-  final int team_number;
-  final int alliance_number;
   final String team_id;
+  final String match_id;
 
   @override
   State<TeamPage> createState() => _TeamPageState();
 }
 
 class _TeamPageState extends State<TeamPage> {
-  Event _event = Event();
   Team _team = Team();
-  Event event = Event();
   Team team = Team();
+  MatchListByTeam _matches = MatchListByTeam();
+  MatchListByTeam matches = MatchListByTeam();
 
   @override
   void initState() {
     super.initState();
-    Request.getEventDetails(widget.event_old.id.toString()).then((value) {
+    Request.getTeamDetails((widget.team_id).toString(), (widget.match_id).toString()).then((value) {
       if (this.mounted) {
         setState(() {
-          _event = value;
-          event = value;
-        });
-      }
-    });
-    Request.getTeamDetails((widget.team_id).toString()).then((value) {
-      if (this.mounted) {
-        setState(() {
-          _team = value;
-          team = value;
+          _team = value[0];
+          team = value[0];
+          _matches = value[1];
+          matches = value[1];
         });
       }
     });
@@ -55,27 +39,18 @@ class _TeamPageState extends State<TeamPage> {
 
   @override
   Widget build(BuildContext context) {
-    final getEventDetailsThrottled = throttle(
-      () async => {
-        event = await Request.getEventDetails(widget.event_old.id.toString()),
-        if (this.mounted)
-          {
-            setState(() {
-              _event = event;
-              event = event;
-            }),
-          },
-      },
-      const Duration(seconds: 2),
-    );
+    List list;
     final getTeamDetailsThrottled = throttle(
       () async => {
-        team = await Request.getTeamDetails((widget.team_id).toString()),
+        list =
+            await Request.getTeamDetails((widget.team_id).toString(), (widget.match_id).toString()),
         if (this.mounted)
           {
             setState(() {
-              _team = team;
-              team = team;
+              _team = list[0];
+              team = list[0];
+              _matches = list[1];
+              matches = list[1];
             }),
           },
       },
@@ -106,12 +81,48 @@ class _TeamPageState extends State<TeamPage> {
             )
           : RefreshIndicator(
               child: ListView(padding: const EdgeInsets.all(8), children: <Widget>[
-                Text('Team Number: ${team.number}'),
-                Text('Team Name: ${team.teamName}'),
-                Text('Team Organization: ${team.organization}'),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.grey[300],
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  margin: const EdgeInsets.all(4),
+                  child: Flex(direction: Axis.vertical, children: [
+                    ListView(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.all(8),
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Text(
+                            team.number.toString(),
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                        ),
+                        Text(
+                          "Name: ${team.teamName.toString()}",
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                        Text(
+                          "Organization: ${team.organization.toString()}",
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                        Text(
+                          "Location: ${team.location?.city.toString()}, ${team.location?.region.toString()}",
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                        Text(
+                          "Grade: ${team.grade.toString()}",
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    )
+                  ]),
+                ),
               ]),
               onRefresh: () async {
-                await getEventDetailsThrottled();
                 await getTeamDetailsThrottled();
               },
             ),

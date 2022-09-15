@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart';
 import 'package:vrc_ranks_app/team.dart';
@@ -67,6 +68,47 @@ class _MatchPageState extends State<MatchPage> {
             )
           : RefreshIndicator(
               child: ListView(padding: const EdgeInsets.all(8), children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.grey[300],
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  margin: const EdgeInsets.all(4),
+                  child: Flex(direction: Axis.vertical, children: [
+                    ListView(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.all(8),
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Text(
+                            event.divisions![0].data!.data![widget.match_number].name.toString(),
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                        ),
+                        Text(
+                          "Field: ${event.divisions![0].data!.data![widget.match_number].field.toString()}",
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                        Text(
+                          "Scheduled: ${DateFormat.jm().format(DateTime.parse(event.divisions![0].data!.data![widget.match_number].scheduled.toString()))}",
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                        if (event.divisions![0].data!.data![widget.match_number].started != null)
+                          Text(
+                            "Started: ${DateFormat.jm().format(DateTime.parse(event.divisions![0].data!.data![widget.match_number].started.toString()))}",
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                        Text(
+                          "Scored: ${event.divisions![0].data!.data![widget.match_number].scored.toString() == "true" ? "Yes" : "No"}",
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    )
+                  ]),
+                ),
                 if (event.divisions != null)
                   if (event.divisions?[0].data?.data?[widget.match_number].alliances?.length !=
                       null)
@@ -81,17 +123,18 @@ class _MatchPageState extends State<MatchPage> {
                                 CupertinoPageRoute(
                                     builder: (context) => TeamPage(
                                         title: (prop2.team?.name).toString(),
-                                        event_old: event,
-                                        match_number: widget.match_number,
-                                        alliance_number: event.divisions?[0].data
-                                                    ?.data?[widget.match_number].alliances ==
-                                                null
-                                            ? 0
-                                            : event.divisions![0].data!.data![widget.match_number]
-                                                .alliances!
-                                                .indexOf(prop),
-                                        team_number:
-                                            prop.teams == null ? 0 : prop.teams!.indexOf(prop2),
+                                        match_id: event.id.toString(),
+                                        // event_old: event,
+                                        // match_number: widget.match_number,
+                                        // alliance_number: event.divisions?[0].data
+                                        //             ?.data?[widget.match_number].alliances ==
+                                        //         null
+                                        //     ? 0
+                                        //     : event.divisions![0].data!.data![widget.match_number]
+                                        //         .alliances!
+                                        //         .indexOf(prop),
+                                        // team_number:
+                                        //     prop.teams == null ? 0 : prop.teams!.indexOf(prop2),
                                         team_id: (prop2.team?.id).toString())),
                               );
                             },
