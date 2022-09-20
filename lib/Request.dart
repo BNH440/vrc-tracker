@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:requests/requests.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'dart:convert';
@@ -20,7 +22,7 @@ Future<events.Events> getEventList() async {
       headers: headers);
 
   var decoded = events.Events.fromJson(jsonDecode(response.body));
-  print("Requested events");
+  log("Requested events");
 
   return decoded;
 }
@@ -46,7 +48,7 @@ Future<events.Event> getEventDetails(String eventId) async {
 
   // TODO: get team list
 
-  print("Requested event details");
+  log("Requested event details");
   return decoded;
 }
 
@@ -63,6 +65,6 @@ Future<List> getTeamDetails(String teamId, String compId) async {
 
   var decoded2 = MatchListByTeam.fromJson(jsonDecode(response2.body));
 
-  print("Requested team details");
+  log("Requested team details");
   return [decoded, decoded2];
 }
