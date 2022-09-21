@@ -47,6 +47,8 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
+    final favorites = Provider.of<Favorites>(context);
+
     final getEventDetailsThrottled = throttle(
       () async => {
         event = await Request.getEventDetails(widget.event_old.id.toString()),
@@ -60,164 +62,159 @@ class _EventPageState extends State<EventPage> {
       },
       const Duration(seconds: 2),
     );
-
-    return Consumer<Favorites>(builder: (context, favorites, child) {
-      return Scaffold(
-          appBar: AppBar(
-            title: Text(widget.title,
-                style: const TextStyle(
-                  overflow: TextOverflow.fade,
-                )),
-            actions: [
-              IconButton(
-                icon: favorites.favoriteComps.contains(event.id.toString())
-                    ? const Icon(Icons.star)
-                    : const Icon(Icons.star_border_outlined),
-                onPressed: () {
-                  favorites.toggleComp(event.id.toString());
-                },
-              ),
-            ],
-          ),
-          body: (event.divisions?[0].data?.data).toString() == "null"
-              ? const Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: EdgeInsets.all(20),
-                    child: CircularProgressIndicator(
-                      color: Colors.red,
-                    ),
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title,
+              style: const TextStyle(
+                overflow: TextOverflow.fade,
+              )),
+          actions: [
+            IconButton(
+              icon: favorites.favoriteComps.contains(event.id.toString())
+                  ? const Icon(Icons.star)
+                  : const Icon(Icons.star_border_outlined),
+              onPressed: () {
+                favorites.toggleComp(event.id.toString());
+              },
+            ),
+          ],
+        ),
+        body: (event.divisions?[0].data?.data).toString() == "null"
+            ? const Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: CircularProgressIndicator(
+                    color: Colors.red,
                   ),
-                )
-              : RefreshIndicator(
-                  child: ListView(
-                    padding: const EdgeInsets.all(8),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: <Widget>[
-                      Container(
+                ),
+              )
+            : RefreshIndicator(
+                child: ListView(
+                  padding: const EdgeInsets.all(8),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: <Widget>[
+                    Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey[300],
+                        ),
+                        padding: const EdgeInsets.all(8),
+                        margin: const EdgeInsets.all(4),
+                        child: Flex(direction: Axis.vertical, children: [
+                          ListView(
+                              shrinkWrap: true,
+                              padding: const EdgeInsets.all(8),
+                              physics: const NeverScrollableScrollPhysics(),
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 5),
+                                  child: Text(
+                                    event.name.toString(),
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: Text(
+                                    "${convertDate(event.start.toString())} - ${convertDate(event.end.toString())}",
+                                    style: const TextStyle(fontSize: 15),
+                                  ),
+                                ),
+                                Text(
+                                  "Ongoing: ${event.ongoing.toString() == "true" ? "Yes" : "No"}",
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                                Text(
+                                  "Competition: ${event.season?.name.toString()}",
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                              ]),
+                          Align(
+                              alignment: FractionalOffset.bottomRight,
+                              child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                                Column(
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        if (Platform.isAndroid) {
+                                          launchUrl(
+                                              Uri.parse(
+                                                  "https://maps.google.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
+                                              mode: LaunchMode.externalApplication);
+                                        } else if (Platform.isIOS) {
+                                          launchUrl(
+                                              Uri.parse(
+                                                  "https://maps.apple.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
+                                              mode: LaunchMode.externalApplication);
+                                        }
+                                        log("Redirect to navigation app");
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(10),
+                                          color: Colors.grey[400],
+                                        ),
+                                        padding: const EdgeInsets.all(10),
+                                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                                        child: const Icon(Icons.navigation_rounded, size: 30),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        launchUrl(
+                                            Uri.parse(
+                                                "https://www.robotevents.com/robot-competitions/vex-robotics-competition/${event.sku}.html"),
+                                            mode: LaunchMode.externalApplication);
+                                        log("Redirect to web browser with comp link");
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(10),
+                                          color: Colors.grey[400],
+                                        ),
+                                        padding: const EdgeInsets.all(10),
+                                        child: const Icon(Icons.link, size: 30),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ]))
+                        ])),
+                    for (var i = 0; i <= (((event.divisions?[0].data?.data?.length ?? 1) - 1)); i++)
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                                builder: (context) => MatchPage(
+                                    title: (event.divisions?[0].data?.data?[i].name).toString(),
+                                    event_old: event,
+                                    match_number: i)),
+                          );
+                        },
+                        child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             color: Colors.grey[300],
                           ),
-                          padding: const EdgeInsets.all(8),
+                          height: 50,
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
                           margin: const EdgeInsets.all(4),
-                          child: Flex(direction: Axis.vertical, children: [
-                            ListView(
-                                shrinkWrap: true,
-                                padding: const EdgeInsets.all(8),
-                                physics: const NeverScrollableScrollPhysics(),
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 5),
-                                    child: Text(
-                                      event.name.toString(),
-                                      style: const TextStyle(fontSize: 20),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    child: Text(
-                                      "${convertDate(event.start.toString())} - ${convertDate(event.end.toString())}",
-                                      style: const TextStyle(fontSize: 15),
-                                    ),
-                                  ),
-                                  Text(
-                                    "Ongoing: ${event.ongoing.toString() == "true" ? "Yes" : "No"}",
-                                    style: const TextStyle(fontSize: 15),
-                                  ),
-                                  Text(
-                                    "Competition: ${event.season?.name.toString()}",
-                                    style: const TextStyle(fontSize: 15),
-                                  ),
-                                ]),
-                            Align(
-                                alignment: FractionalOffset.bottomRight,
-                                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                                  Column(
-                                    children: [
-                                      InkWell(
-                                        onTap: () {
-                                          if (Platform.isAndroid) {
-                                            launchUrl(
-                                                Uri.parse(
-                                                    "https://maps.google.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
-                                                mode: LaunchMode.externalApplication);
-                                          } else if (Platform.isIOS) {
-                                            launchUrl(
-                                                Uri.parse(
-                                                    "https://maps.apple.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
-                                                mode: LaunchMode.externalApplication);
-                                          }
-                                          log("Redirect to navigation app");
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(10),
-                                            color: Colors.grey[400],
-                                          ),
-                                          padding: const EdgeInsets.all(10),
-                                          margin: const EdgeInsets.symmetric(horizontal: 10),
-                                          child: const Icon(Icons.navigation_rounded, size: 30),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      InkWell(
-                                        onTap: () {
-                                          launchUrl(
-                                              Uri.parse(
-                                                  "https://www.robotevents.com/robot-competitions/vex-robotics-competition/${event.sku}.html"),
-                                              mode: LaunchMode.externalApplication);
-                                          log("Redirect to web browser with comp link");
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(10),
-                                            color: Colors.grey[400],
-                                          ),
-                                          padding: const EdgeInsets.all(10),
-                                          child: const Icon(Icons.link, size: 30),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ]))
-                          ])),
-                      for (var i = 0;
-                          i <= (((event.divisions?[0].data?.data?.length ?? 1) - 1));
-                          i++)
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                  builder: (context) => MatchPage(
-                                      title: (event.divisions?[0].data?.data?[i].name).toString(),
-                                      event_old: event,
-                                      match_number: i)),
-                            );
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.grey[300],
-                            ),
-                            height: 50,
-                            padding: const EdgeInsets.symmetric(horizontal: 30),
-                            margin: const EdgeInsets.all(4),
-                            child: Center(
-                              child: Text((event.divisions?[0].data?.data?[i].name).toString()),
-                            ),
+                          child: Center(
+                            child: Text((event.divisions?[0].data?.data?[i].name).toString()),
                           ),
                         ),
-                    ],
-                  ),
-                  onRefresh: () async {
-                    await getEventDetailsThrottled();
-                  },
-                ));
-    });
+                      ),
+                  ],
+                ),
+                onRefresh: () async {
+                  await getEventDetailsThrottled();
+                },
+              ));
   }
 }

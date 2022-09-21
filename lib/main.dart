@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rate_limiter/rate_limiter.dart';
-import 'package:vrc_ranks_app/favorites.dart';
+import 'package:vrc_ranks_app/Favorites.dart';
 
 import 'Schema/Events.dart';
 import 'event.dart';
@@ -57,8 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Events events = Events();
 
-  final favorites = Favorites();
-
   @override
   void initState() {
     super.initState();
@@ -74,6 +72,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final favorites = Provider.of<Favorites>(context);
+
     final getEventsThrottled = throttle(
       () async => {
         events = await Request.getEventList(),
@@ -93,101 +93,102 @@ class _MyHomePageState extends State<MyHomePage> {
       const Duration(seconds: 1),
     );
 
-    return Consumer<Favorites>(builder: (context, favorites, child) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-          actions: [
-            IconButton(
-              icon: favorites.favoriteComps.contains("f")
-                  ? const Icon(Icons.star)
-                  : const Icon(Icons.star_border_outlined),
-              onPressed: () {
-                favorites.toggleComp("f");
-              },
-            ),
-          ],
-        ),
-        body: (_events.data).toString() == "null"
-            ? const Align(
-                alignment: Alignment.topCenter,
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: CircularProgressIndicator(
-                    color: Colors.red,
-                  ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: favorites.favoriteComps.contains("f")
+                ? const Icon(Icons.star)
+                : const Icon(Icons.star_border_outlined),
+            onPressed: () {
+              favorites.toggleComp("f");
+            },
+          ),
+        ],
+      ),
+      body: (_events.data).toString() == "null"
+          ? const Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(
+                  color: Colors.red,
                 ),
-              )
-            : RefreshIndicator(
-                child: ListView(
-                  padding: const EdgeInsets.all(8),
-                  children: <Widget>[
-                    Text(favorites.favoriteComps.isEmpty
-                        ? "None"
-                        : favorites.favoriteComps.toString()),
+              ),
+            )
+          : RefreshIndicator(
+              child: ListView(
+                padding: const EdgeInsets.all(8),
+                children: <Widget>[
+                  Text(favorites.favoriteComps.isEmpty
+                      ? "None"
+                      : favorites.favoriteComps.toString()),
 
-                    //   return Text(favorites.favoriteComps.elementAt(0).toString() ?? "No favorites");
-                    // for (var comp in favorites.favoriteComps) {
-                    //   Event compDetails = Future.sync(() => Request.getEventDetails(comp.toString()));
-                    //   return Stack(
-                    //     children: [
-                    //       Card(
-                    //         child: ListTile(
-                    //           title: Text(),
-                    //           subtitle: Text(comp.location),
-                    //           onTap: () {
-                    //             Navigator.push(
-                    //               context,
-                    //               MaterialPageRoute(
-                    //                 builder: (context) => EventPage(
-                    //                   title: comp.name,
-                    //                   event_old: event,
-                    //                 ),
-                    //               ),
-                    //             );
-                    //           },
-                    //         ),
-                    //       ),
-                    //     ],
-                    //   );
-                    // }
-                    // }),
-                    if (_events.data != null)
-                      for (var event in _events.data!)
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                  builder: (context) =>
-                                      EventPage(title: (event.name).toString(), event_old: event)),
-                            );
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.grey[300],
+                  //   return Text(favorites.favoriteComps.elementAt(0).toString() ?? "No favorites");
+                  // for (var comp in favorites.favoriteComps) {
+                  //   Event compDetails = Future.sync(() => Request.getEventDetails(comp.toString()));
+                  //   return Stack(
+                  //     children: [
+                  //       Card(
+                  //         child: ListTile(
+                  //           title: Text(),
+                  //           subtitle: Text(comp.location),
+                  //           onTap: () {
+                  //             Navigator.push(
+                  //               context,
+                  //               MaterialPageRoute(
+                  //                 builder: (context) => EventPage(
+                  //                   title: comp.name,
+                  //                   event_old: event,
+                  //                 ),
+                  //               ),
+                  //             );
+                  //           },
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   );
+                  // }
+                  // }),
+                  if (_events.data != null)
+                    for (var event in _events.data!)
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => (ChangeNotifierProvider<Favorites>.value(
+                                  value: Favorites(),
+                                  child:
+                                      EventPage(title: (event.name).toString(), event_old: event))),
                             ),
-                            height: 50,
-                            padding: const EdgeInsets.symmetric(horizontal: 30),
-                            margin: const EdgeInsets.all(4),
-                            child: Center(
-                              child: Text(
-                                (event.name).toString(),
-                                overflow: TextOverflow.fade,
-                                maxLines: 1,
-                                softWrap: false,
-                              ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey[300],
+                          ),
+                          height: 50,
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          margin: const EdgeInsets.all(4),
+                          child: Center(
+                            child: Text(
+                              (event.name).toString(),
+                              overflow: TextOverflow.fade,
+                              maxLines: 1,
+                              softWrap: false,
                             ),
                           ),
                         ),
-                  ],
-                ),
-                onRefresh: () async {
-                  await getEventsThrottled();
-                },
+                      ),
+                ],
               ),
-      );
-    });
+              onRefresh: () async {
+                await getEventsThrottled();
+              },
+            ),
+    );
   }
 }
