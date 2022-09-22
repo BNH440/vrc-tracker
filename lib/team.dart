@@ -4,10 +4,12 @@ import 'package:rate_limiter/rate_limiter.dart';
 import 'package:vrc_ranks_app/Schema/MatchListByTeam.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart' as Events;
+import 'package:vrc_ranks_app/main.dart';
 import 'Request.dart' as Request;
 import 'match.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TeamPage extends StatefulWidget {
+class TeamPage extends ConsumerStatefulWidget {
   const TeamPage(
       {Key? key,
       required this.title,
@@ -22,10 +24,10 @@ class TeamPage extends StatefulWidget {
   final Events.Event event_old;
 
   @override
-  State<TeamPage> createState() => _TeamPageState();
+  _TeamPageState createState() => _TeamPageState();
 }
 
-class _TeamPageState extends State<TeamPage> {
+class _TeamPageState extends ConsumerState<TeamPage> {
   Team _team = Team();
   Team team = Team();
   MatchListByTeam _matches = MatchListByTeam();
@@ -34,6 +36,7 @@ class _TeamPageState extends State<TeamPage> {
   @override
   void initState() {
     super.initState();
+    final favoriteTeams = ref.read(favoriteTeamsProvider);
     Request.getTeamDetails((widget.team_id).toString(), (widget.event_old.id).toString())
         .then((value) {
       if (this.mounted) {
@@ -49,6 +52,8 @@ class _TeamPageState extends State<TeamPage> {
 
   @override
   Widget build(BuildContext context) {
+    final favoriteTeams = ref.watch(favoriteTeamsProvider);
+
     List list;
     final getTeamDetailsThrottled = throttle(
       () async => {
@@ -72,9 +77,17 @@ class _TeamPageState extends State<TeamPage> {
         title: Text(widget.title),
         actions: [
           IconButton(
-            icon: const Icon(Icons.star_border_outlined),
+            icon: ref.read(favoriteTeamsProvider.notifier).state.contains(team.id.toString())
+                ? const Icon(Icons.star)
+                : const Icon(Icons.star_border_outlined),
             onPressed: () {
-              // TODO: Add favorite code
+              List<String> oldState = ref.read(favoriteTeamsProvider.notifier).state;
+              if (oldState.contains(team.id.toString())) {
+                oldState.remove(team.id.toString());
+              } else {
+                oldState.add(team.id.toString());
+              }
+              ref.read(favoriteTeamsProvider.notifier).update((state) => oldState.toList());
             },
           ),
         ],

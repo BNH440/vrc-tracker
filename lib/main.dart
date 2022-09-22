@@ -2,9 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rate_limiter/rate_limiter.dart';
-import 'package:vrc_ranks_app/Favorites.dart';
 
 import 'Schema/Events.dart';
 import 'event.dart';
@@ -15,7 +14,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future main() async {
   await dotenv.load(fileName: ".env");
-  runApp(ChangeNotifierProvider(create: (context) => Favorites(), child: const MyApp()));
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -43,23 +42,35 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends ConsumerStatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+final favoriteCompsProvider = StateProvider<List<String>>((ref) {
+  return [];
+});
+
+final favoriteTeamsProvider = StateProvider<List<String>>((ref) {
+  return [];
+});
+
+class _MyHomePageState extends ConsumerState<MyHomePage> {
   Events _events = Events();
 
   Events events = Events();
 
+  List<Event> favoritesEvents = [];
+  List<Event> favoritesTeams = [];
+
   @override
   void initState() {
     super.initState();
+    final value = ref.read(favoriteCompsProvider);
     Request.getEventList().then((value) {
       if (this.mounted) {
         setState(() {
@@ -72,7 +83,23 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final favorites = Provider.of<Favorites>(context);
+    // final favorites = Provider.of<Favorites>(context);
+    final favoriteComps = ref.watch(favoriteCompsProvider);
+    final favoriteTeams = ref.watch(favoriteTeamsProvider);
+
+    // TODO: LOOP INSIDE BUILD METHOD REMOVE!!!!!!!!!!
+    // for (var comp in favorites) {
+    //   Request.getEventDetails(comp.toString()).then((value) => {
+    //         if (this.mounted)
+    //           {
+    //             setState(() {
+    //               var newFavoritesEvents = favoritesEvents;
+    //               newFavoritesEvents.add(value);
+    //               favoritesEvents = newFavoritesEvents;
+    //             }),
+    //           },
+    //       });
+    // }
 
     final getEventsThrottled = throttle(
       () async => {
@@ -96,16 +123,6 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: favorites.favoriteComps.contains("f")
-                ? const Icon(Icons.star)
-                : const Icon(Icons.star_border_outlined),
-            onPressed: () {
-              favorites.toggleComp("f");
-            },
-          ),
-        ],
       ),
       body: (_events.data).toString() == "null"
           ? const Align(
@@ -121,36 +138,37 @@ class _MyHomePageState extends State<MyHomePage> {
               child: ListView(
                 padding: const EdgeInsets.all(8),
                 children: <Widget>[
-                  Text(favorites.favoriteComps.isEmpty
-                      ? "None"
-                      : favorites.favoriteComps.toString()),
+                  // Text(favorites.favoriteComps.isEmpty
+                  //     ? "None"
+                  //     : favorites.favoriteComps.toString()),
+                  Text(favoriteComps.toString()),
+                  Text(favoriteTeams.toString()),
 
-                  //   return Text(favorites.favoriteComps.elementAt(0).toString() ?? "No favorites");
-                  // for (var comp in favorites.favoriteComps) {
-                  //   Event compDetails = Future.sync(() => Request.getEventDetails(comp.toString()));
-                  //   return Stack(
-                  //     children: [
-                  //       Card(
-                  //         child: ListTile(
-                  //           title: Text(),
-                  //           subtitle: Text(comp.location),
-                  //           onTap: () {
-                  //             Navigator.push(
-                  //               context,
-                  //               MaterialPageRoute(
-                  //                 builder: (context) => EventPage(
-                  //                   title: comp.name,
-                  //                   event_old: event,
+                  // return Text(favorites.favoriteComps.elementAt(0).toString() ?? "No favorites");
+
+                  // if(favoritesEvents.isNotEmpty)
+                  //   for (var comp in favoritesEvents)
+                  //     Stack(
+                  //       children: [
+                  //         Card(
+                  //           child: ListTile(
+                  //             title: Text(comp.name.toString()),
+                  //             onTap: () {
+                  //               Navigator.push(
+                  //                 context,
+                  //                 MaterialPageRoute(
+                  //                   builder: (context) => EventPage(
+                  //                     title: comp.name.toString(),
+                  //                     event_old: comp,
+                  //                   ),
                   //                 ),
-                  //               ),
-                  //             );
-                  //           },
+                  //               );
+                  //             },
+                  //           ),
                   //         ),
-                  //       ),
-                  //     ],
-                  //   );
-                  // }
-                  // }),
+                  //       ],
+                  //     );
+
                   if (_events.data != null)
                     for (var event in _events.data!)
                       InkWell(
@@ -158,11 +176,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           Navigator.push(
                             context,
                             CupertinoPageRoute(
-                              builder: (context) => (ChangeNotifierProvider<Favorites>.value(
-                                  value: Favorites(),
-                                  child:
-                                      EventPage(title: (event.name).toString(), event_old: event))),
-                            ),
+                                builder: (context) =>
+                                    EventPage(title: (event.name).toString(), event_old: event)),
                           );
                         },
                         child: Container(

@@ -2,27 +2,27 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart';
+import 'package:vrc_ranks_app/main.dart';
 import 'Request.dart' as Request;
 import 'match.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io' show Platform;
-import 'Favorites.dart';
 
-class EventPage extends StatefulWidget {
+class EventPage extends ConsumerStatefulWidget {
   const EventPage({Key? key, required this.title, required this.event_old}) : super(key: key);
 
   final String title;
   final Event event_old;
 
   @override
-  State<EventPage> createState() => _EventPageState();
+  _EventPageState createState() => _EventPageState();
 }
 
-class _EventPageState extends State<EventPage> {
+class _EventPageState extends ConsumerState<EventPage> {
   Event _event = Event();
   Event event = Event();
 
@@ -35,6 +35,7 @@ class _EventPageState extends State<EventPage> {
   @override
   void initState() {
     super.initState();
+    final favorites = ref.read(favoriteCompsProvider);
     Request.getEventDetails(widget.event_old.id.toString()).then((value) {
       if (this.mounted) {
         setState(() {
@@ -47,7 +48,8 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
-    final favorites = Provider.of<Favorites>(context);
+    // final favorites = Provider.of<Favorites>(context);
+    final favorites = ref.watch(favoriteCompsProvider);
 
     final getEventDetailsThrottled = throttle(
       () async => {
@@ -70,11 +72,17 @@ class _EventPageState extends State<EventPage> {
               )),
           actions: [
             IconButton(
-              icon: favorites.favoriteComps.contains(event.id.toString())
+              icon: ref.read(favoriteCompsProvider.notifier).state.contains(event.id.toString())
                   ? const Icon(Icons.star)
                   : const Icon(Icons.star_border_outlined),
               onPressed: () {
-                favorites.toggleComp(event.id.toString());
+                List<String> oldState = ref.read(favoriteCompsProvider.notifier).state;
+                if (oldState.contains(event.id.toString())) {
+                  oldState.remove(event.id.toString());
+                } else {
+                  oldState.add(event.id.toString());
+                }
+                ref.read(favoriteCompsProvider.notifier).update((state) => oldState.toList());
               },
             ),
           ],
