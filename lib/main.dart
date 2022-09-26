@@ -4,12 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rate_limiter/rate_limiter.dart';
-
 import 'Schema/Events.dart';
 import 'event.dart';
-
 import 'Request.dart' as Request;
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future main() async {
@@ -120,9 +117,36 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       const Duration(seconds: 1),
     );
 
+    int _selectedIndex = 0;
+    const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+
+    void _onItemTapped(int index) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event),
+            label: 'Events',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'Teams',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.numbers),
+            label: 'Rankings',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
       body: (_events.data).toString() == "null"
           ? const Align(
