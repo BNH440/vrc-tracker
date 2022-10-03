@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'VEX Ranks App',
-      theme: Styles.themeData(true, context),
+      theme: Styles.themeData(false, context),
       home: const MainPage(),
     );
   }

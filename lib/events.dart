@@ -49,23 +49,8 @@ class _EventsPageState extends ConsumerState<EventsPage> {
 
   @override
   Widget build(BuildContext context) {
-    // final favorites = Provider.of<Favorites>(context);
     final favoriteComps = ref.watch(favoriteCompsProvider);
     final favoriteTeams = ref.watch(favoriteTeamsProvider);
-
-    // TODO: LOOP INSIDE BUILD METHOD REMOVE!!!!!!!!!!
-    // for (var comp in favorites) {
-    //   Request.getEventDetails(comp.toString()).then((value) => {
-    //         if (this.mounted)
-    //           {
-    //             setState(() {
-    //               var newFavoritesEvents = favoritesEvents;
-    //               newFavoritesEvents.add(value);
-    //               favoritesEvents = newFavoritesEvents;
-    //             }),
-    //           },
-    //       });
-    // }
 
     final getEventsThrottled = throttle(
       () async => {
@@ -102,37 +87,6 @@ class _EventsPageState extends ConsumerState<EventsPage> {
             child: ListView(
               padding: const EdgeInsets.all(8),
               children: <Widget>[
-                // Text(favorites.favoriteComps.isEmpty
-                //     ? "None"
-                //     : favorites.favoriteComps.toString()),
-                Text(favoriteComps.toString()),
-                Text(favoriteTeams.toString()),
-
-                // return Text(favorites.favoriteComps.elementAt(0).toString() ?? "No favorites");
-
-                // if(favoritesEvents.isNotEmpty)
-                //   for (var comp in favoritesEvents)
-                //     Stack(
-                //       children: [
-                //         Card(
-                //           child: ListTile(
-                //             title: Text(comp.name.toString()),
-                //             onTap: () {
-                //               Navigator.push(
-                //                 context,
-                //                 MaterialPageRoute(
-                //                   builder: (context) => EventPage(
-                //                     title: comp.name.toString(),
-                //                     event_old: comp,
-                //                   ),
-                //                 ),
-                //               );
-                //             },
-                //           ),
-                //         ),
-                //       ],
-                //     );
-
                 if (_events.data != null)
                   for (var event in _events.data!)
                     InkWell(

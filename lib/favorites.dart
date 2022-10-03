@@ -24,7 +24,6 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
   @override
   void initState() {
     super.initState();
-    // final value = ref.read(favoriteCompsProvider);
   }
 
   @override
