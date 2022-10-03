@@ -68,3 +68,13 @@ Future<List> getTeamDetails(String teamId, String compId) async {
   log("Requested team details");
   return [decoded, decoded2];
 }
+
+Future<Team> getTeam(String teamId) async {
+  var response =
+      await Requests.get("https://www.robotevents.com/api/v2/teams/$teamId", headers: headers);
+
+  var decoded = Team.fromJson(jsonDecode(response.body));
+
+  log("Requested team details");
+  return decoded;
+}
