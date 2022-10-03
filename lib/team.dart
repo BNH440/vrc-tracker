@@ -4,7 +4,7 @@ import 'package:rate_limiter/rate_limiter.dart';
 import 'package:vrc_ranks_app/Schema/MatchListByTeam.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart' as Events;
-import 'package:vrc_ranks_app/main.dart';
+import 'package:vrc_ranks_app/events.dart';
 import 'Request.dart' as Request;
 import 'match.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -107,7 +107,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Colors.grey[300],
+                    color: Theme.of(context).cardColor,
                   ),
                   padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.all(4),
@@ -160,7 +160,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          color: Colors.grey[300],
+                          color: Theme.of(context).cardColor,
                         ),
                         height: 50,
                         padding: const EdgeInsets.symmetric(horizontal: 30),

@@ -4,8 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rate_limiter/rate_limiter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart';
-import 'package:vrc_ranks_app/main.dart';
+import 'package:vrc_ranks_app/events.dart';
 import 'Request.dart' as Request;
 import 'match.dart';
 import 'package:intl/intl.dart';
@@ -36,6 +37,9 @@ class _EventPageState extends ConsumerState<EventPage> {
   void initState() {
     super.initState();
     final favorites = ref.read(favoriteCompsProvider);
+    SharedPreferences.getInstance().then((prefs) => prefs.get('favoriteComps') ?? []).then((value) {
+      //Add code to set favorites
+    });
     Request.getEventDetails(widget.event_old.id.toString()).then((value) {
       if (this.mounted) {
         setState(() {
@@ -83,6 +87,9 @@ class _EventPageState extends ConsumerState<EventPage> {
                   oldState.add(event.id.toString());
                 }
                 ref.read(favoriteCompsProvider.notifier).update((state) => oldState.toList());
+
+                SharedPreferences.getInstance()
+                    .then((prefs) => prefs.setStringList('favoriteComps', oldState.toList()));
               },
             ),
           ],
@@ -105,7 +112,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                     Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          color: Colors.grey[300],
+                          color: Theme.of(context).cardColor,
                         ),
                         padding: const EdgeInsets.all(8),
                         margin: const EdgeInsets.all(4),
@@ -161,7 +168,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                       child: Container(
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(10),
-                                          color: Colors.grey[400],
+                                          color: Theme.of(context).backgroundColor,
                                         ),
                                         padding: const EdgeInsets.all(10),
                                         margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -183,7 +190,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                       child: Container(
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(10),
-                                          color: Colors.grey[400],
+                                          color: Theme.of(context).backgroundColor,
                                         ),
                                         padding: const EdgeInsets.all(10),
                                         child: const Icon(Icons.link, size: 30),
@@ -208,7 +215,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
-                            color: Colors.grey[300],
+                            color: Theme.of(context).cardColor,
                           ),
                           height: 50,
                           padding: const EdgeInsets.symmetric(horizontal: 30),

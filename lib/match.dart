@@ -71,7 +71,7 @@ class _MatchPageState extends State<MatchPage> {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Colors.grey[300],
+                    color: Theme.of(context).cardColor,
                   ),
                   padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.all(4),
@@ -131,7 +131,7 @@ class _MatchPageState extends State<MatchPage> {
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                color: Colors.grey[300],
+                                color: Theme.of(context).cardColor,
                                 border: Border.all(
                                   color: prop.color == 'red'
                                       ? Colors.red
