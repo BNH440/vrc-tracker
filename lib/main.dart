@@ -12,13 +12,13 @@ Future main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'VEX Ranks App',
       theme: Styles.themeData(false, context),
+      darkTheme: Styles.themeData(true, context),
+      themeMode: ThemeMode.system,
       home: const MainPage(),
     );
   }
