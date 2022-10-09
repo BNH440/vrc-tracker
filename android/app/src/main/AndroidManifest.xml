@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.blakehaug.vrc_tracker">
    <application
-        android:label="vrc_ranks_app"
+        android:label="VRC Tracker"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
