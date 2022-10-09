@@ -1,4 +1,4 @@
-package com.example.vrc_ranks_app
+package com.blakehaug.vrc_tracker
 
 import io.flutter.embedding.android.FlutterActivity
 

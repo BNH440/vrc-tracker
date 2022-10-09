@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.vrc_ranks_app">
+    package="com.blakehaug.vrc_tracker">
    <application
         android:label="vrc_ranks_app"
         android:name="${applicationName}"
@@ -31,4 +31,5 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+    <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>
