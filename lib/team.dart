@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rate_limiter/rate_limiter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrc_ranks_app/Schema/MatchListByTeam.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart' as Events;
@@ -88,6 +89,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                 oldState.add(team.id.toString());
               }
               ref.read(favoriteTeamsProvider.notifier).update((state) => oldState.toList());
+
+              SharedPreferences.getInstance()
+                  .then((prefs) => prefs.setStringList('favoriteTeams', oldState.toList()));
             },
           ),
         ],

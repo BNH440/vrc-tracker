@@ -36,10 +36,6 @@ class _EventPageState extends ConsumerState<EventPage> {
   @override
   void initState() {
     super.initState();
-    final favorites = ref.read(favoriteCompsProvider);
-    SharedPreferences.getInstance().then((prefs) => prefs.get('favoriteComps') ?? []).then((value) {
-      //Add code to set favorites
-    });
     Request.getEventDetails(widget.event_old.id.toString()).then((value) {
       if (this.mounted) {
         setState(() {
