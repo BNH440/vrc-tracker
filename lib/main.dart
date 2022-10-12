@@ -36,7 +36,7 @@ class _MainPageState extends ConsumerState<MainPage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = <Widget>[
-    const EventsPage(title: "VRC Ranks App"),
+    const EventsPage(title: "VRC Tracker"),
     const Icon(
       Icons.people,
       size: 150,
@@ -75,7 +75,7 @@ class _MainPageState extends ConsumerState<MainPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('VRC Ranks App'),
+        title: const Text('VRC Tracker'),
       ),
       body: Center(
         child: _pages.elementAt(_selectedIndex),
