@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "276101714218",
+    "project_id": "vrc-tracker",
+    "storage_bucket": "vrc-tracker.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:276101714218:android:6fb28884a426033b2ece53",
+        "android_client_info": {
+          "package_name": "com.blakehaug.vrc_tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "276101714218-gobg2m627g7a38l7c68u5f4k2cef6lgi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8Bj8xAxzqWdXPHb5PXkh6s5qEzuQf5cs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "276101714218-gobg2m627g7a38l7c68u5f4k2cef6lgi.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "276101714218-7lkucp324c3cgbvf64i7ip9rsj3gaopo.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.blakehaug.vrcTracker"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:isolate';
+
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,10 +9,31 @@ import 'package:vrc_ranks_app/events.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:vrc_ranks_app/favorites.dart';
 import 'package:vrc_ranks_app/themeData.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 Future main() async {
-  await dotenv.load(fileName: ".env");
-  runApp(const ProviderScope(child: MyApp()));
+  Isolate.current.addErrorListener(RawReceivePort((pair) async {
+    final List<dynamic> errorAndStacktrace = pair;
+    await FirebaseCrashlytics.instance.recordError(
+      errorAndStacktrace.first,
+      errorAndStacktrace.last,
+      fatal: true,
+    );
+  }).sendPort);
+
+  runZonedGuarded<Future<void>>(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
+
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+    await FirebaseAnalytics.instance.logEvent(name: 'app_open');
+
+    await dotenv.load(fileName: ".env");
+
+    runApp(const ProviderScope(child: MyApp()));
+  }, (error, stack) => FirebaseCrashlytics.instance.recordError(error, stack, fatal: true));
 }
 
 class MyApp extends StatelessWidget {
