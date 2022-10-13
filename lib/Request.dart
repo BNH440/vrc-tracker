@@ -14,7 +14,7 @@ var headers = {
   'Authorization': 'Bearer ${dotenv.env['API_KEY']}',
 };
 
-var utc = "${DateTime.now().addDays(-1).toUtc().format("yyyy-MM-dd")}T00:00:00Z";
+var utc = "${DateTime.now().addDays(-2).toUtc().format("yyyy-MM-dd")}T00:00:00Z";
 
 Future<events.Events> getEventList() async {
   var response = await Requests.get(
@@ -38,8 +38,8 @@ Future<events.Event> getEventDetails(String eventId) async {
       // get div ids and fetch info
       var divId = div.id;
       var divResponse = await Requests.get(
-          // "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches",
-          "https://www.robotevents.com/api/v2/events/48126/divisions/$divId/matches",
+          "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches",
+          // "https://www.robotevents.com/api/v2/events/48126/divisions/$divId/matches",
           headers: headers);
       var divDecoded = division.Div.fromJson(jsonDecode(divResponse.body));
       decoded.divisions![divId! - 1].data = divDecoded;
@@ -58,10 +58,10 @@ Future<List> getTeamDetails(String teamId, String compId) async {
 
   var decoded = Team.fromJson(jsonDecode(response.body));
 
-  var response2 = await Requests.get(
-      // "https://www.robotevents.com/api/v2/teams/128201/matches?event[]=$compId",
-      "https://www.robotevents.com/api/v2/teams/$teamId/matches?event[]=48126",
-      headers: headers);
+  var response2 =
+      await Requests.get("https://www.robotevents.com/api/v2/teams/$teamId/matches?event[]=$compId",
+          // "https://www.robotevents.com/api/v2/teams/$teamId/matches?event[]=48126",
+          headers: headers);
 
   var decoded2 = MatchListByTeam.fromJson(jsonDecode(response2.body));
 

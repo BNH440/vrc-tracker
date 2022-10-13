@@ -102,11 +102,36 @@ class _MatchPageState extends State<MatchPage> {
                             style: const TextStyle(fontSize: 15),
                           ),
                         Text(
-                          "Scored: ${event.divisions![0].data!.data![widget.match_number].scored.toString() == "true" ? "Yes" : "No"}",
+                          "Scored: ${event.divisions![0].data!.data![widget.match_number].scored.toString() == "true" ? "No" : "Yes"}",
                           style: const TextStyle(fontSize: 15),
                         ),
                       ],
-                    )
+                    ),
+                    if (!(event.divisions![0].data!.data![widget.match_number].scored ?? true))
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(
+                            fontSize: 25.0,
+                          ),
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: event.divisions![0].data!.data![widget.match_number]
+                                        .alliances?[0].score
+                                        .toString() ??
+                                    "",
+                                style: const TextStyle(color: Colors.red)),
+                            const TextSpan(
+                              text: " - ",
+                            ),
+                            TextSpan(
+                                text: event.divisions![0].data!.data![widget.match_number]
+                                        .alliances?[1].score
+                                        .toString() ??
+                                    "",
+                                style: const TextStyle(color: Colors.blue)),
+                          ],
+                        ),
+                      )
                   ]),
                 ),
                 if (event.divisions != null)

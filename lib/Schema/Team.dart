@@ -246,8 +246,8 @@ class Coordinates {
   set lon(double? lon) => _lon = lon;
 
   Coordinates.fromJson(Map<String, dynamic> json) {
-    _lat = json['lat'];
-    _lon = json['lon'];
+    _lat = json['lat'].toDouble();
+    _lon = json['lon'].toDouble();
   }
 
   Map<String, dynamic> toJson() {
