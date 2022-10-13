@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'Schema/Events.dart';
 import 'event.dart';
@@ -26,6 +27,35 @@ final favoriteTeamsProvider = StateProvider<List<String>>((ref) {
 });
 
 class _EventsPageState extends ConsumerState<EventsPage> {
+  void getEvents() {
+    Request.getEventList(selectedDate, dropdownValue).then((value) {
+      if (this.mounted) {
+        setState(() {
+          _events = value;
+          events = value;
+        });
+      }
+    });
+  }
+
+  DateTime selectedDate = DateTime.now();
+
+  String dropdownValue = "All";
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        firstDate: DateTime(2015, 8),
+        lastDate: DateTime(2101));
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+      getEvents();
+    }
+  }
+
   Events _events = Events();
 
   Events events = Events();
@@ -37,7 +67,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
   void initState() {
     super.initState();
     final value = ref.read(favoriteCompsProvider);
-    Request.getEventList().then((value) {
+    Request.getEventList(selectedDate, dropdownValue).then((value) {
       if (this.mounted) {
         setState(() {
           _events = value;
@@ -54,7 +84,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
 
     final getEventsThrottled = throttle(
       () async => {
-        events = await Request.getEventList(),
+        events = await Request.getEventList(selectedDate, dropdownValue),
         if (this.mounted)
           {
             setState(() {
@@ -71,8 +101,6 @@ class _EventsPageState extends ConsumerState<EventsPage> {
       const Duration(seconds: 1),
     );
 
-    const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-
     return (_events.data).toString() == "null"
         ? const Align(
             alignment: Alignment.topCenter,
@@ -87,6 +115,41 @@ class _EventsPageState extends ConsumerState<EventsPage> {
             child: ListView(
               padding: const EdgeInsets.all(8),
               children: <Widget>[
+                Flex(direction: Axis.horizontal, children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => _selectDate(context),
+                      child: Text(DateFormat.yMMMd().format(selectedDate)),
+                    ),
+                  ),
+                  const Spacer(
+                    flex: 1,
+                  ),
+                  Expanded(
+                    child: DropdownButton(
+                      value: dropdownValue,
+                      items: const [
+                        DropdownMenuItem(
+                          value: "All",
+                          child: Text("All"),
+                        ),
+                        DropdownMenuItem(
+                          value: "High School",
+                          child: Text("High School"),
+                        ),
+                        DropdownMenuItem(
+                          value: "Middle School",
+                          child: Text("Middle School"),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(
+                          () => {dropdownValue = value.toString(), getEvents()},
+                        );
+                      },
+                    ),
+                  ),
+                ]),
                 if (_events.data != null)
                   for (var event in _events.data!)
                     InkWell(
