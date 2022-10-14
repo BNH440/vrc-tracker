@@ -18,7 +18,7 @@ Future<events.Events> getEventList(DateTime date, String grade) async {
   var utcDate = "${date.addDays(-1).toUTC.format("yyyy-MM-dd")}T00:00:00Z";
 
   var response = await Requests.get(
-      "https://www.robotevents.com/api/v2/events?season[]=173&start=$utcDate",
+      "https://www.robotevents.com/api/v2/events?season[]=173&start=$utcDate&per_page=1000",
       headers: headers);
 
   var decoded = events.Events.fromJson(jsonDecode(response.body));
