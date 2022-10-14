@@ -91,7 +91,7 @@ class _MatchPageState extends State<MatchPage> {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 10),
                                 child: Text(
-                                  match!.name.toString(),
+                                  match.name.toString(),
                                   style: const TextStyle(fontSize: 20),
                                 ),
                               ),
