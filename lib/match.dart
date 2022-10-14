@@ -119,7 +119,7 @@ class _MatchPageState extends State<MatchPage> {
                                         .alliances?[0].score
                                         .toString() ??
                                     "",
-                                style: const TextStyle(color: Colors.red)),
+                                style: const TextStyle(color: Colors.blue)),
                             const TextSpan(
                               text: " - ",
                             ),
@@ -128,7 +128,7 @@ class _MatchPageState extends State<MatchPage> {
                                         .alliances?[1].score
                                         .toString() ??
                                     "",
-                                style: const TextStyle(color: Colors.blue)),
+                                style: const TextStyle(color: Colors.red)),
                           ],
                         ),
                       )
