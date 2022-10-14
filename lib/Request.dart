@@ -38,7 +38,7 @@ Future<events.Event> getEventDetails(String eventId) async {
       // get div ids and fetch info
       var divId = div.id;
       var divResponse = await Requests.get(
-          "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches",
+          "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches?per_page=1000",
           headers: headers);
       var divDecoded = division.Div.fromJson(jsonDecode(divResponse.body));
       decoded.divisions![divId! - 1].data = divDecoded;
