@@ -153,13 +153,13 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     InkWell(
                       onTap: () {
                         Navigator.push(
-                          context,
-                          CupertinoPageRoute(
+                            context,
+                            CupertinoPageRoute(
                               builder: (context) => MatchPage(
                                   title: (matches.data?[i].name).toString(),
                                   event_old: widget.event_old,
-                                  match_number: i)),
-                        );
+                                  match_number: (matches.data?[i].id ?? 0).toInt()),
+                            ));
                       },
                       child: Container(
                         decoration: BoxDecoration(

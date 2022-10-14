@@ -205,7 +205,8 @@ class _EventPageState extends ConsumerState<EventPage> {
                                 builder: (context) => MatchPage(
                                     title: (event.divisions?[0].data?.data?[i].name).toString(),
                                     event_old: event,
-                                    match_number: i)),
+                                    match_number:
+                                        (event.divisions?[0].data?.data?[i].id ?? 0).toInt())),
                           );
                         },
                         child: Container(

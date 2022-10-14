@@ -52,11 +52,15 @@ class _MatchPageState extends State<MatchPage> {
       const Duration(seconds: 2),
     );
 
+    var match = (event.divisions?[0].data?.data?.singleWhere(
+        (element) => element.id == widget.match_number,
+        orElse: () => event.divisions![0].data!.data![0]));
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: (event.divisions?[0].data?.data).toString() == "null"
+      body: (match).toString() == "null"
           ? const Align(
               alignment: Alignment.topCenter,
               child: Padding(
@@ -84,30 +88,30 @@ class _MatchPageState extends State<MatchPage> {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 10),
                           child: Text(
-                            event.divisions![0].data!.data![widget.match_number].name.toString(),
+                            match!.name.toString(),
                             style: const TextStyle(fontSize: 20),
                           ),
                         ),
                         Text(
-                          "Field: ${event.divisions![0].data!.data![widget.match_number].field.toString()}",
+                          "Field: ${match.field.toString()}",
                           style: const TextStyle(fontSize: 15),
                         ),
                         Text(
-                          "Scheduled: ${DateFormat.jm().format(DateTime.parse(event.divisions![0].data!.data![widget.match_number].scheduled.toString()))}",
+                          "Scheduled: ${DateFormat.jm().format(DateTime.parse(match.scheduled.toString()))}",
                           style: const TextStyle(fontSize: 15),
                         ),
-                        if (event.divisions![0].data!.data![widget.match_number].started != null)
+                        if (match.started != null)
                           Text(
-                            "Started: ${DateFormat.jm().format(DateTime.parse(event.divisions![0].data!.data![widget.match_number].started.toString()))}",
+                            "Started: ${DateFormat.jm().format(DateTime.parse(match.started.toString()))}",
                             style: const TextStyle(fontSize: 15),
                           ),
                         Text(
-                          "Scored: ${event.divisions![0].data!.data![widget.match_number].scored.toString() == "true" ? "No" : "Yes"}",
+                          "Scored: ${match.scored.toString() == "true" ? "No" : "Yes"}",
                           style: const TextStyle(fontSize: 15),
                         ),
                       ],
                     ),
-                    if (!(event.divisions![0].data!.data![widget.match_number].scored ?? true))
+                    if (!(match.scored ?? true))
                       RichText(
                         text: TextSpan(
                           style: const TextStyle(
@@ -115,19 +119,14 @@ class _MatchPageState extends State<MatchPage> {
                           ),
                           children: <TextSpan>[
                             TextSpan(
-                                text: event.divisions![0].data!.data![widget.match_number]
-                                        .alliances?[0].score
-                                        .toString() ??
-                                    "",
+                                text: match.alliances?[0].score.toString() ?? "",
                                 style: const TextStyle(color: Colors.blue)),
-                            const TextSpan(
+                            TextSpan(
                               text: " - ",
+                              style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                             ),
                             TextSpan(
-                                text: event.divisions![0].data!.data![widget.match_number]
-                                        .alliances?[1].score
-                                        .toString() ??
-                                    "",
+                                text: match.alliances?[1].score.toString() ?? "",
                                 style: const TextStyle(color: Colors.red)),
                           ],
                         ),
@@ -135,10 +134,8 @@ class _MatchPageState extends State<MatchPage> {
                   ]),
                 ),
                 if (event.divisions != null)
-                  if (event.divisions?[0].data?.data?[widget.match_number].alliances?.length !=
-                      null)
-                    for (var prop
-                        in (event.divisions![0].data!.data![widget.match_number].alliances!))
+                  if (match.alliances?.length != null)
+                    for (var prop in (match.alliances!))
                       if (prop.teams != null)
                         for (var prop2 in prop.teams!)
                           InkWell(
