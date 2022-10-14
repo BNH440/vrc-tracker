@@ -109,12 +109,14 @@ class _MatchPageState extends State<MatchPage> {
                                   style: const TextStyle(fontSize: 15),
                                 ),
                               Text(
-                                "Scored: ${match.scored.toString() == "true" ? "No" : "Yes"}",
+                                "Scored: ${(!(((match.alliances?[0].score ?? 0) & (match.alliances?[0].score ?? 0)) == 0)) ? "Yes" : "No"}",
                                 style: const TextStyle(fontSize: 15),
                               ),
                             ],
                           ),
-                          if (!(match.scored ?? true))
+                          if (!(((match.alliances?[0].score ?? 0) &
+                                  (match.alliances?[0].score ?? 0)) ==
+                              0))
                             RichText(
                               text: TextSpan(
                                 style: const TextStyle(
