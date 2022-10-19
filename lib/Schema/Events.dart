@@ -1,4 +1,5 @@
 import 'package:vrc_ranks_app/Schema/Division.dart';
+import 'package:vrc_ranks_app/Schema/Rankings.dart';
 import 'package:vrc_ranks_app/Schema/TeamList.dart';
 
 class Events {
@@ -101,6 +102,7 @@ class Event {
   bool? ongoing;
   bool? awardsFinalized;
   Null? eventType;
+  List<Rankings>? rankings;
 
   Event(
       {this.id,
@@ -116,7 +118,8 @@ class Event {
       this.level,
       this.ongoing,
       this.awardsFinalized,
-      this.eventType});
+      this.eventType,
+      this.rankings});
 
   Event.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -238,9 +241,8 @@ class Location {
     region = json['region'];
     postcode = json['postcode'];
     country = json['country'];
-    coordinates = json['coordinates'] != null
-        ? new Coordinates.fromJson(json['coordinates'])
-        : null;
+    coordinates =
+        json['coordinates'] != null ? new Coordinates.fromJson(json['coordinates']) : null;
   }
 
   Map<String, dynamic> toJson() {

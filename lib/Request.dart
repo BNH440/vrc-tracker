@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:requests/requests.dart';
+import 'package:vrc_ranks_app/Schema/Rankings.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'dart:convert';
 import 'Schema/Events.dart' as events;
@@ -29,6 +30,7 @@ Future<events.Events> getEventList(DateTime date, String grade) async {
 }
 
 Future<events.Event> getEventDetails(String eventId) async {
+  List<Rankings> rankings = [];
   var response =
       await Requests.get("https://www.robotevents.com/api/v2/events/$eventId", headers: headers);
 
@@ -43,8 +45,18 @@ Future<events.Event> getEventDetails(String eventId) async {
           headers: headers);
       var divDecoded = division.Div.fromJson(jsonDecode(divResponse.body));
       decoded.divisions![divId! - 1].data = divDecoded;
+
+      var rankingsResponse = await Requests.get(
+          "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/rankings?per_page=1000",
+          headers: headers);
+
+      var rankingsDecoded = Rankings.fromJson(jsonDecode(rankingsResponse.body));
+
+      rankings.add(rankingsDecoded);
     }
   }
+
+  decoded.rankings = rankings;
 
   var response2 = await Requests.get(
       "https://www.robotevents.com/api/v2/events/$eventId/teams?per_page=1000",

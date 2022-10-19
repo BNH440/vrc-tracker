@@ -311,7 +311,42 @@ class _EventPageState extends ConsumerState<EventPage> {
                         await getEventDetailsThrottled();
                       },
                     ),
-              const Text("Rankings"),
+              (event.rankings?[0]).toString() == "null"
+                  ? const Text("")
+                  : RefreshIndicator(
+                      child: ListView(children: [
+                        for (var i = (((event.rankings?[0].data?.length ?? 1) - 1)); i >= 0; i--)
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) => TeamPage(
+                                      title: (event.rankings?[0].data?[i].team?.name).toString(),
+                                      event_old: event,
+                                      match_id: event.id.toString(),
+                                      team_id: (event.rankings?[0].data?[i].team?.id).toString()),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Theme.of(context).cardColor,
+                              ),
+                              height: 50,
+                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              margin: const EdgeInsets.all(4),
+                              child: Center(
+                                child: Text((event.rankings?[0].data?[i].team?.name).toString()),
+                              ),
+                            ),
+                          ),
+                      ]),
+                      onRefresh: () async {
+                        await getEventDetailsThrottled();
+                      },
+                    ),
             ],
           ),
         ),
