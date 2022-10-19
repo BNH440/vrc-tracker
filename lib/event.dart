@@ -7,6 +7,7 @@ import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart';
 import 'package:vrc_ranks_app/events.dart';
+import 'package:vrc_ranks_app/team.dart';
 import 'Request.dart' as Request;
 import 'match.dart';
 import 'package:intl/intl.dart';
@@ -274,8 +275,43 @@ class _EventPageState extends ConsumerState<EventPage> {
                         await getEventDetailsThrottled();
                       },
                     ),
-              const Text("f1"),
-              const Text("f2"),
+              (event.teams?.data).toString() == "null"
+                  ? const Text("")
+                  : RefreshIndicator(
+                      child: ListView(children: [
+                        for (var i = 0; i <= (((event.teams?.data?.length ?? 1) - 1)); i++)
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) => TeamPage(
+                                      title: (event.teams?.data?[i].number).toString(),
+                                      event_old: event,
+                                      match_id: event.id.toString(),
+                                      team_id: (event.teams?.data?[i].id).toString()),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Theme.of(context).cardColor,
+                              ),
+                              height: 50,
+                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              margin: const EdgeInsets.all(4),
+                              child: Center(
+                                child: Text((event.teams?.data?[i].number).toString()),
+                              ),
+                            ),
+                          ),
+                      ]),
+                      onRefresh: () async {
+                        await getEventDetailsThrottled();
+                      },
+                    ),
+              const Text("Rankings"),
             ],
           ),
         ),

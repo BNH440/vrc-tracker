@@ -1,4 +1,5 @@
 import 'package:vrc_ranks_app/Schema/Division.dart';
+import 'package:vrc_ranks_app/Schema/TeamList.dart';
 
 class Events {
   Meta? meta;
@@ -95,6 +96,7 @@ class Event {
   Program? program;
   Location? location;
   List<Divisions>? divisions;
+  TeamList? teams;
   String? level;
   bool? ongoing;
   bool? awardsFinalized;
@@ -110,6 +112,7 @@ class Event {
       this.program,
       this.location,
       this.divisions,
+      this.teams,
       this.level,
       this.ongoing,
       this.awardsFinalized,
@@ -121,13 +124,9 @@ class Event {
     name = json['name'];
     start = json['start'];
     end = json['end'];
-    season =
-        json['season'] != null ? new Season.fromJson(json['season']) : null;
-    program =
-        json['program'] != null ? new Program.fromJson(json['program']) : null;
-    location = json['location'] != null
-        ? new Location.fromJson(json['location'])
-        : null;
+    season = json['season'] != null ? new Season.fromJson(json['season']) : null;
+    program = json['program'] != null ? new Program.fromJson(json['program']) : null;
+    location = json['location'] != null ? new Location.fromJson(json['location']) : null;
     if (json['divisions'] != null) {
       divisions = <Divisions>[];
       json['divisions'].forEach((v) {
@@ -261,8 +260,8 @@ class Location {
 }
 
 class Coordinates {
-  double? lat;
-  double? lon;
+  num? lat;
+  num? lon;
 
   Coordinates({this.lat, this.lon});
 

@@ -8,6 +8,7 @@ import 'Schema/Division.dart' as division;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:dart_date/dart_date.dart';
 import 'Schema/MatchListByTeam.dart';
+import 'Schema/TeamList.dart' as TeamList;
 
 var headers = {
   'Accept': 'application/json',
@@ -45,7 +46,13 @@ Future<events.Event> getEventDetails(String eventId) async {
     }
   }
 
-  // TODO: get team list
+  var response2 = await Requests.get(
+      "https://www.robotevents.com/api/v2/events/$eventId/teams?per_page=1000",
+      headers: headers);
+
+  var decoded2 = TeamList.TeamList.fromJson(jsonDecode(response2.body));
+
+  decoded.teams = decoded2;
 
   log("Requested event details");
   return decoded;
