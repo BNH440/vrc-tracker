@@ -48,7 +48,6 @@ class _EventPageState extends ConsumerState<EventPage> {
 
   @override
   Widget build(BuildContext context) {
-    // final favorites = Provider.of<Favorites>(context);
     final favorites = ref.watch(favoriteCompsProvider);
 
     final getEventDetailsThrottled = throttle(
@@ -64,169 +63,223 @@ class _EventPageState extends ConsumerState<EventPage> {
       },
       const Duration(seconds: 2),
     );
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title,
-              style: const TextStyle(
-                overflow: TextOverflow.fade,
-              )),
-          actions: [
-            IconButton(
-              icon: ref.read(favoriteCompsProvider.notifier).state.contains(event.id.toString())
-                  ? const Icon(Icons.star)
-                  : const Icon(Icons.star_border_outlined),
-              onPressed: () {
-                List<String> oldState = ref.read(favoriteCompsProvider.notifier).state;
-                if (oldState.contains(event.id.toString())) {
-                  oldState.remove(event.id.toString());
-                } else {
-                  oldState.add(event.id.toString());
-                }
-                ref.read(favoriteCompsProvider.notifier).update((state) => oldState.toList());
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        body: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverAppBar(
+                title: Text(widget.title,
+                    style: const TextStyle(
+                      overflow: TextOverflow.fade,
+                    )),
+                actions: [
+                  IconButton(
+                    icon:
+                        ref.read(favoriteCompsProvider.notifier).state.contains(event.id.toString())
+                            ? const Icon(Icons.star)
+                            : const Icon(Icons.star_border_outlined),
+                    onPressed: () {
+                      List<String> oldState = ref.read(favoriteCompsProvider.notifier).state;
+                      if (oldState.contains(event.id.toString())) {
+                        oldState.remove(event.id.toString());
+                      } else {
+                        oldState.add(event.id.toString());
+                      }
+                      ref.read(favoriteCompsProvider.notifier).update((state) => oldState.toList());
 
-                SharedPreferences.getInstance()
-                    .then((prefs) => prefs.setStringList('favoriteComps', oldState.toList()));
-              },
-            ),
-          ],
-        ),
-        body: (event.divisions?[0].data?.data).toString() == "null"
-            ? const Align(
-                alignment: Alignment.topCenter,
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: CircularProgressIndicator(
-                    color: Colors.red,
+                      SharedPreferences.getInstance()
+                          .then((prefs) => prefs.setStringList('favoriteComps', oldState.toList()));
+                    },
                   ),
-                ),
-              )
-            : RefreshIndicator(
-                child: ListView(
-                  padding: const EdgeInsets.all(8),
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: <Widget>[
-                    Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Theme.of(context).cardColor,
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        margin: const EdgeInsets.all(4),
-                        child: Flex(direction: Axis.vertical, children: [
-                          ListView(
-                              shrinkWrap: true,
-                              padding: const EdgeInsets.all(8),
-                              physics: const NeverScrollableScrollPhysics(),
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 5),
-                                  child: Text(
-                                    event.name.toString(),
-                                    style: const TextStyle(fontSize: 20),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: Text(
-                                    "${convertDate(event.start.toString())} - ${convertDate(event.end.toString())}",
-                                    style: const TextStyle(fontSize: 15),
-                                  ),
-                                ),
-                                Text(
-                                  "Ongoing: ${event.ongoing.toString() == "true" ? "Yes" : "No"}",
-                                  style: const TextStyle(fontSize: 15),
-                                ),
-                                Text(
-                                  "Competition: ${event.season?.name.toString()}",
-                                  style: const TextStyle(fontSize: 15),
-                                ),
-                              ]),
-                          Align(
-                              alignment: FractionalOffset.bottomRight,
-                              child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                                Column(
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        if (Platform.isAndroid) {
-                                          launchUrl(
-                                              Uri.parse(
-                                                  "https://maps.google.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
-                                              mode: LaunchMode.externalApplication);
-                                        } else if (Platform.isIOS) {
-                                          launchUrl(
-                                              Uri.parse(
-                                                  "https://maps.apple.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
-                                              mode: LaunchMode.externalApplication);
-                                        }
-                                        log("Redirect to navigation app");
-                                      },
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
-                                          color: Theme.of(context).backgroundColor,
-                                        ),
-                                        padding: const EdgeInsets.all(10),
-                                        margin: const EdgeInsets.symmetric(horizontal: 10),
-                                        child: const Icon(Icons.navigation_rounded, size: 30),
+                ],
+                pinned: true,
+                forceElevated: innerBoxIsScrolled,
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    (event.divisions?[0].data?.data).toString() == "null"
+                        ? const Align(
+                            alignment: Alignment.topCenter,
+                            child: Padding(
+                              padding: EdgeInsets.all(20),
+                              child: CircularProgressIndicator(
+                                color: Colors.red,
+                              ),
+                            ),
+                          )
+                        : Container(
+                            padding: const EdgeInsets.all(10),
+                            child: Column(
+                              children: [
+                                RefreshIndicator(
+                                  child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: Theme.of(context).cardColor,
                                       ),
-                                    ),
+                                      padding: const EdgeInsets.all(8),
+                                      margin: const EdgeInsets.all(4),
+                                      child: Flex(direction: Axis.vertical, children: [
+                                        ListView(
+                                            shrinkWrap: true,
+                                            padding: const EdgeInsets.all(8),
+                                            physics: const NeverScrollableScrollPhysics(),
+                                            children: <Widget>[
+                                              Padding(
+                                                padding: const EdgeInsets.only(bottom: 5),
+                                                child: Text(
+                                                  event.name.toString(),
+                                                  style: const TextStyle(fontSize: 20),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(bottom: 10),
+                                                child: Text(
+                                                  "${convertDate(event.start.toString())} - ${convertDate(event.end.toString())}",
+                                                  style: const TextStyle(fontSize: 15),
+                                                ),
+                                              ),
+                                              Text(
+                                                "Ongoing: ${event.ongoing.toString() == "true" ? "Yes" : "No"}",
+                                                style: const TextStyle(fontSize: 15),
+                                              ),
+                                              Text(
+                                                "Competition: ${event.season?.name.toString()}",
+                                                style: const TextStyle(fontSize: 15),
+                                              ),
+                                            ]),
+                                        Align(
+                                            alignment: FractionalOffset.bottomRight,
+                                            child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                children: [
+                                                  Column(
+                                                    children: [
+                                                      InkWell(
+                                                        onTap: () {
+                                                          if (Platform.isAndroid) {
+                                                            launchUrl(
+                                                                Uri.parse(
+                                                                    "https://maps.google.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
+                                                                mode:
+                                                                    LaunchMode.externalApplication);
+                                                          } else if (Platform.isIOS) {
+                                                            launchUrl(
+                                                                Uri.parse(
+                                                                    "https://maps.apple.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
+                                                                mode:
+                                                                    LaunchMode.externalApplication);
+                                                          }
+                                                          log("Redirect to navigation app");
+                                                        },
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                            borderRadius: BorderRadius.circular(10),
+                                                            color:
+                                                                Theme.of(context).backgroundColor,
+                                                          ),
+                                                          padding: const EdgeInsets.all(10),
+                                                          margin: const EdgeInsets.symmetric(
+                                                              horizontal: 10),
+                                                          child: const Icon(
+                                                              Icons.navigation_rounded,
+                                                              size: 30),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Column(
+                                                    children: [
+                                                      InkWell(
+                                                        onTap: () {
+                                                          launchUrl(
+                                                              Uri.parse(
+                                                                  "https://www.robotevents.com/robot-competitions/vex-robotics-competition/${event.sku}.html"),
+                                                              mode: LaunchMode.externalApplication);
+                                                          log("Redirect to web browser with comp link");
+                                                        },
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                            borderRadius: BorderRadius.circular(10),
+                                                            color:
+                                                                Theme.of(context).backgroundColor,
+                                                          ),
+                                                          padding: const EdgeInsets.all(10),
+                                                          child: const Icon(Icons.link, size: 30),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ]))
+                                      ])),
+                                  onRefresh: () async {
+                                    await getEventDetailsThrottled();
+                                  },
+                                ),
+                                TabBar(
+                                  indicatorColor: Theme.of(context).colorScheme.secondary,
+                                  tabs: const [
+                                    Tab(icon: Icon(Icons.schedule), text: "Matches"),
+                                    Tab(icon: Icon(Icons.people), text: "Teams"),
+                                    Tab(icon: Icon(Icons.bar_chart), text: "Rankings"),
                                   ],
                                 ),
-                                Column(
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        launchUrl(
-                                            Uri.parse(
-                                                "https://www.robotevents.com/robot-competitions/vex-robotics-competition/${event.sku}.html"),
-                                            mode: LaunchMode.externalApplication);
-                                        log("Redirect to web browser with comp link");
-                                      },
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
-                                          color: Theme.of(context).backgroundColor,
-                                        ),
-                                        padding: const EdgeInsets.all(10),
-                                        child: const Icon(Icons.link, size: 30),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ]))
-                        ])),
-                    for (var i = 0; i <= (((event.divisions?[0].data?.data?.length ?? 1) - 1)); i++)
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                                builder: (context) => MatchPage(
-                                    title: (event.divisions?[0].data?.data?[i].name).toString(),
-                                    event_old: event,
-                                    match_number:
-                                        (event.divisions?[0].data?.data?[i].id ?? 0).toInt())),
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Theme.of(context).cardColor,
-                          ),
-                          height: 50,
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          margin: const EdgeInsets.all(4),
-                          child: Center(
-                            child: Text((event.divisions?[0].data?.data?[i].name).toString()),
-                          ),
-                        ),
-                      ),
+                              ],
+                            ),
+                          )
                   ],
                 ),
-                onRefresh: () async {
-                  await getEventDetailsThrottled();
-                },
-              ));
+              )
+            ];
+          },
+          body: TabBarView(
+            children: [
+              (event.divisions?[0].data?.data).toString() == "null"
+                  ? const Text("")
+                  : RefreshIndicator(
+                      child: ListView(children: [
+                        for (var i = 0;
+                            i <= (((event.divisions?[0].data?.data?.length ?? 1) - 1));
+                            i++)
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                    builder: (context) => MatchPage(
+                                        title: (event.divisions?[0].data?.data?[i].name).toString(),
+                                        event_old: event,
+                                        match_number:
+                                            (event.divisions?[0].data?.data?[i].id ?? 0).toInt())),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Theme.of(context).cardColor,
+                              ),
+                              height: 50,
+                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              margin: const EdgeInsets.all(4),
+                              child: Center(
+                                child: Text((event.divisions?[0].data?.data?[i].name).toString()),
+                              ),
+                            ),
+                          ),
+                      ]),
+                      onRefresh: () async {
+                        await getEventDetailsThrottled();
+                      },
+                    ),
+              const Text("f1"),
+              const Text("f2"),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
