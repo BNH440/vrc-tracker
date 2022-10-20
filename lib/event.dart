@@ -241,36 +241,41 @@ class _EventPageState extends ConsumerState<EventPage> {
               (event.divisions?[0].data?.data).toString() == "null"
                   ? const Text("")
                   : RefreshIndicator(
-                      child: ListView(children: [
-                        for (var i = 0;
-                            i <= (((event.divisions?[0].data?.data?.length ?? 1) - 1));
-                            i++)
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                    builder: (context) => MatchPage(
-                                        title: (event.divisions?[0].data?.data?[i].name).toString(),
-                                        event_old: event,
-                                        match_number:
-                                            (event.divisions?[0].data?.data?[i].id ?? 0).toInt())),
-                              );
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Theme.of(context).cardColor,
-                              ),
-                              height: 50,
-                              padding: const EdgeInsets.symmetric(horizontal: 30),
-                              margin: const EdgeInsets.all(4),
-                              child: Center(
-                                child: Text((event.divisions?[0].data?.data?[i].name).toString()),
+                      child: MediaQuery.removePadding(
+                        removeTop: true,
+                        context: context,
+                        child: ListView(children: [
+                          for (var i = 0;
+                              i <= (((event.divisions?[0].data?.data?.length ?? 1) - 1));
+                              i++)
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(
+                                      builder: (context) => MatchPage(
+                                          title:
+                                              (event.divisions?[0].data?.data?[i].name).toString(),
+                                          event_old: event,
+                                          match_number: (event.divisions?[0].data?.data?[i].id ?? 0)
+                                              .toInt())),
+                                );
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Theme.of(context).cardColor,
+                                ),
+                                height: 50,
+                                padding: const EdgeInsets.symmetric(horizontal: 30),
+                                margin: const EdgeInsets.all(4),
+                                child: Center(
+                                  child: Text((event.divisions?[0].data?.data?[i].name).toString()),
+                                ),
                               ),
                             ),
-                          ),
-                      ]),
+                        ]),
+                      ),
                       onRefresh: () async {
                         await getEventDetailsThrottled();
                       },
@@ -278,35 +283,39 @@ class _EventPageState extends ConsumerState<EventPage> {
               (event.teams?.data).toString() == "null"
                   ? const Text("")
                   : RefreshIndicator(
-                      child: ListView(children: [
-                        for (var i = 0; i <= (((event.teams?.data?.length ?? 1) - 1)); i++)
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => TeamPage(
-                                      title: (event.teams?.data?[i].number).toString(),
-                                      event_old: event,
-                                      match_id: event.id.toString(),
-                                      team_id: (event.teams?.data?[i].id).toString()),
+                      child: MediaQuery.removePadding(
+                        removeTop: true,
+                        context: context,
+                        child: ListView(children: [
+                          for (var i = 0; i <= (((event.teams?.data?.length ?? 1) - 1)); i++)
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) => TeamPage(
+                                        title: (event.teams?.data?[i].number).toString(),
+                                        event_old: event,
+                                        match_id: event.id.toString(),
+                                        team_id: (event.teams?.data?[i].id).toString()),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Theme.of(context).cardColor,
                                 ),
-                              );
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Theme.of(context).cardColor,
-                              ),
-                              height: 50,
-                              padding: const EdgeInsets.symmetric(horizontal: 30),
-                              margin: const EdgeInsets.all(4),
-                              child: Center(
-                                child: Text((event.teams?.data?[i].number).toString()),
+                                height: 50,
+                                padding: const EdgeInsets.symmetric(horizontal: 30),
+                                margin: const EdgeInsets.all(4),
+                                child: Center(
+                                  child: Text((event.teams?.data?[i].number).toString()),
+                                ),
                               ),
                             ),
-                          ),
-                      ]),
+                        ]),
+                      ),
                       onRefresh: () async {
                         await getEventDetailsThrottled();
                       },
@@ -314,35 +323,39 @@ class _EventPageState extends ConsumerState<EventPage> {
               (event.rankings?[0]).toString() == "null"
                   ? const Text("")
                   : RefreshIndicator(
-                      child: ListView(children: [
-                        for (var i = (((event.rankings?[0].data?.length ?? 1) - 1)); i >= 0; i--)
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => TeamPage(
-                                      title: (event.rankings?[0].data?[i].team?.name).toString(),
-                                      event_old: event,
-                                      match_id: event.id.toString(),
-                                      team_id: (event.rankings?[0].data?[i].team?.id).toString()),
+                      child: MediaQuery.removePadding(
+                        removeTop: true,
+                        context: context,
+                        child: ListView(children: [
+                          for (var i = (((event.rankings?[0].data?.length ?? 1) - 1)); i >= 0; i--)
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) => TeamPage(
+                                        title: (event.rankings?[0].data?[i].team?.name).toString(),
+                                        event_old: event,
+                                        match_id: event.id.toString(),
+                                        team_id: (event.rankings?[0].data?[i].team?.id).toString()),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Theme.of(context).cardColor,
                                 ),
-                              );
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Theme.of(context).cardColor,
-                              ),
-                              height: 50,
-                              padding: const EdgeInsets.symmetric(horizontal: 30),
-                              margin: const EdgeInsets.all(4),
-                              child: Center(
-                                child: Text((event.rankings?[0].data?[i].team?.name).toString()),
+                                height: 50,
+                                padding: const EdgeInsets.symmetric(horizontal: 30),
+                                margin: const EdgeInsets.all(4),
+                                child: Center(
+                                  child: Text((event.rankings?[0].data?[i].team?.name).toString()),
+                                ),
                               ),
                             ),
-                          ),
-                      ]),
+                        ]),
+                      ),
                       onRefresh: () async {
                         await getEventDetailsThrottled();
                       },
