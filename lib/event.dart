@@ -361,9 +361,58 @@ class _EventPageState extends ConsumerState<EventPage> {
                                     height: 50,
                                     padding: const EdgeInsets.symmetric(horizontal: 30),
                                     margin: const EdgeInsets.all(4),
-                                    child: Center(
-                                      child:
-                                          Text((event.rankings?[0].data?[i].team?.name).toString()),
+                                    child: Flex(
+                                      direction: Axis.horizontal,
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                WidgetSpan(
+                                                    alignment: PlaceholderAlignment.middle,
+                                                    child: Text(
+                                                      "${(i - (event.rankings?[0].data?.length ?? 0)).abs()}. ",
+                                                      style: TextStyle(
+                                                          color: Theme.of(context)
+                                                              .colorScheme
+                                                              .secondary,
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: 18),
+                                                    )),
+                                                WidgetSpan(
+                                                  alignment: PlaceholderAlignment.middle,
+                                                  child: Text(
+                                                    (event.rankings?[0].data?[i].team?.name)
+                                                        .toString(),
+                                                    style: const TextStyle(fontSize: 16),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                WidgetSpan(
+                                                  alignment: PlaceholderAlignment.middle,
+                                                  child: Text(
+                                                    "WP: ${(event.rankings?[0].data?[i].wp).toString()} AP: ${(event.rankings?[0].data?[i].ap).toString()} SP: ${(event.rankings?[0].data?[i].sp).toString()}      ${event.rankings?[0].data?[i].wins}-${event.rankings?[0].data?[i].losses}-${event.rankings?[0].data?[i].ties}",
+                                                    style: TextStyle(
+                                                      color: Theme.of(context).colorScheme.tertiary,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),

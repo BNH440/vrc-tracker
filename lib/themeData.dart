@@ -5,8 +5,10 @@ class Styles {
     return ThemeData(
       primarySwatch: Colors.red,
       colorScheme: isDarkTheme
-          ? const ColorScheme.dark(primary: Colors.red, secondary: Colors.red)
-          : const ColorScheme.light(primary: Colors.red, secondary: Colors.red),
+          ? const ColorScheme.dark(
+              primary: Colors.red, secondary: Colors.red, tertiary: Colors.white54)
+          : ColorScheme.light(
+              primary: Colors.red, secondary: Colors.red, tertiary: Colors.grey[800]),
       primaryColor: isDarkTheme ? Colors.black : Colors.white,
       backgroundColor: isDarkTheme ? Colors.black : const Color(0xffF1F5FB),
       indicatorColor: isDarkTheme ? const Color(0xff0E1D36) : const Color(0xffCBDCF8),
