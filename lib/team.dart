@@ -147,6 +147,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         if (widget.event_old.rankings?[0].data != null)
                           if ((widget.event_old.rankings?[0].data!.length)! > 0)
                             ListView(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
                               children: [
                                 const Text(""),
                                 Text(

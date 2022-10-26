@@ -13,6 +13,7 @@ import 'match.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io' show Platform;
+import 'package:collection/collection.dart';
 
 class EventPage extends ConsumerStatefulWidget {
   const EventPage({Key? key, required this.title, required this.event_old}) : super(key: key);
@@ -293,7 +294,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                             removeTop: true,
                             context: context,
                             child: ListView(children: [
-                              for (var i = 0; i <= (((event.teams?.data?.length ?? 1) - 1)); i++)
+                              for (var i = 0; i <= (((_event.teams?.data?.length ?? 1) - 1)); i++)
                                 InkWell(
                                   onTap: () {
                                     Navigator.push(
@@ -315,8 +316,67 @@ class _EventPageState extends ConsumerState<EventPage> {
                                     height: 50,
                                     padding: const EdgeInsets.symmetric(horizontal: 30),
                                     margin: const EdgeInsets.all(4),
-                                    child: Center(
-                                      child: Text((event.teams?.data?[i].number).toString()),
+                                    child: Flex(
+                                      direction: Axis.horizontal,
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                WidgetSpan(
+                                                  alignment: PlaceholderAlignment.middle,
+                                                  child: Text(
+                                                    (event.teams?.data?[i].number).toString(),
+                                                    style: const TextStyle(fontSize: 16),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        if (event.teams?.data?[i].teamName != null)
+                                          Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: SizedBox(
+                                              width: 160,
+                                              child: Text(
+                                                (event.teams?.data?[i].teamName).toString(),
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: Theme.of(context).colorScheme.tertiary),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                softWrap: false,
+                                              ),
+                                            ),
+                                          ),
+                                        const Spacer(flex: 5),
+                                        if (event.rankings?[0].data != null)
+                                          if ((event.rankings?[0].data?.length ?? 0) > 0)
+                                            Align(
+                                              alignment: Alignment.centerRight,
+                                              child: RichText(
+                                                text: TextSpan(
+                                                  children: [
+                                                    WidgetSpan(
+                                                      alignment: PlaceholderAlignment.middle,
+                                                      child: Text(
+                                                        "Rank: ${event.rankings?[0].data?[i].rank}      ${event.rankings?[0].data?[i].wins}-${event.rankings?[0].data?[i].losses}-${event.rankings?[0].data?[i].ties}",
+                                                        style: TextStyle(
+                                                          color: Theme.of(context)
+                                                              .colorScheme
+                                                              .tertiary,
+                                                          fontSize: 14,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                      ],
                                     ),
                                   ),
                                 ),
@@ -372,7 +432,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                 WidgetSpan(
                                                     alignment: PlaceholderAlignment.middle,
                                                     child: Text(
-                                                      "${(i - (event.rankings?[0].data?.length ?? 0)).abs()}. ",
+                                                      "${event.rankings?[0].data?[i].rank}. ",
                                                       style: TextStyle(
                                                           color: Theme.of(context)
                                                               .colorScheme
