@@ -95,14 +95,16 @@ class _MatchPageState extends State<MatchPage> {
                                   style: const TextStyle(fontSize: 20),
                                 ),
                               ),
-                              Text(
-                                "Field: ${match.field.toString()}",
-                                style: const TextStyle(fontSize: 15),
-                              ),
-                              Text(
-                                "Scheduled: ${DateFormat.jm().format(DateTime.parse(match.scheduled.toString()))}",
-                                style: const TextStyle(fontSize: 15),
-                              ),
+                              if (match.field.toString() != "null")
+                                Text(
+                                  "Field: ${match.field.toString()}",
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                              if (match.scheduled.toString() != "null")
+                                Text(
+                                  "Scheduled: ${DateFormat.jm().format(DateTime.parse(match.scheduled.toString()))}",
+                                  style: const TextStyle(fontSize: 15),
+                                ),
                               if (match.started != null)
                                 Text(
                                   "Started: ${DateFormat.jm().format(DateTime.parse(match.started.toString()))}",
