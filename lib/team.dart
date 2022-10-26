@@ -144,27 +144,33 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           "Grade: ${team.grade.toString()}",
                           style: const TextStyle(fontSize: 15),
                         ),
-                        const Text(""),
-                        Text(
-                          "Rank: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).rank.toString()}",
-                          style: const TextStyle(fontSize: 15),
-                        ),
-                        Text(
-                          "Record: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).wins.toString()}-${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).losses.toString()}-${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).ties.toString()}",
-                          style: const TextStyle(fontSize: 15),
-                        ),
-                        Text(
-                          "Avg Points: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).averagePoints.toString()}",
-                          style: const TextStyle(fontSize: 15),
-                        ),
-                        Text(
-                          "High Score: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).highScore.toString()}",
-                          style: const TextStyle(fontSize: 15),
-                        ),
-                        Text(
-                          "WP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).wp.toString()}, AP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).ap.toString()}, SP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).sp.toString()}",
-                          style: const TextStyle(fontSize: 15),
-                        ),
+                        if (widget.event_old.rankings?[0].data != null)
+                          if ((widget.event_old.rankings?[0].data!.length)! > 0)
+                            ListView(
+                              children: [
+                                const Text(""),
+                                Text(
+                                  "Rank: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).rank.toString()}",
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                                Text(
+                                  "Record: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).wins.toString()}-${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).losses.toString()}-${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).ties.toString()}",
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                                Text(
+                                  "Avg Points: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).averagePoints.toString()}",
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                                Text(
+                                  "High Score: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).highScore.toString()}",
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                                Text(
+                                  "WP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).wp.toString()}, AP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).ap.toString()}, SP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).sp.toString()}",
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                              ],
+                            )
                       ],
                     )
                   ]),
