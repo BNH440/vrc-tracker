@@ -273,9 +273,138 @@ class _EventPageState extends ConsumerState<EventPage> {
                                     height: 50,
                                     padding: const EdgeInsets.symmetric(horizontal: 30),
                                     margin: const EdgeInsets.all(4),
-                                    child: Center(
-                                      child: Text(
-                                          (event.divisions?[0].data?.data?[i].name).toString()),
+                                    child: Flex(
+                                      direction: Axis.horizontal,
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                WidgetSpan(
+                                                  alignment: PlaceholderAlignment.middle,
+                                                  child: Text(
+                                                    (event.divisions?[0].data?.data?[i].name)
+                                                        .toString(),
+                                                    style: const TextStyle(fontSize: 16),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        const Spacer(flex: 2),
+                                        SizedBox(
+                                          width: 60,
+                                          child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: RichText(
+                                              text: TextSpan(
+                                                children: [
+                                                  WidgetSpan(
+                                                    alignment: PlaceholderAlignment.middle,
+                                                    child: Text(
+                                                      "${event.divisions?[0].data?.data?[i].alliances?[0].teams?[0].team?.name}\n${event.divisions?[0].data?.data?[i].alliances?[0].teams?[1].team?.name}",
+                                                      style: TextStyle(
+                                                        color:
+                                                            Theme.of(context).colorScheme.tertiary,
+                                                        fontSize: 14,
+                                                      ),
+                                                      textAlign: TextAlign.right,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        (event.divisions?[0].data?.data?[i].alliances?[0].score
+                                                        .toString() !=
+                                                    "0" &&
+                                                event.divisions?[0].data?.data?[i].alliances?[1]
+                                                        .score
+                                                        .toString() !=
+                                                    "0")
+                                            ? SizedBox(
+                                                width: 90,
+                                                child: Align(
+                                                  alignment: Alignment.center,
+                                                  child: RichText(
+                                                    text: TextSpan(
+                                                      children: [
+                                                        WidgetSpan(
+                                                            alignment: PlaceholderAlignment.middle,
+                                                            child: RichText(
+                                                              text: TextSpan(
+                                                                style: const TextStyle(
+                                                                  fontSize: 20.0,
+                                                                ),
+                                                                children: <TextSpan>[
+                                                                  TextSpan(
+                                                                      text: event
+                                                                              .divisions?[0]
+                                                                              .data
+                                                                              ?.data?[i]
+                                                                              .alliances?[0]
+                                                                              .score
+                                                                              .toString() ??
+                                                                          "",
+                                                                      style: const TextStyle(
+                                                                          color: Colors.blue)),
+                                                                  TextSpan(
+                                                                    text: " - ",
+                                                                    style: TextStyle(
+                                                                        color: Theme.of(context)
+                                                                            .textTheme
+                                                                            .bodyLarge
+                                                                            ?.color),
+                                                                  ),
+                                                                  TextSpan(
+                                                                      text: event
+                                                                              .divisions?[0]
+                                                                              .data
+                                                                              ?.data?[i]
+                                                                              .alliances?[1]
+                                                                              .score
+                                                                              .toString() ??
+                                                                          "",
+                                                                      style: const TextStyle(
+                                                                          color: Colors.red)),
+                                                                ],
+                                                              ),
+                                                            )),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                            : Text("N/A"),
+                                        const Spacer(),
+                                        SizedBox(
+                                          width: 60,
+                                          child: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: RichText(
+                                              text: TextSpan(
+                                                children: [
+                                                  WidgetSpan(
+                                                    alignment: PlaceholderAlignment.middle,
+                                                    child: Text(
+                                                      "${event.divisions?[0].data?.data?[i].alliances?[1].teams?[0].team?.name}\n${event.divisions?[0].data?.data?[i].alliances?[1].teams?[1].team?.name}",
+                                                      style: TextStyle(
+                                                        color:
+                                                            Theme.of(context).colorScheme.tertiary,
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      ],
                                     ),
                                   ),
                                 ),
