@@ -9,6 +9,7 @@ import 'package:vrc_ranks_app/events.dart';
 import 'Request.dart' as Request;
 import 'match.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:collection/collection.dart';
 
 class TeamPage extends ConsumerStatefulWidget {
   const TeamPage(
@@ -152,23 +153,23 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               children: [
                                 const Text(""),
                                 Text(
-                                  "Rank: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).rank.toString()}",
+                                  "Rank: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.rank.toString()}",
                                   style: const TextStyle(fontSize: 15),
                                 ),
                                 Text(
-                                  "Record: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).wins.toString()}-${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).losses.toString()}-${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).ties.toString()}",
+                                  "Record: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wins.toString()}-${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).losses.toString()}-${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).ties.toString()}",
                                   style: const TextStyle(fontSize: 15),
                                 ),
                                 Text(
-                                  "Avg Points: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).averagePoints.toString()}",
+                                  "Avg Points: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.averagePoints.toString()}",
                                   style: const TextStyle(fontSize: 15),
                                 ),
                                 Text(
-                                  "High Score: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).highScore.toString()}",
+                                  "High Score: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.highScore.toString()}",
                                   style: const TextStyle(fontSize: 15),
                                 ),
                                 Text(
-                                  "WP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).wp.toString()}, AP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).ap.toString()}, SP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).sp.toString()}",
+                                  "WP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wp.toString()}, AP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).ap.toString()}, SP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).sp.toString()}",
                                   style: const TextStyle(fontSize: 15),
                                 ),
                               ],
