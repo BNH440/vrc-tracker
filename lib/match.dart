@@ -102,12 +102,7 @@ class _MatchPageState extends State<MatchPage> {
                                 ),
                               if (match.scheduled.toString() != "null")
                                 Text(
-                                  "Scheduled: ${DateFormat.jm().format(DateTime.parse(match.scheduled.toString()))}",
-                                  style: const TextStyle(fontSize: 15),
-                                ),
-                              if (match.started != null)
-                                Text(
-                                  "Started: ${DateFormat.jm().format(DateTime.parse(match.started.toString()))}",
+                                  "Scheduled: ${DateFormat.jm().format(DateTime.parse(match.scheduled.toString()).toLocal())}",
                                   style: const TextStyle(fontSize: 15),
                                 ),
                               Text(
