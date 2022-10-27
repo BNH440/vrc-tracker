@@ -157,7 +157,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                   style: const TextStyle(fontSize: 15),
                                 ),
                                 Text(
-                                  "Record: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wins.toString()}-${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).losses.toString()}-${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).ties.toString()}",
+                                  "Record: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wins.toString()}-${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.losses.toString()}-${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ties.toString()}",
                                   style: const TextStyle(fontSize: 15),
                                 ),
                                 Text(
@@ -169,7 +169,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                   style: const TextStyle(fontSize: 15),
                                 ),
                                 Text(
-                                  "WP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wp.toString()}, AP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).ap.toString()}, SP: ${widget.event_old.rankings?[0].data?.firstWhere((element) => element.team?.id == team.id).sp.toString()}",
+                                  "WP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wp.toString()}, AP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ap.toString()}, SP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.sp.toString()}",
                                   style: const TextStyle(fontSize: 15),
                                 ),
                               ],
