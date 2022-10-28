@@ -464,7 +464,9 @@ class _EventPageState extends ConsumerState<EventPage> {
                                             ),
                                           ),
                                         ),
-                                        const Spacer(flex: 2),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
                                         if (event.teams?.data?[i].teamName != null)
                                           Align(
                                             alignment: Alignment.centerLeft,
