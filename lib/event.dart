@@ -327,7 +327,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                         .toString() !=
                                                     "0")
                                             ? SizedBox(
-                                                width: 90,
+                                                width: 100,
                                                 child: Align(
                                                   alignment: Alignment.center,
                                                   child: RichText(
@@ -486,27 +486,33 @@ class _EventPageState extends ConsumerState<EventPage> {
                                         const Spacer(flex: 5),
                                         if (event.rankings?[0].data != null)
                                           if ((event.rankings?[0].data?.length ?? 0) > 0)
-                                            Align(
-                                              alignment: Alignment.centerRight,
-                                              child: RichText(
-                                                text: TextSpan(
-                                                  children: [
-                                                    WidgetSpan(
-                                                      alignment: PlaceholderAlignment.middle,
-                                                      child: Text(
-                                                        "Rank: ${event.rankings?[0].data?[i].rank}      ${event.rankings?[0].data?[i].wins}-${event.rankings?[0].data?[i].losses}-${event.rankings?[0].data?[i].ties}",
-                                                        style: TextStyle(
-                                                          color: Theme.of(context)
-                                                              .colorScheme
-                                                              .tertiary,
-                                                          fontSize: 14,
+                                            if (event.rankings?[0].data
+                                                    ?.firstWhereOrNull((element) =>
+                                                        element.team?.id ==
+                                                        event.teams?.data?[i].id)
+                                                    .toString() !=
+                                                "null")
+                                              Align(
+                                                alignment: Alignment.centerRight,
+                                                child: RichText(
+                                                  text: TextSpan(
+                                                    children: [
+                                                      WidgetSpan(
+                                                        alignment: PlaceholderAlignment.middle,
+                                                        child: Text(
+                                                          "Rank: ${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.rank.toString()}      ${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.wins.toString()}-${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.losses.toString()}-${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.ties.toString()}",
+                                                          style: TextStyle(
+                                                            color: Theme.of(context)
+                                                                .colorScheme
+                                                                .tertiary,
+                                                            fontSize: 14,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
-                                            ),
                                       ],
                                     ),
                                   ),
