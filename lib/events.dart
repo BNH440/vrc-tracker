@@ -8,6 +8,7 @@ import 'package:rate_limiter/rate_limiter.dart';
 import 'Schema/Events.dart';
 import 'event.dart';
 import 'Request.dart' as Request;
+import 'package:fuzzy/fuzzy.dart';
 
 class EventsPage extends ConsumerStatefulWidget {
   const EventsPage({Key? key, required this.title}) : super(key: key);
@@ -69,11 +70,16 @@ class _EventsPageState extends ConsumerState<EventsPage> {
       searchList.addAll(_events.data!);
       if (query.isNotEmpty) {
         List<Event> dummyListData = <Event>[];
-        searchList.forEach((item) {
-          if (item.name!.contains(query)) {
-            dummyListData.add(item);
-          }
-        });
+
+        var fuse = Fuzzy(searchList.map((e) => e.name).toList());
+
+        var nameToIndexMap =
+            Map.fromEntries(searchList.map((e) => MapEntry(e.name, searchList.indexOf(e))));
+
+        var result = fuse.search(query);
+
+        dummyListData.addAll(result.map((e) => searchList[nameToIndexMap[e.item]!]).toList());
+
         setState(() {
           items.clear();
           items.addAll(dummyListData);
