@@ -492,24 +492,27 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                         event.teams?.data?[i].id)
                                                     .toString() !=
                                                 "null")
-                                              Align(
-                                                alignment: Alignment.centerRight,
-                                                child: RichText(
-                                                  text: TextSpan(
-                                                    children: [
-                                                      WidgetSpan(
-                                                        alignment: PlaceholderAlignment.middle,
-                                                        child: Text(
-                                                          "Rank: ${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.rank.toString()}      ${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.wins.toString()}-${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.losses.toString()}-${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.ties.toString()}",
-                                                          style: TextStyle(
-                                                            color: Theme.of(context)
-                                                                .colorScheme
-                                                                .tertiary,
-                                                            fontSize: 14,
+                                              SizedBox(
+                                                width: 60,
+                                                child: Align(
+                                                  alignment: Alignment.centerRight,
+                                                  child: RichText(
+                                                    text: TextSpan(
+                                                      children: [
+                                                        WidgetSpan(
+                                                          alignment: PlaceholderAlignment.middle,
+                                                          child: Text(
+                                                            "Rank: ${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.rank.toString()}      ${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.wins.toString()}-${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.losses.toString()}-${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.ties.toString()}",
+                                                            style: TextStyle(
+                                                              color: Theme.of(context)
+                                                                  .colorScheme
+                                                                  .tertiary,
+                                                              fontSize: 14,
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ],
+                                                      ],
+                                                    ),
                                                   ),
                                                 ),
                                               ),

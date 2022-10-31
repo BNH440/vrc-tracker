@@ -123,32 +123,32 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                     ),
                   ),
                   const Spacer(
-                    flex: 1,
+                    flex: 2,
                   ),
-                  Expanded(
-                    child: DropdownButton(
-                      value: dropdownValue,
-                      items: const [
-                        DropdownMenuItem(
-                          value: "All",
-                          child: Text("All"),
-                        ),
-                        DropdownMenuItem(
-                          value: "High School",
-                          child: Text("High School"),
-                        ),
-                        DropdownMenuItem(
-                          value: "Middle School",
-                          child: Text("Middle School"),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(
-                          () => {dropdownValue = value.toString(), getEvents()},
-                        );
-                      },
-                    ),
-                  ),
+                  // Expanded(
+                  //   child: DropdownButton(
+                  //     value: dropdownValue,
+                  //     items: const [
+                  //       DropdownMenuItem(
+                  //         value: "All",
+                  //         child: Text("All"),
+                  //       ),
+                  //       DropdownMenuItem(
+                  //         value: "High School",
+                  //         child: Text("High School"),
+                  //       ),
+                  //       DropdownMenuItem(
+                  //         value: "Middle School",
+                  //         child: Text("Middle School"),
+                  //       ),
+                  //     ],
+                  //     onChanged: (value) {
+                  //       setState(
+                  //         () => {dropdownValue = value.toString(), getEvents()},
+                  //       );
+                  //     },
+                  //   ),
+                  // ),
                 ]),
                 if (_events.data != null)
                   for (var event in _events.data!)
