@@ -44,6 +44,9 @@ Future<events.Event> getEventDetails(String eventId) async {
           "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches?per_page=1000",
           headers: headers);
       var divDecoded = division.Div.fromJson(jsonDecode(divResponse.body));
+
+      divDecoded.data?.sort((a, b) => a.id!.compareTo(b.id!));
+
       decoded.divisions![divId! - 1].data = divDecoded;
 
       var rankingsResponse = await Requests.get(
