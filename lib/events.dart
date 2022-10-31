@@ -146,7 +146,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
               children: <Widget>[
                 Flex(direction: Axis.horizontal, children: [
                   Expanded(
-                    flex: 5,
+                    flex: 6,
                     child: ElevatedButton(
                       onPressed: () => _selectDate(context),
                       child: Text(DateFormat.yMMMd().format(selectedDate)),
