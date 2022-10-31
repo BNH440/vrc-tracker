@@ -63,6 +63,31 @@ class _EventsPageState extends ConsumerState<EventsPage> {
   List<Event> favoritesEvents = [];
   List<Event> favoritesTeams = [];
 
+  void filterSearchResults(String query) {
+    if (_events.data != null) {
+      List<Event> searchList = <Event>[];
+      searchList.addAll(_events.data!);
+      if (query.isNotEmpty) {
+        List<Event> dummyListData = <Event>[];
+        searchList.forEach((item) {
+          if (item.name!.contains(query)) {
+            dummyListData.add(item);
+          }
+        });
+        setState(() {
+          items.clear();
+          items.addAll(dummyListData);
+        });
+        return;
+      } else {
+        setState(() {
+          items.clear();
+          items.addAll(_events.data!);
+        });
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -72,10 +97,13 @@ class _EventsPageState extends ConsumerState<EventsPage> {
         setState(() {
           _events = value;
           events = value;
+          filterSearchResults("");
         });
       }
     });
   }
+
+  var items = <Event>[];
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +118,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
             setState(() {
               _events = events;
               events = events;
+              filterSearchResults("");
             }),
           },
       },
@@ -117,14 +146,33 @@ class _EventsPageState extends ConsumerState<EventsPage> {
               children: <Widget>[
                 Flex(direction: Axis.horizontal, children: [
                   Expanded(
+                    flex: 5,
                     child: ElevatedButton(
                       onPressed: () => _selectDate(context),
                       child: Text(DateFormat.yMMMd().format(selectedDate)),
                     ),
                   ),
                   const Spacer(
-                    flex: 2,
+                    flex: 1,
                   ),
+                  Expanded(
+                    flex: 10,
+                    child: TextField(
+                      onChanged: (value) {
+                        filterSearchResults(value);
+                      },
+                      decoration: InputDecoration(
+                          labelText: "Search",
+                          hintText: "Search",
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).textTheme.bodyMedium?.color,
+                          ),
+                          prefixIcon: const Icon(Icons.search),
+                          border: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(25.0)))),
+                    ),
+                  ),
+
                   // Expanded(
                   //   child: DropdownButton(
                   //     value: dropdownValue,
@@ -151,7 +199,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                   // ),
                 ]),
                 if (_events.data != null)
-                  for (var event in _events.data!)
+                  for (var event in items)
                     InkWell(
                       onTap: () {
                         Navigator.push(

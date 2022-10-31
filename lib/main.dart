@@ -62,10 +62,10 @@ class _MainPageState extends ConsumerState<MainPage> {
 
   final List<Widget> _pages = <Widget>[
     const EventsPage(title: "VRC Tracker"),
-    const Icon(
-      Icons.people,
-      size: 150,
-    ),
+    // const Icon(
+    //   Icons.people,
+    //   size: 150,
+    // ),
     const FavoritesPage()
   ];
 
@@ -110,10 +110,6 @@ class _MainPageState extends ConsumerState<MainPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.event),
             label: 'Events',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Teams',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.star),
