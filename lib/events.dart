@@ -54,6 +54,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
         selectedDate = picked;
       });
       getEvents();
+      filterSearchResults("");
     }
   }
 
@@ -169,7 +170,6 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                       },
                       decoration: InputDecoration(
                           labelText: "Search",
-                          // hintText: "Search",
                           labelStyle: TextStyle(
                             color: Theme.of(context).textTheme.bodyMedium?.color,
                           ),
