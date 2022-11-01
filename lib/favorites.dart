@@ -7,6 +7,7 @@ import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'package:vrc_ranks_app/event.dart';
+import 'package:vrc_ranks_app/teamEvents.dart';
 import 'Schema/Events.dart';
 import 'events.dart';
 import 'Request.dart' as Request;
@@ -150,14 +151,14 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                       ),
                     for (var team in favoriteTeamsDetails)
                       InkWell(
-                        // onTap: () {
-                        //   Navigator.push(
-                        //     context,
-                        //     CupertinoPageRoute(
-                        //         builder: (context) =>
-                        //             EventPage(title: (event.name).toString(), event_old: event)),
-                        //   );
-                        // },
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                                builder: (context) => TeamEventsPage(
+                                    title: (team.number).toString(), team_id: team.id ?? 0)),
+                          );
+                        },
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),

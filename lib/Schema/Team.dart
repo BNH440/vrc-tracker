@@ -1,3 +1,6 @@
+import 'package:vrc_ranks_app/Schema/EventListByTeam.dart';
+import 'package:vrc_ranks_app/Schema/Rankings.dart';
+
 class Team {
   int? _id;
   String? _number;
@@ -8,6 +11,7 @@ class Team {
   Location? _location;
   bool? _registered;
   String? _grade;
+  EventListByTeam? _events;
 
   Team(
       {int? id,
@@ -18,7 +22,8 @@ class Team {
       String? organization,
       Location? location,
       bool? registered,
-      String? grade}) {
+      String? grade,
+      EventListByTeam? events}) {
     if (id != null) {
       this._id = id;
     }
@@ -66,6 +71,9 @@ class Team {
   set registered(bool? registered) => _registered = registered;
   String? get grade => _grade;
   set grade(String? grade) => _grade = grade;
+
+  EventListByTeam? get events => _events;
+  set events(EventListByTeam? events) => _events = events;
 
   Team.fromJson(Map<String, dynamic> json) {
     _id = json['id'];

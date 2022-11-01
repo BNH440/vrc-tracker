@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:requests/requests.dart';
+import 'package:vrc_ranks_app/Schema/EventListByTeam.dart';
 import 'package:vrc_ranks_app/Schema/Rankings.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'dart:convert';
@@ -98,6 +99,14 @@ Future<Team> getTeam(String teamId) async {
       await Requests.get("https://www.robotevents.com/api/v2/teams/$teamId", headers: headers);
 
   var decoded = Team.fromJson(jsonDecode(response.body));
+
+  var response2 = await Requests.get(
+      "https://www.robotevents.com/api/v2/teams/$teamId/events?season[]=173",
+      headers: headers);
+
+  var decoded2 = EventListByTeam.fromJson(jsonDecode(response2.body));
+
+  decoded.events = decoded2;
 
   log("Requested team details");
   return decoded;
