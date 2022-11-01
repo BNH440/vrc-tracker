@@ -23,14 +23,42 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
   List<Team> favoritesTeams = [];
   List<Event> favoriteCompsDetails = [];
   List<Team> favoriteTeamsDetails = [];
-  // late SharedPreferences prefs;
 
   @override
   void initState() {
     super.initState();
-    // prefs = await SharedPreferences.getInstance();
+
     final favoriteComps = ref.read(favoriteCompsProvider);
     final favoriteTeams = ref.read(favoriteTeamsProvider);
+
+    Event currentEvent;
+    Team currentTeam;
+
+    favoriteCompsDetails.clear();
+    for (var event in favoriteComps) {
+      log("Getting event details for ${event.toString()}");
+      Request.getEventDetails(event).then((val) => {
+            if (mounted)
+              {
+                setState(() {
+                  favoriteCompsDetails.add(val);
+                }),
+              }
+          });
+    }
+
+    favoriteTeamsDetails.clear();
+    for (var team in favoriteTeams) {
+      log("Getting team details for ${team.toString()}");
+      Request.getTeam(team.toString()).then((val) => {
+            if (this.mounted)
+              {
+                setState(() {
+                  favoriteTeamsDetails.add(val);
+                }),
+              }
+          });
+    }
   }
 
   @override
@@ -56,7 +84,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
               }
           }
       },
-      const Duration(seconds: 2),
+      const Duration(seconds: 0),
     );
     final getTeamDetailsThrottled = throttle(
       () async => {
@@ -73,77 +101,87 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
               }
           }
       },
-      const Duration(seconds: 2),
+      const Duration(seconds: 0),
     );
 
     return favoriteComps.isEmpty && favoriteTeams.isEmpty
         ? const Text("No favorites found")
-        : RefreshIndicator(
-            child: ListView(
-              padding: const EdgeInsets.all(8),
-              children: <Widget>[
-                for (var event in favoriteCompsDetails)
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        CupertinoPageRoute(
-                            builder: (context) =>
-                                EventPage(title: (event.name).toString(), event_old: event)),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Theme.of(context).cardColor,
-                      ),
-                      height: 50,
-                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                      margin: const EdgeInsets.all(4),
-                      child: Center(
-                        child: Text(
-                          (event.name).toString(),
-                          overflow: TextOverflow.fade,
-                          maxLines: 1,
-                          softWrap: false,
+        : favoriteCompsDetails.isEmpty && favoriteTeamsDetails.isEmpty
+            ? const Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: CircularProgressIndicator(
+                    color: Colors.red,
+                  ),
+                ),
+              )
+            : RefreshIndicator(
+                child: ListView(
+                  padding: const EdgeInsets.all(8),
+                  children: <Widget>[
+                    for (var event in favoriteCompsDetails)
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                                builder: (context) =>
+                                    EventPage(title: (event.name).toString(), event_old: event)),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Theme.of(context).cardColor,
+                          ),
+                          height: 50,
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          margin: const EdgeInsets.all(4),
+                          child: Center(
+                            child: Text(
+                              (event.name).toString(),
+                              overflow: TextOverflow.fade,
+                              maxLines: 1,
+                              softWrap: false,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                for (var team in favoriteTeamsDetails)
-                  InkWell(
-                    // onTap: () {
-                    //   Navigator.push(
-                    //     context,
-                    //     CupertinoPageRoute(
-                    //         builder: (context) =>
-                    //             EventPage(title: (event.name).toString(), event_old: event)),
-                    //   );
-                    // },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Theme.of(context).cardColor,
-                      ),
-                      height: 50,
-                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                      margin: const EdgeInsets.all(4),
-                      child: Center(
-                        child: Text(
-                          (team.number).toString(),
-                          overflow: TextOverflow.fade,
-                          maxLines: 1,
-                          softWrap: false,
+                    for (var team in favoriteTeamsDetails)
+                      InkWell(
+                        // onTap: () {
+                        //   Navigator.push(
+                        //     context,
+                        //     CupertinoPageRoute(
+                        //         builder: (context) =>
+                        //             EventPage(title: (event.name).toString(), event_old: event)),
+                        //   );
+                        // },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Theme.of(context).cardColor,
+                          ),
+                          height: 50,
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          margin: const EdgeInsets.all(4),
+                          child: Center(
+                            child: Text(
+                              (team.number).toString(),
+                              overflow: TextOverflow.fade,
+                              maxLines: 1,
+                              softWrap: false,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-              ],
-            ),
-            onRefresh: () async {
-              await getEventDetailsThrottled();
-              await getTeamDetailsThrottled();
-            },
-          );
+                  ],
+                ),
+                onRefresh: () async {
+                  await getEventDetailsThrottled();
+                  await getTeamDetailsThrottled();
+                },
+              );
   }
 }

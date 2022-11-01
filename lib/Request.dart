@@ -69,7 +69,9 @@ Future<events.Event> getEventDetails(String eventId) async {
 
   decoded.teams = decoded2;
 
-  decoded.teams!.data!.sort((a, b) => a.number!.compareTo(b.number!));
+  if (decoded.teams?.data?.isNotEmpty ?? false) {
+    decoded.teams!.data!.sort((a, b) => a.number!.compareTo(b.number!));
+  }
 
   log("Requested event details");
   return decoded;
