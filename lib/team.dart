@@ -71,7 +71,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
             }),
           },
       },
-      const Duration(seconds: 2),
+      const Duration(seconds: 0),
     );
 
     return Scaffold(

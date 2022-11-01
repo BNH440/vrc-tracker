@@ -129,12 +129,12 @@ class _EventsPageState extends ConsumerState<EventsPage> {
             }),
           },
       },
-      const Duration(seconds: 1),
+      const Duration(seconds: 0),
     );
 
     final printThrottled = throttle(
       () => log('throttled'),
-      const Duration(seconds: 1),
+      const Duration(seconds: 0),
     );
 
     return (_events.data).toString() == "null"

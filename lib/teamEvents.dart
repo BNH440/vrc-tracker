@@ -56,7 +56,7 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
             }),
           },
       },
-      const Duration(seconds: 2),
+      const Duration(seconds: 0),
     );
 
     return Scaffold(

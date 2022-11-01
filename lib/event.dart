@@ -63,7 +63,7 @@ class _EventPageState extends ConsumerState<EventPage> {
             }),
           },
       },
-      const Duration(seconds: 2),
+      const Duration(seconds: 0),
     );
     return DefaultTabController(
       length: 3,

@@ -51,7 +51,7 @@ class _MatchPageState extends State<MatchPage> {
             }),
           },
       },
-      const Duration(seconds: 2),
+      const Duration(seconds: 0),
     );
 
     Div.Data? match = (event.divisions?[0].data?.data
