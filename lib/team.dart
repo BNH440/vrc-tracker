@@ -147,33 +147,38 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         ),
                         if (widget.event_old.rankings?[0].data != null)
                           if ((widget.event_old.rankings?[0].data!.length)! > 0)
-                            ListView(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              children: [
-                                const Text(""),
-                                Text(
-                                  "Rank: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.rank.toString()}",
-                                  style: const TextStyle(fontSize: 15),
-                                ),
-                                Text(
-                                  "Record: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wins.toString()}-${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.losses.toString()}-${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ties.toString()}",
-                                  style: const TextStyle(fontSize: 15),
-                                ),
-                                Text(
-                                  "Avg Points: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.averagePoints.toString()}",
-                                  style: const TextStyle(fontSize: 15),
-                                ),
-                                Text(
-                                  "High Score: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.highScore.toString()}",
-                                  style: const TextStyle(fontSize: 15),
-                                ),
-                                Text(
-                                  "WP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wp.toString()}, AP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ap.toString()}, SP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.sp.toString()}",
-                                  style: const TextStyle(fontSize: 15),
-                                ),
-                              ],
-                            )
+                            MediaQuery.removePadding(
+                              removeTop: true,
+                              removeBottom: true,
+                              context: context,
+                              child: ListView(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                children: [
+                                  const Text(""),
+                                  Text(
+                                    "Rank: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.rank.toString()}",
+                                    style: const TextStyle(fontSize: 15),
+                                  ),
+                                  Text(
+                                    "Record: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wins.toString()}-${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.losses.toString()}-${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ties.toString()}",
+                                    style: const TextStyle(fontSize: 15),
+                                  ),
+                                  Text(
+                                    "Avg Points: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.averagePoints.toString()}",
+                                    style: const TextStyle(fontSize: 15),
+                                  ),
+                                  Text(
+                                    "High Score: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.highScore.toString()}",
+                                    style: const TextStyle(fontSize: 15),
+                                  ),
+                                  Text(
+                                    "WP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wp.toString()}, AP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ap.toString()}, SP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.sp.toString()}",
+                                    style: const TextStyle(fontSize: 15),
+                                  ),
+                                ],
+                              ),
+                            ),
                       ],
                     )
                   ]),
