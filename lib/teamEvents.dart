@@ -2,16 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vrc_ranks_app/Schema/EventListByTeam.dart';
-import 'package:vrc_ranks_app/Schema/MatchListByTeam.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
-import 'package:vrc_ranks_app/Schema/Events.dart' as Events;
 import 'package:vrc_ranks_app/event.dart';
 import 'package:vrc_ranks_app/events.dart';
 import 'Request.dart' as Request;
-import 'match.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:collection/collection.dart';
 
 class TeamEventsPage extends ConsumerStatefulWidget {
   const TeamEventsPage({Key? key, required this.title, required this.team_id}) : super(key: key);
