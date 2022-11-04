@@ -269,8 +269,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                                           text: matches.data?[i].alliances?[0].score
                                                                   .toString() ??
                                                               "",
-                                                          style:
-                                                              const TextStyle(color: Colors.blue)),
+                                                          style: TextStyle(
+                                                              color: Colors.blue,
+                                                              fontWeight: (matches.data?[i]
+                                                                          .alliances?[0].teams!
+                                                                          .any((element) =>
+                                                                              element.team?.id ==
+                                                                              team.id) ??
+                                                                      false)
+                                                                  ? FontWeight.bold
+                                                                  : FontWeight.normal)),
                                                       TextSpan(
                                                         text: " - ",
                                                         style: TextStyle(
@@ -283,8 +291,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                                           text: matches.data?[i].alliances?[1].score
                                                                   .toString() ??
                                                               "",
-                                                          style:
-                                                              const TextStyle(color: Colors.red)),
+                                                          style: TextStyle(
+                                                              color: Colors.red,
+                                                              fontWeight: (matches.data?[i]
+                                                                          .alliances?[1].teams!
+                                                                          .any((element) =>
+                                                                              element.team?.id ==
+                                                                              team.id) ??
+                                                                      false)
+                                                                  ? FontWeight.bold
+                                                                  : FontWeight.normal)),
                                                     ],
                                                   ),
                                                 )),
