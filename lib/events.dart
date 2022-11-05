@@ -34,6 +34,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
         setState(() {
           _events = value;
           events = value;
+          filterSearchResults("");
         });
       }
     });
@@ -54,7 +55,6 @@ class _EventsPageState extends ConsumerState<EventsPage> {
         selectedDate = picked;
       });
       getEvents();
-      filterSearchResults("");
     }
   }
 
