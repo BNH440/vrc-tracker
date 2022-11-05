@@ -137,107 +137,110 @@ class _EventsPageState extends ConsumerState<EventsPage> {
       const Duration(seconds: 0),
     );
 
-    return (_events.data).toString() == "null"
-        ? const Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: CircularProgressIndicator(
-                color: Colors.red,
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+      child: (_events.data).toString() == "null"
+          ? const Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(
+                  color: Colors.red,
+                ),
               ),
-            ),
-          )
-        : RefreshIndicator(
-            child: ListView(
-              padding: const EdgeInsets.all(8),
-              children: <Widget>[
-                Flex(direction: Axis.horizontal, children: [
-                  Expanded(
-                    flex: 6,
-                    child: ElevatedButton(
-                      onPressed: () => _selectDate(context),
-                      child: Text(DateFormat.yMMMd().format(selectedDate)),
+            )
+          : RefreshIndicator(
+              child: ListView(
+                padding: const EdgeInsets.all(8),
+                children: <Widget>[
+                  Flex(direction: Axis.horizontal, children: [
+                    Expanded(
+                      flex: 6,
+                      child: ElevatedButton(
+                        onPressed: () => _selectDate(context),
+                        child: Text(DateFormat.yMMMd().format(selectedDate)),
+                      ),
                     ),
-                  ),
-                  const Spacer(
-                    flex: 1,
-                  ),
-                  Expanded(
-                    flex: 10,
-                    child: TextField(
-                      onChanged: (value) {
-                        filterSearchResults(value);
-                      },
-                      decoration: InputDecoration(
-                          labelText: "Search",
-                          labelStyle: TextStyle(
-                            color: Theme.of(context).textTheme.bodyMedium?.color,
-                          ),
-                          prefixIcon: const Icon(Icons.search),
-                          border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(25.0)))),
+                    const Spacer(
+                      flex: 1,
                     ),
-                  ),
+                    Expanded(
+                      flex: 10,
+                      child: TextField(
+                        onChanged: (value) {
+                          filterSearchResults(value);
+                        },
+                        decoration: InputDecoration(
+                            labelText: "Search",
+                            labelStyle: TextStyle(
+                              color: Theme.of(context).textTheme.bodyMedium?.color,
+                            ),
+                            prefixIcon: const Icon(Icons.search),
+                            border: const OutlineInputBorder(
+                                borderRadius: BorderRadius.all(Radius.circular(25.0)))),
+                      ),
+                    ),
 
-                  // Expanded(
-                  //   child: DropdownButton(
-                  //     value: dropdownValue,
-                  //     items: const [
-                  //       DropdownMenuItem(
-                  //         value: "All",
-                  //         child: Text("All"),
-                  //       ),
-                  //       DropdownMenuItem(
-                  //         value: "High School",
-                  //         child: Text("High School"),
-                  //       ),
-                  //       DropdownMenuItem(
-                  //         value: "Middle School",
-                  //         child: Text("Middle School"),
-                  //       ),
-                  //     ],
-                  //     onChanged: (value) {
-                  //       setState(
-                  //         () => {dropdownValue = value.toString(), getEvents()},
-                  //       );
-                  //     },
-                  //   ),
-                  // ),
-                ]),
-                if (_events.data != null)
-                  for (var event in items)
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                              builder: (context) =>
-                                  EventPage(title: (event.name).toString(), event_old: event)),
-                        );
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Theme.of(context).cardColor,
-                        ),
-                        height: 50,
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
-                        margin: const EdgeInsets.all(4),
-                        child: Center(
-                          child: Text(
-                            (event.name).toString(),
-                            overflow: TextOverflow.fade,
-                            maxLines: 1,
-                            softWrap: false,
+                    // Expanded(
+                    //   child: DropdownButton(
+                    //     value: dropdownValue,
+                    //     items: const [
+                    //       DropdownMenuItem(
+                    //         value: "All",
+                    //         child: Text("All"),
+                    //       ),
+                    //       DropdownMenuItem(
+                    //         value: "High School",
+                    //         child: Text("High School"),
+                    //       ),
+                    //       DropdownMenuItem(
+                    //         value: "Middle School",
+                    //         child: Text("Middle School"),
+                    //       ),
+                    //     ],
+                    //     onChanged: (value) {
+                    //       setState(
+                    //         () => {dropdownValue = value.toString(), getEvents()},
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
+                  ]),
+                  if (_events.data != null)
+                    for (var event in items)
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                                builder: (context) =>
+                                    EventPage(title: (event.name).toString(), event_old: event)),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Theme.of(context).cardColor,
+                          ),
+                          height: 50,
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          margin: const EdgeInsets.all(4),
+                          child: Center(
+                            child: Text(
+                              (event.name).toString(),
+                              overflow: TextOverflow.fade,
+                              maxLines: 1,
+                              softWrap: false,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-              ],
+                ],
+              ),
+              onRefresh: () async {
+                await getEventsThrottled();
+              },
             ),
-            onRefresh: () async {
-              await getEventsThrottled();
-            },
-          );
+    );
   }
 }

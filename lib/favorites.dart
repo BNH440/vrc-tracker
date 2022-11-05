@@ -104,84 +104,87 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
       const Duration(seconds: 0),
     );
 
-    return favoriteComps.isEmpty && favoriteTeams.isEmpty
-        ? const Text("No favorites found")
-        : favoriteCompsDetails.isEmpty && favoriteTeamsDetails.isEmpty
-            ? const Align(
-                alignment: Alignment.topCenter,
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: CircularProgressIndicator(
-                    color: Colors.red,
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+      child: favoriteComps.isEmpty && favoriteTeams.isEmpty
+          ? const Text("No favorites found")
+          : favoriteCompsDetails.isEmpty && favoriteTeamsDetails.isEmpty
+              ? const Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: CircularProgressIndicator(
+                      color: Colors.red,
+                    ),
                   ),
-                ),
-              )
-            : RefreshIndicator(
-                child: ListView(
-                  padding: const EdgeInsets.all(8),
-                  children: <Widget>[
-                    for (var event in favoriteCompsDetails)
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                                builder: (context) =>
-                                    EventPage(title: (event.name).toString(), event_old: event)),
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Theme.of(context).cardColor,
-                          ),
-                          height: 50,
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          margin: const EdgeInsets.all(4),
-                          child: Center(
-                            child: Text(
-                              (event.name).toString(),
-                              overflow: TextOverflow.fade,
-                              maxLines: 1,
-                              softWrap: false,
+                )
+              : RefreshIndicator(
+                  child: ListView(
+                    padding: const EdgeInsets.all(8),
+                    children: <Widget>[
+                      for (var event in favoriteCompsDetails)
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                  builder: (context) =>
+                                      EventPage(title: (event.name).toString(), event_old: event)),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Theme.of(context).cardColor,
+                            ),
+                            height: 50,
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            margin: const EdgeInsets.all(4),
+                            child: Center(
+                              child: Text(
+                                (event.name).toString(),
+                                overflow: TextOverflow.fade,
+                                maxLines: 1,
+                                softWrap: false,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    for (var team in favoriteTeamsDetails)
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                                builder: (context) => TeamEventsPage(
-                                    title: (team.number).toString(), team_id: team.id ?? 0)),
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Theme.of(context).cardColor,
-                          ),
-                          height: 50,
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          margin: const EdgeInsets.all(4),
-                          child: Center(
-                            child: Text(
-                              (team.number).toString(),
-                              overflow: TextOverflow.fade,
-                              maxLines: 1,
-                              softWrap: false,
+                      for (var team in favoriteTeamsDetails)
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                  builder: (context) => TeamEventsPage(
+                                      title: (team.number).toString(), team_id: team.id ?? 0)),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Theme.of(context).cardColor,
+                            ),
+                            height: 50,
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            margin: const EdgeInsets.all(4),
+                            child: Center(
+                              child: Text(
+                                (team.number).toString(),
+                                overflow: TextOverflow.fade,
+                                maxLines: 1,
+                                softWrap: false,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
+                  onRefresh: () async {
+                    await getEventDetailsThrottled();
+                    await getTeamDetailsThrottled();
+                  },
                 ),
-                onRefresh: () async {
-                  await getEventDetailsThrottled();
-                  await getTeamDetailsThrottled();
-                },
-              );
+    );
   }
 }
