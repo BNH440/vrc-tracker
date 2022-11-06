@@ -123,61 +123,63 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                     padding: const EdgeInsets.all(8),
                     children: <Widget>[
                       for (var event in favoriteCompsDetails)
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                  builder: (context) =>
-                                      EventPage(title: (event.name).toString(), event_old: event)),
-                            );
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Theme.of(context).cardColor,
-                            ),
-                            height: 50,
-                            padding: const EdgeInsets.symmetric(horizontal: 30),
-                            margin: const EdgeInsets.all(4),
-                            child: Center(
-                              child: Text(
-                                (event.name).toString(),
-                                overflow: TextOverflow.fade,
-                                maxLines: 1,
-                                softWrap: false,
+                        if (event.name != null)
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                    builder: (context) => EventPage(
+                                        title: (event.name).toString(), event_old: event)),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Theme.of(context).cardColor,
+                              ),
+                              height: 50,
+                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              margin: const EdgeInsets.all(4),
+                              child: Center(
+                                child: Text(
+                                  (event.name).toString(),
+                                  overflow: TextOverflow.fade,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                ),
                               ),
                             ),
                           ),
-                        ),
                       for (var team in favoriteTeamsDetails)
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                  builder: (context) => TeamEventsPage(
-                                      title: (team.number).toString(), team_id: team.id ?? 0)),
-                            );
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Theme.of(context).cardColor,
-                            ),
-                            height: 50,
-                            padding: const EdgeInsets.symmetric(horizontal: 30),
-                            margin: const EdgeInsets.all(4),
-                            child: Center(
-                              child: Text(
-                                (team.number).toString(),
-                                overflow: TextOverflow.fade,
-                                maxLines: 1,
-                                softWrap: false,
+                        if (team.number != null)
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                    builder: (context) => TeamEventsPage(
+                                        title: (team.number).toString(), team_id: team.id ?? 0)),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Theme.of(context).cardColor,
+                              ),
+                              height: 50,
+                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              margin: const EdgeInsets.all(4),
+                              child: Center(
+                                child: Text(
+                                  (team.number).toString(),
+                                  overflow: TextOverflow.fade,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                ),
                               ),
                             ),
                           ),
-                        ),
                     ],
                   ),
                   onRefresh: () async {
