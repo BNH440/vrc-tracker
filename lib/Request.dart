@@ -164,10 +164,8 @@ Future<List<SkillsTotal>> getSkills(String compId) async {
   }
 
   if (newList.isNotEmpty) {
-    for (var skillsRun in newList) {
-      newList.sort((a, b) =>
-          (b.programmingScore + b.driverScore).compareTo(a.programmingScore + a.driverScore));
-    }
+    newList.sort((a, b) =>
+        (b.programmingScore + b.driverScore).compareTo(a.programmingScore + a.driverScore));
   }
 
   return newList;
