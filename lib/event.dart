@@ -326,7 +326,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                           ),
                                           const Spacer(flex: 2),
                                           SizedBox(
-                                            width: 60,
+                                            width: 55,
                                             child: Align(
                                               alignment: Alignment.centerRight,
                                               child: RichText(
@@ -415,7 +415,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                               : Text("N/A"),
                                           const Spacer(),
                                           SizedBox(
-                                            width: 60,
+                                            width: 55,
                                             child: Align(
                                               alignment: Alignment.centerLeft,
                                               child: RichText(

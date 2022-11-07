@@ -204,7 +204,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                             color: Theme.of(context).cardColor,
                           ),
                           height: 50,
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
                           margin: const EdgeInsets.all(4),
                           child: Flex(
                             direction: Axis.horizontal,
@@ -227,7 +227,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               ),
                               const Spacer(flex: 2),
                               SizedBox(
-                                width: 60,
+                                width: 55,
                                 child: Align(
                                   alignment: Alignment.centerRight,
                                   child: RichText(
@@ -316,7 +316,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                   : Text("N/A"),
                               const Spacer(),
                               SizedBox(
-                                width: 60,
+                                width: 55,
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: RichText(
