@@ -29,7 +29,7 @@ final favoriteTeamsProvider = StateProvider<List<String>>((ref) {
 
 class _EventsPageState extends ConsumerState<EventsPage> {
   void getEvents() {
-    Request.getEventList(selectedDate, dropdownValue).then((value) {
+    Request.getEventList(selectedDate).then((value) {
       if (this.mounted) {
         setState(() {
           _events = value;
@@ -41,8 +41,6 @@ class _EventsPageState extends ConsumerState<EventsPage> {
   }
 
   DateTime selectedDate = DateTime.now();
-
-  String dropdownValue = "All";
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -99,7 +97,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
   void initState() {
     super.initState();
     final value = ref.read(favoriteCompsProvider);
-    Request.getEventList(selectedDate, dropdownValue).then((value) {
+    Request.getEventList(selectedDate).then((value) {
       if (this.mounted) {
         setState(() {
           _events = value;
@@ -119,7 +117,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
 
     final getEventsThrottled = throttle(
       () async => {
-        events = await Request.getEventList(selectedDate, dropdownValue),
+        events = await Request.getEventList(selectedDate),
         if (this.mounted)
           {
             setState(() {
@@ -180,31 +178,6 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                                 borderRadius: BorderRadius.all(Radius.circular(25.0)))),
                       ),
                     ),
-
-                    // Expanded(
-                    //   child: DropdownButton(
-                    //     value: dropdownValue,
-                    //     items: const [
-                    //       DropdownMenuItem(
-                    //         value: "All",
-                    //         child: Text("All"),
-                    //       ),
-                    //       DropdownMenuItem(
-                    //         value: "High School",
-                    //         child: Text("High School"),
-                    //       ),
-                    //       DropdownMenuItem(
-                    //         value: "Middle School",
-                    //         child: Text("Middle School"),
-                    //       ),
-                    //     ],
-                    //     onChanged: (value) {
-                    //       setState(
-                    //         () => {dropdownValue = value.toString(), getEvents()},
-                    //       );
-                    //     },
-                    //   ),
-                    // ),
                   ]),
                   if (_events.data != null)
                     for (var event in items)
