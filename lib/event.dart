@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart';
+import 'package:vrc_ranks_app/Schema/Skills.dart' as Skills;
 import 'package:vrc_ranks_app/events.dart';
 import 'package:vrc_ranks_app/team.dart';
 import 'Request.dart' as Request;
@@ -28,6 +29,8 @@ class EventPage extends ConsumerStatefulWidget {
 class _EventPageState extends ConsumerState<EventPage> {
   Event _event = Event();
   Event event = Event();
+  List<Request.SkillsTotal> _skills = [];
+  List<Request.SkillsTotal> skills = [];
 
   String convertDate(String date) {
     var humanDate = DateTime.parse(date);
@@ -43,6 +46,14 @@ class _EventPageState extends ConsumerState<EventPage> {
         setState(() {
           _event = value;
           event = value;
+        });
+      }
+    });
+    Request.getSkills(widget.event_old.id.toString()).then((value) {
+      if (this.mounted) {
+        setState(() {
+          _skills = value;
+          skills = value;
         });
       }
     });
@@ -62,13 +73,21 @@ class _EventPageState extends ConsumerState<EventPage> {
               event = event;
             }),
           },
+        skills = await Request.getSkills(widget.event_old.id.toString()),
+        if (this.mounted)
+          {
+            setState(() {
+              _skills = skills;
+              skills = skills;
+            }),
+          },
       },
       const Duration(seconds: 0),
     );
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTabController(
-        length: 3,
+        length: 4,
         child: Scaffold(
           body: NestedScrollView(
             headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -236,6 +255,9 @@ class _EventPageState extends ConsumerState<EventPage> {
                                       Tab(icon: Icon(Icons.schedule), text: "Matches"),
                                       Tab(icon: Icon(Icons.people), text: "Teams"),
                                       Tab(icon: Icon(Icons.bar_chart), text: "Rankings"),
+                                      Tab(
+                                          icon: Icon(Icons.precision_manufacturing),
+                                          text: "Skills"),
                                     ],
                                   ),
                                 ],
@@ -639,6 +661,98 @@ class _EventPageState extends ConsumerState<EventPage> {
                               await getEventDetailsThrottled();
                             },
                           ),
+                // Skills list using _skills
+                _skills.isEmpty
+                    ? const Center(child: Text("No skills found"))
+                    : RefreshIndicator(
+                        child: MediaQuery(
+                          data: MediaQuery.of(context)
+                              .copyWith(textScaleFactor: 1.0)
+                              .removePadding(removeTop: true),
+                          child: ListView(children: [
+                            for (var i = 0; i < _skills.length; i++)
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                      builder: (context) => TeamPage(
+                                          title: (_skills[i].teamNumber).toString(),
+                                          event_old: event,
+                                          match_id: event.id.toString(),
+                                          team_id: (_skills[i].teamId).toString()),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: Theme.of(context).cardColor,
+                                  ),
+                                  height: 50,
+                                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                                  margin: const EdgeInsets.all(4),
+                                  child: Flex(
+                                    direction: Axis.horizontal,
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              WidgetSpan(
+                                                  alignment: PlaceholderAlignment.middle,
+                                                  child: Text(
+                                                    "${i + 1}. ",
+                                                    style: TextStyle(
+                                                        color:
+                                                            Theme.of(context).colorScheme.secondary,
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 18),
+                                                  )),
+                                              WidgetSpan(
+                                                alignment: PlaceholderAlignment.middle,
+                                                child: Text(
+                                                  (_skills[i].teamNumber).toString(),
+                                                  style: const TextStyle(fontSize: 16),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              WidgetSpan(
+                                                alignment: PlaceholderAlignment.middle,
+                                                child: Text(
+                                                  "Total: ${_skills[i].driverScore + _skills[i].programmingScore}   Driver: ${_skills[i].driverScore}   Prog: ${_skills[i].programmingScore}",
+                                                  style: TextStyle(
+                                                    color: Theme.of(context).colorScheme.tertiary,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ]),
+                        ),
+                        onRefresh: () async {
+                          await getEventDetailsThrottled();
+                        },
+                      ),
+
+                // const Text("Skills"),
               ],
             ),
           ),
