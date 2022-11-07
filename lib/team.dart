@@ -341,32 +341,6 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           ),
                         ),
                       ),
-
-                  // for (var i = 0; i <= (((matches.data?.length ?? 1) - 1)); i++)
-                  //   InkWell(
-                  //     onTap: () {
-                  //       Navigator.push(
-                  //           context,
-                  //           CupertinoPageRoute(
-                  //             builder: (context) => MatchPage(
-                  //                 title: (matches.data?[i].name).toString(),
-                  //                 event_old: widget.event_old,
-                  //                 match_number: (matches.data?[i].id ?? 0).toInt()),
-                  //           ));
-                  //     },
-                  //     child: Container(
-                  //       decoration: BoxDecoration(
-                  //         borderRadius: BorderRadius.circular(10),
-                  //         color: Theme.of(context).cardColor,
-                  //       ),
-                  //       height: 50,
-                  //       padding: const EdgeInsets.symmetric(horizontal: 30),
-                  //       margin: const EdgeInsets.all(4),
-                  //       child: Center(
-                  //         child: Text((matches.data?[i].name).toString()),
-                  //       ),
-                  //     ),
-                  //   ),
                 ]),
                 onRefresh: () async {
                   await getTeamDetailsThrottled();

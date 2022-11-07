@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart';
-import 'package:vrc_ranks_app/Schema/Skills.dart' as Skills;
 import 'package:vrc_ranks_app/events.dart';
 import 'package:vrc_ranks_app/team.dart';
 import 'Request.dart' as Request;
@@ -661,7 +660,6 @@ class _EventPageState extends ConsumerState<EventPage> {
                               await getEventDetailsThrottled();
                             },
                           ),
-                // Skills list using _skills
                 _skills.isEmpty
                     ? const Center(child: Text("No skills found"))
                     : RefreshIndicator(
