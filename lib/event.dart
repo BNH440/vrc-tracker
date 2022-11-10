@@ -749,8 +749,6 @@ class _EventPageState extends ConsumerState<EventPage> {
                           await getEventDetailsThrottled();
                         },
                       ),
-
-                // const Text("Skills"),
               ],
             ),
           ),
