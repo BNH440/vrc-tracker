@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
@@ -37,8 +38,28 @@ class _EventPageState extends ConsumerState<EventPage> {
     return DateFormat("MMM dd, yyyy").format(humanDate);
   }
 
+  late Timer timer;
+
   @override
   void initState() {
+    timer = Timer.periodic(const Duration(seconds: 5), (t) {
+      Request.getEventDetails(widget.event_old.id.toString()).then((value) {
+        if (this.mounted) {
+          setState(() {
+            _event = value;
+            event = value;
+          });
+        }
+      });
+      Request.getSkills(widget.event_old.id.toString()).then((value) {
+        if (this.mounted) {
+          setState(() {
+            _skills = value;
+            skills = value;
+          });
+        }
+      });
+    });
     super.initState();
     Request.getEventDetails(widget.event_old.id.toString()).then((value) {
       if (this.mounted) {
@@ -68,6 +89,9 @@ class _EventPageState extends ConsumerState<EventPage> {
         if (this.mounted)
           {
             setState(() {
+              event.divisions?[0].data?.data?[12].alliances?[0].score = timer.tick;
+              _event.divisions?[0].data?.data?[12].alliances?[0].score = timer.tick;
+
               _event = event;
               event = event;
             }),
@@ -83,6 +107,469 @@ class _EventPageState extends ConsumerState<EventPage> {
       },
       const Duration(seconds: 0),
     );
+
+    Widget MatchesTab() {
+      return (event.divisions?[0].data?.data).toString() == "null"
+          ? const Text("")
+          : event.divisions?[0].data?.data?.length == 0
+              ? const Center(child: Text("No matches found"))
+              : RefreshIndicator(
+                  child: MediaQuery(
+                    data: MediaQuery.of(context)
+                        .copyWith(textScaleFactor: 1.0)
+                        .removePadding(removeTop: true),
+                    child: ListView(children: [
+                      for (var i = 0;
+                          i <= (((event.divisions?[0].data?.data?.length ?? 1) - 1));
+                          i++)
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                  builder: (context) => MatchPage(
+                                      title: (event.divisions?[0].data?.data?[i].name).toString(),
+                                      event_old: event,
+                                      match_number:
+                                          (event.divisions?[0].data?.data?[i].id ?? 0).toInt())),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Theme.of(context).cardColor,
+                            ),
+                            height: 50,
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            margin: const EdgeInsets.all(4),
+                            child: Flex(
+                              direction: Axis.horizontal,
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        WidgetSpan(
+                                          alignment: PlaceholderAlignment.middle,
+                                          child: Text(
+                                            (event.divisions?[0].data?.data?[i].name).toString(),
+                                            style: const TextStyle(fontSize: 16),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(flex: 2),
+                                SizedBox(
+                                  width: 55,
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          WidgetSpan(
+                                            alignment: PlaceholderAlignment.middle,
+                                            child: Text(
+                                              "${event.divisions?[0].data?.data?[i].alliances?[0].teams?[0].team?.name}\n${event.divisions?[0].data?.data?[i].alliances?[0].teams?[1].team?.name}",
+                                              style: TextStyle(
+                                                color: Theme.of(context).colorScheme.tertiary,
+                                                fontSize: 14,
+                                              ),
+                                              textAlign: TextAlign.right,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(),
+                                (event.divisions?[0].data?.data?[i].alliances?[0].score
+                                                .toString() !=
+                                            "0" &&
+                                        event.divisions?[0].data?.data?[i].alliances?[1].score
+                                                .toString() !=
+                                            "0")
+                                    ? SizedBox(
+                                        width: 100,
+                                        child: Align(
+                                          alignment: Alignment.center,
+                                          child: RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                WidgetSpan(
+                                                    alignment: PlaceholderAlignment.middle,
+                                                    child: RichText(
+                                                      text: TextSpan(
+                                                        style: const TextStyle(
+                                                          fontSize: 20.0,
+                                                        ),
+                                                        children: <TextSpan>[
+                                                          TextSpan(
+                                                              text: event.divisions?[0].data
+                                                                      ?.data?[i].alliances?[0].score
+                                                                      .toString() ??
+                                                                  "",
+                                                              style: const TextStyle(
+                                                                  color: Colors.blue)),
+                                                          TextSpan(
+                                                            text: " - ",
+                                                            style: TextStyle(
+                                                                color: Theme.of(context)
+                                                                    .textTheme
+                                                                    .bodyLarge
+                                                                    ?.color),
+                                                          ),
+                                                          TextSpan(
+                                                              text: event.divisions?[0].data
+                                                                      ?.data?[i].alliances?[1].score
+                                                                      .toString() ??
+                                                                  "",
+                                                              style: const TextStyle(
+                                                                  color: Colors.red)),
+                                                        ],
+                                                      ),
+                                                    )),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Text("N/A"),
+                                const Spacer(),
+                                SizedBox(
+                                  width: 55,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          WidgetSpan(
+                                            alignment: PlaceholderAlignment.middle,
+                                            child: Text(
+                                              "${event.divisions?[0].data?.data?[i].alliances?[1].teams?[0].team?.name}\n${event.divisions?[0].data?.data?[i].alliances?[1].teams?[1].team?.name}",
+                                              style: TextStyle(
+                                                color: Theme.of(context).colorScheme.tertiary,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                    ]),
+                  ),
+                  onRefresh: () async {
+                    await getEventDetailsThrottled();
+                  },
+                );
+    }
+
+    Widget TeamsTab() {
+      return (event.teams?.data).toString() == "null"
+          ? const Text("")
+          : event.teams?.data?.length == 0
+              ? const Center(child: Text("No teams found"))
+              : RefreshIndicator(
+                  child: MediaQuery(
+                    data: MediaQuery.of(context)
+                        .copyWith(textScaleFactor: 1.0)
+                        .removePadding(removeTop: true),
+                    child: ListView(children: [
+                      for (var i = 0; i <= (((_event.teams?.data?.length ?? 1) - 1)); i++)
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) => TeamPage(
+                                    title: (event.teams?.data?[i].number).toString(),
+                                    event_old: event,
+                                    match_id: event.id.toString(),
+                                    team_id: (event.teams?.data?[i].id).toString()),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Theme.of(context).cardColor,
+                            ),
+                            height: 50,
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            margin: const EdgeInsets.all(4),
+                            child: Flex(
+                              direction: Axis.horizontal,
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        WidgetSpan(
+                                          alignment: PlaceholderAlignment.middle,
+                                          child: Text(
+                                            (event.teams?.data?[i].number).toString(),
+                                            style: const TextStyle(fontSize: 16),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                if (event.teams?.data?[i].teamName != null)
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: SizedBox(
+                                      width: 160,
+                                      child: Text(
+                                        (event.teams?.data?[i].teamName).toString(),
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: Theme.of(context).colorScheme.tertiary),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        softWrap: false,
+                                      ),
+                                    ),
+                                  ),
+                                const Spacer(flex: 5),
+                                if (event.rankings?[0].data != null)
+                                  if ((event.rankings?[0].data?.length ?? 0) > 0)
+                                    if (event.rankings?[0].data
+                                            ?.firstWhereOrNull((element) =>
+                                                element.team?.id == event.teams?.data?[i].id)
+                                            .toString() !=
+                                        "null")
+                                      SizedBox(
+                                        width: 60,
+                                        child: Align(
+                                          alignment: Alignment.centerRight,
+                                          child: RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                WidgetSpan(
+                                                  alignment: PlaceholderAlignment.middle,
+                                                  child: Text(
+                                                    "Rank: ${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.rank.toString()}      ${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.wins.toString()}-${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.losses.toString()}-${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.ties.toString()}",
+                                                    style: TextStyle(
+                                                      color: Theme.of(context).colorScheme.tertiary,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ]),
+                  ),
+                  onRefresh: () async {
+                    await getEventDetailsThrottled();
+                  },
+                );
+    }
+
+    Widget RankingsTab() {
+      return (event.rankings?[0]).toString() == "null"
+          ? const Text("")
+          : event.rankings?[0].data?.length == 0
+              ? const Center(child: Text("No rankings found"))
+              : RefreshIndicator(
+                  child: MediaQuery(
+                    data: MediaQuery.of(context)
+                        .copyWith(textScaleFactor: 1.0)
+                        .removePadding(removeTop: true),
+                    child: ListView(children: [
+                      for (var i = (((event.rankings?[0].data?.length ?? 1) - 1)); i >= 0; i--)
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) => TeamPage(
+                                    title: (event.rankings?[0].data?[i].team?.name).toString(),
+                                    event_old: event,
+                                    match_id: event.id.toString(),
+                                    team_id: (event.rankings?[0].data?[i].team?.id).toString()),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Theme.of(context).cardColor,
+                            ),
+                            height: 50,
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            margin: const EdgeInsets.all(4),
+                            child: Flex(
+                              direction: Axis.horizontal,
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        WidgetSpan(
+                                            alignment: PlaceholderAlignment.middle,
+                                            child: Text(
+                                              "${event.rankings?[0].data?[i].rank}. ",
+                                              style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.secondary,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18),
+                                            )),
+                                        WidgetSpan(
+                                          alignment: PlaceholderAlignment.middle,
+                                          child: Text(
+                                            (event.rankings?[0].data?[i].team?.name).toString(),
+                                            style: const TextStyle(fontSize: 16),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        WidgetSpan(
+                                          alignment: PlaceholderAlignment.middle,
+                                          child: Text(
+                                            "WP: ${(event.rankings?[0].data?[i].wp).toString()} AP: ${(event.rankings?[0].data?[i].ap).toString()} SP: ${(event.rankings?[0].data?[i].sp).toString()}      ${event.rankings?[0].data?[i].wins}-${event.rankings?[0].data?[i].losses}-${event.rankings?[0].data?[i].ties}",
+                                            style: TextStyle(
+                                              color: Theme.of(context).colorScheme.tertiary,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ]),
+                  ),
+                  onRefresh: () async {
+                    await getEventDetailsThrottled();
+                  },
+                );
+    }
+
+    Widget SkillsTab() {
+      return _skills.isEmpty
+          ? const Center(child: Text("No skills found"))
+          : RefreshIndicator(
+              child: MediaQuery(
+                data: MediaQuery.of(context)
+                    .copyWith(textScaleFactor: 1.0)
+                    .removePadding(removeTop: true),
+                child: ListView(children: [
+                  for (var i = 0; i < _skills.length; i++)
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (context) => TeamPage(
+                                title: (_skills[i].teamNumber).toString(),
+                                event_old: event,
+                                match_id: event.id.toString(),
+                                team_id: (_skills[i].teamId).toString()),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Theme.of(context).cardColor,
+                        ),
+                        height: 50,
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        margin: const EdgeInsets.all(4),
+                        child: Flex(
+                          direction: Axis.horizontal,
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: RichText(
+                                text: TextSpan(
+                                  children: [
+                                    WidgetSpan(
+                                        alignment: PlaceholderAlignment.middle,
+                                        child: Text(
+                                          "${i + 1}. ",
+                                          style: TextStyle(
+                                              color: Theme.of(context).colorScheme.secondary,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18),
+                                        )),
+                                    WidgetSpan(
+                                      alignment: PlaceholderAlignment.middle,
+                                      child: Text(
+                                        (_skills[i].teamNumber).toString(),
+                                        style: const TextStyle(fontSize: 16),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: RichText(
+                                text: TextSpan(
+                                  children: [
+                                    WidgetSpan(
+                                      alignment: PlaceholderAlignment.middle,
+                                      child: Text(
+                                        "Total: ${_skills[i].driverScore + _skills[i].programmingScore}   Driver: ${_skills[i].driverScore}   Prog: ${_skills[i].programmingScore}",
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.tertiary,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ]),
+              ),
+              onRefresh: () async {
+                await getEventDetailsThrottled();
+              },
+            );
+    }
+
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTabController(
@@ -268,488 +755,7 @@ class _EventPageState extends ConsumerState<EventPage> {
               ];
             },
             body: TabBarView(
-              children: [
-                (event.divisions?[0].data?.data).toString() == "null"
-                    ? const Text("")
-                    : event.divisions?[0].data?.data?.length == 0
-                        ? const Center(child: Text("No matches found"))
-                        : RefreshIndicator(
-                            child: MediaQuery(
-                              data: MediaQuery.of(context)
-                                  .copyWith(textScaleFactor: 1.0)
-                                  .removePadding(removeTop: true),
-                              child: ListView(children: [
-                                for (var i = 0;
-                                    i <= (((event.divisions?[0].data?.data?.length ?? 1) - 1));
-                                    i++)
-                                  InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        CupertinoPageRoute(
-                                            builder: (context) => MatchPage(
-                                                title: (event.divisions?[0].data?.data?[i].name)
-                                                    .toString(),
-                                                event_old: event,
-                                                match_number:
-                                                    (event.divisions?[0].data?.data?[i].id ?? 0)
-                                                        .toInt())),
-                                      );
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: Theme.of(context).cardColor,
-                                      ),
-                                      height: 50,
-                                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                                      margin: const EdgeInsets.all(4),
-                                      child: Flex(
-                                        direction: Axis.horizontal,
-                                        children: [
-                                          Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: RichText(
-                                              text: TextSpan(
-                                                children: [
-                                                  WidgetSpan(
-                                                    alignment: PlaceholderAlignment.middle,
-                                                    child: Text(
-                                                      (event.divisions?[0].data?.data?[i].name)
-                                                          .toString(),
-                                                      style: const TextStyle(fontSize: 16),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          const Spacer(flex: 2),
-                                          SizedBox(
-                                            width: 55,
-                                            child: Align(
-                                              alignment: Alignment.centerRight,
-                                              child: RichText(
-                                                text: TextSpan(
-                                                  children: [
-                                                    WidgetSpan(
-                                                      alignment: PlaceholderAlignment.middle,
-                                                      child: Text(
-                                                        "${event.divisions?[0].data?.data?[i].alliances?[0].teams?[0].team?.name}\n${event.divisions?[0].data?.data?[i].alliances?[0].teams?[1].team?.name}",
-                                                        style: TextStyle(
-                                                          color: Theme.of(context)
-                                                              .colorScheme
-                                                              .tertiary,
-                                                          fontSize: 14,
-                                                        ),
-                                                        textAlign: TextAlign.right,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const Spacer(),
-                                          (event.divisions?[0].data?.data?[i].alliances?[0].score
-                                                          .toString() !=
-                                                      "0" &&
-                                                  event.divisions?[0].data?.data?[i].alliances?[1]
-                                                          .score
-                                                          .toString() !=
-                                                      "0")
-                                              ? SizedBox(
-                                                  width: 100,
-                                                  child: Align(
-                                                    alignment: Alignment.center,
-                                                    child: RichText(
-                                                      text: TextSpan(
-                                                        children: [
-                                                          WidgetSpan(
-                                                              alignment:
-                                                                  PlaceholderAlignment.middle,
-                                                              child: RichText(
-                                                                text: TextSpan(
-                                                                  style: const TextStyle(
-                                                                    fontSize: 20.0,
-                                                                  ),
-                                                                  children: <TextSpan>[
-                                                                    TextSpan(
-                                                                        text: event
-                                                                                .divisions?[0]
-                                                                                .data
-                                                                                ?.data?[i]
-                                                                                .alliances?[0]
-                                                                                .score
-                                                                                .toString() ??
-                                                                            "",
-                                                                        style: const TextStyle(
-                                                                            color: Colors.blue)),
-                                                                    TextSpan(
-                                                                      text: " - ",
-                                                                      style: TextStyle(
-                                                                          color: Theme.of(context)
-                                                                              .textTheme
-                                                                              .bodyLarge
-                                                                              ?.color),
-                                                                    ),
-                                                                    TextSpan(
-                                                                        text: event
-                                                                                .divisions?[0]
-                                                                                .data
-                                                                                ?.data?[i]
-                                                                                .alliances?[1]
-                                                                                .score
-                                                                                .toString() ??
-                                                                            "",
-                                                                        style: const TextStyle(
-                                                                            color: Colors.red)),
-                                                                  ],
-                                                                ),
-                                                              )),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                )
-                                              : Text("N/A"),
-                                          const Spacer(),
-                                          SizedBox(
-                                            width: 55,
-                                            child: Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: RichText(
-                                                text: TextSpan(
-                                                  children: [
-                                                    WidgetSpan(
-                                                      alignment: PlaceholderAlignment.middle,
-                                                      child: Text(
-                                                        "${event.divisions?[0].data?.data?[i].alliances?[1].teams?[0].team?.name}\n${event.divisions?[0].data?.data?[i].alliances?[1].teams?[1].team?.name}",
-                                                        style: TextStyle(
-                                                          color: Theme.of(context)
-                                                              .colorScheme
-                                                              .tertiary,
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                              ]),
-                            ),
-                            onRefresh: () async {
-                              await getEventDetailsThrottled();
-                            },
-                          ),
-                (event.teams?.data).toString() == "null"
-                    ? const Text("")
-                    : event.teams?.data?.length == 0
-                        ? const Center(child: Text("No teams found"))
-                        : RefreshIndicator(
-                            child: MediaQuery(
-                              data: MediaQuery.of(context)
-                                  .copyWith(textScaleFactor: 1.0)
-                                  .removePadding(removeTop: true),
-                              child: ListView(children: [
-                                for (var i = 0; i <= (((_event.teams?.data?.length ?? 1) - 1)); i++)
-                                  InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        CupertinoPageRoute(
-                                          builder: (context) => TeamPage(
-                                              title: (event.teams?.data?[i].number).toString(),
-                                              event_old: event,
-                                              match_id: event.id.toString(),
-                                              team_id: (event.teams?.data?[i].id).toString()),
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: Theme.of(context).cardColor,
-                                      ),
-                                      height: 50,
-                                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                                      margin: const EdgeInsets.all(4),
-                                      child: Flex(
-                                        direction: Axis.horizontal,
-                                        children: [
-                                          Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: RichText(
-                                              text: TextSpan(
-                                                children: [
-                                                  WidgetSpan(
-                                                    alignment: PlaceholderAlignment.middle,
-                                                    child: Text(
-                                                      (event.teams?.data?[i].number).toString(),
-                                                      style: const TextStyle(fontSize: 16),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          if (event.teams?.data?[i].teamName != null)
-                                            Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: SizedBox(
-                                                width: 160,
-                                                child: Text(
-                                                  (event.teams?.data?[i].teamName).toString(),
-                                                  style: TextStyle(
-                                                      fontSize: 16,
-                                                      color:
-                                                          Theme.of(context).colorScheme.tertiary),
-                                                  overflow: TextOverflow.ellipsis,
-                                                  maxLines: 1,
-                                                  softWrap: false,
-                                                ),
-                                              ),
-                                            ),
-                                          const Spacer(flex: 5),
-                                          if (event.rankings?[0].data != null)
-                                            if ((event.rankings?[0].data?.length ?? 0) > 0)
-                                              if (event.rankings?[0].data
-                                                      ?.firstWhereOrNull((element) =>
-                                                          element.team?.id ==
-                                                          event.teams?.data?[i].id)
-                                                      .toString() !=
-                                                  "null")
-                                                SizedBox(
-                                                  width: 60,
-                                                  child: Align(
-                                                    alignment: Alignment.centerRight,
-                                                    child: RichText(
-                                                      text: TextSpan(
-                                                        children: [
-                                                          WidgetSpan(
-                                                            alignment: PlaceholderAlignment.middle,
-                                                            child: Text(
-                                                              "Rank: ${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.rank.toString()}      ${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.wins.toString()}-${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.losses.toString()}-${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.ties.toString()}",
-                                                              style: TextStyle(
-                                                                color: Theme.of(context)
-                                                                    .colorScheme
-                                                                    .tertiary,
-                                                                fontSize: 14,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                              ]),
-                            ),
-                            onRefresh: () async {
-                              await getEventDetailsThrottled();
-                            },
-                          ),
-                (event.rankings?[0]).toString() == "null"
-                    ? const Text("")
-                    : event.rankings?[0].data?.length == 0
-                        ? const Center(child: Text("No rankings found"))
-                        : RefreshIndicator(
-                            child: MediaQuery(
-                              data: MediaQuery.of(context)
-                                  .copyWith(textScaleFactor: 1.0)
-                                  .removePadding(removeTop: true),
-                              child: ListView(children: [
-                                for (var i = (((event.rankings?[0].data?.length ?? 1) - 1));
-                                    i >= 0;
-                                    i--)
-                                  InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        CupertinoPageRoute(
-                                          builder: (context) => TeamPage(
-                                              title: (event.rankings?[0].data?[i].team?.name)
-                                                  .toString(),
-                                              event_old: event,
-                                              match_id: event.id.toString(),
-                                              team_id: (event.rankings?[0].data?[i].team?.id)
-                                                  .toString()),
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: Theme.of(context).cardColor,
-                                      ),
-                                      height: 50,
-                                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                                      margin: const EdgeInsets.all(4),
-                                      child: Flex(
-                                        direction: Axis.horizontal,
-                                        children: [
-                                          Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: RichText(
-                                              text: TextSpan(
-                                                children: [
-                                                  WidgetSpan(
-                                                      alignment: PlaceholderAlignment.middle,
-                                                      child: Text(
-                                                        "${event.rankings?[0].data?[i].rank}. ",
-                                                        style: TextStyle(
-                                                            color: Theme.of(context)
-                                                                .colorScheme
-                                                                .secondary,
-                                                            fontWeight: FontWeight.bold,
-                                                            fontSize: 18),
-                                                      )),
-                                                  WidgetSpan(
-                                                    alignment: PlaceholderAlignment.middle,
-                                                    child: Text(
-                                                      (event.rankings?[0].data?[i].team?.name)
-                                                          .toString(),
-                                                      style: const TextStyle(fontSize: 16),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          const Spacer(),
-                                          Align(
-                                            alignment: Alignment.centerRight,
-                                            child: RichText(
-                                              text: TextSpan(
-                                                children: [
-                                                  WidgetSpan(
-                                                    alignment: PlaceholderAlignment.middle,
-                                                    child: Text(
-                                                      "WP: ${(event.rankings?[0].data?[i].wp).toString()} AP: ${(event.rankings?[0].data?[i].ap).toString()} SP: ${(event.rankings?[0].data?[i].sp).toString()}      ${event.rankings?[0].data?[i].wins}-${event.rankings?[0].data?[i].losses}-${event.rankings?[0].data?[i].ties}",
-                                                      style: TextStyle(
-                                                        color:
-                                                            Theme.of(context).colorScheme.tertiary,
-                                                        fontSize: 14,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                              ]),
-                            ),
-                            onRefresh: () async {
-                              await getEventDetailsThrottled();
-                            },
-                          ),
-                _skills.isEmpty
-                    ? const Center(child: Text("No skills found"))
-                    : RefreshIndicator(
-                        child: MediaQuery(
-                          data: MediaQuery.of(context)
-                              .copyWith(textScaleFactor: 1.0)
-                              .removePadding(removeTop: true),
-                          child: ListView(children: [
-                            for (var i = 0; i < _skills.length; i++)
-                              InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    CupertinoPageRoute(
-                                      builder: (context) => TeamPage(
-                                          title: (_skills[i].teamNumber).toString(),
-                                          event_old: event,
-                                          match_id: event.id.toString(),
-                                          team_id: (_skills[i].teamId).toString()),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: Theme.of(context).cardColor,
-                                  ),
-                                  height: 50,
-                                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                                  margin: const EdgeInsets.all(4),
-                                  child: Flex(
-                                    direction: Axis.horizontal,
-                                    children: [
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: RichText(
-                                          text: TextSpan(
-                                            children: [
-                                              WidgetSpan(
-                                                  alignment: PlaceholderAlignment.middle,
-                                                  child: Text(
-                                                    "${i + 1}. ",
-                                                    style: TextStyle(
-                                                        color:
-                                                            Theme.of(context).colorScheme.secondary,
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 18),
-                                                  )),
-                                              WidgetSpan(
-                                                alignment: PlaceholderAlignment.middle,
-                                                child: Text(
-                                                  (_skills[i].teamNumber).toString(),
-                                                  style: const TextStyle(fontSize: 16),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: RichText(
-                                          text: TextSpan(
-                                            children: [
-                                              WidgetSpan(
-                                                alignment: PlaceholderAlignment.middle,
-                                                child: Text(
-                                                  "Total: ${_skills[i].driverScore + _skills[i].programmingScore}   Driver: ${_skills[i].driverScore}   Prog: ${_skills[i].programmingScore}",
-                                                  style: TextStyle(
-                                                    color: Theme.of(context).colorScheme.tertiary,
-                                                    fontSize: 14,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                          ]),
-                        ),
-                        onRefresh: () async {
-                          await getEventDetailsThrottled();
-                        },
-                      ),
-              ],
+              children: [MatchesTab(), TeamsTab(), RankingsTab(), SkillsTab()],
             ),
           ),
         ),
