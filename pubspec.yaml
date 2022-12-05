@@ -47,6 +47,8 @@ dependencies:
     firebase_analytics: ^9.3.8
     collection: ^1.16.0
     fuzzy: 0.4.0-nullsafety.0
+    geolocator: ^8.2.0
+    geocoding: ^2.0.4
 
 dev_dependencies:
     flutter_test:

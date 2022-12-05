@@ -103,6 +103,7 @@ class Event {
   bool? awardsFinalized;
   Null? eventType;
   List<Rankings>? rankings;
+  bool isLocal = false;
 
   Event(
       {this.id,

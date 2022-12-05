@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'Schema/Events.dart';
@@ -51,6 +52,8 @@ class _EventsPageState extends ConsumerState<EventsPage> {
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
+        _events.data = null;
+        events.data = null;
       });
       getEvents();
     }
@@ -180,34 +183,75 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                     ),
                   ]),
                   if (_events.data != null)
-                    for (var event in items)
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                                builder: (context) =>
-                                    EventPage(title: (event.name).toString(), event_old: event)),
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Theme.of(context).cardColor,
-                          ),
-                          height: 50,
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          margin: const EdgeInsets.all(4),
-                          child: Center(
-                            child: Text(
-                              (event.name).toString(),
-                              overflow: TextOverflow.fade,
-                              maxLines: 1,
-                              softWrap: false,
-                            ),
+                    if (items.where((element) => element.isLocal).isNotEmpty)
+                      Container(
+                        margin: const EdgeInsets.all(4),
+                        child: RichText(
+                            text: const TextSpan(
+                                text: "Nearby Events", style: TextStyle(fontSize: 20))),
+                      ),
+                  for (var event in items.where((element) => element.isLocal))
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                              builder: (context) =>
+                                  EventPage(title: (event.name).toString(), event_old: event)),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Theme.of(context).cardColor,
+                        ),
+                        height: 50,
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        margin: const EdgeInsets.all(4),
+                        child: Center(
+                          child: Text(
+                            (event.name).toString(),
+                            overflow: TextOverflow.fade,
+                            maxLines: 1,
+                            softWrap: false,
                           ),
                         ),
                       ),
+                    ),
+                  if (items.where((element) => element.isLocal).length > 0) const Divider(),
+                  Container(
+                    margin: const EdgeInsets.all(4),
+                    child: RichText(
+                        text: const TextSpan(text: "All Events", style: TextStyle(fontSize: 20))),
+                  ),
+                  for (var event in items.where((element) => element.isLocal == false))
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                              builder: (context) =>
+                                  EventPage(title: (event.name).toString(), event_old: event)),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Theme.of(context).cardColor,
+                        ),
+                        height: 50,
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        margin: const EdgeInsets.all(4),
+                        child: Center(
+                          child: Text(
+                            (event.name).toString(),
+                            overflow: TextOverflow.fade,
+                            maxLines: 1,
+                            softWrap: false,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
               onRefresh: () async {

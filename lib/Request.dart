@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:geolocator/geolocator.dart';
 import 'package:requests/requests.dart';
 import 'package:vrc_ranks_app/Schema/EventListByTeam.dart';
 import 'package:vrc_ranks_app/Schema/Rankings.dart';
@@ -18,6 +19,38 @@ var headers = {
   'Authorization': 'Bearer ${dotenv.env['API_KEY']}',
 };
 
+Future<bool> _handleLocationPermission() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    return false;
+  }
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      return false;
+    }
+  }
+  if (permission == LocationPermission.deniedForever) {
+    return false;
+  }
+  return true;
+}
+
+Future<bool> isLocal(Position position, double latitude, double longitude) async {
+  const metersInMile = 1609.34;
+
+  // check if coordinates are within 60 miles of the user
+
+  double distanceInMeters =
+      Geolocator.distanceBetween(position.latitude, position.longitude, latitude, longitude);
+
+  return distanceInMeters < (metersInMile * 60);
+}
+
 Future<events.Events> getEventList(DateTime date) async {
   var utcDate = "${date.addDays(-1).format("yyyy-MM-dd")}T00:00:00Z";
 
@@ -26,6 +59,19 @@ Future<events.Events> getEventList(DateTime date) async {
       headers: headers);
 
   var decoded = events.Events.fromJson(jsonDecode(response.body));
+
+  if (decoded.data != null) {
+    if (await _handleLocationPermission()) {
+      Position position =
+          await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+      for (var event in decoded.data!) {
+        event.isLocal = await isLocal(position, event.location?.coordinates?.lat?.toDouble() ?? 0.0,
+            event.location?.coordinates?.lon?.toDouble() ?? 0.0);
+      }
+    }
+  }
+
   log("Requested events");
 
   return decoded;
@@ -141,12 +187,14 @@ Future<List<SkillsTotal>> getSkills(String compId) async {
 
   List<SkillsTotal> newList = [];
 
-  for (var i = 0; i < decodedDriver.data!.length; i++) {
-    newList.add(SkillsTotal(
-        teamId: decodedDriver.data![i].team!.id ?? 0,
-        teamNumber: decodedDriver.data![i].team!.name ?? "",
-        driverScore: decodedDriver.data![i].score ?? 0,
-        programmingScore: 0));
+  if (decodedDriver.data != null) {
+    for (var i = 0; i < decodedDriver.data!.length; i++) {
+      newList.add(SkillsTotal(
+          teamId: decodedDriver.data![i].team!.id ?? 0,
+          teamNumber: decodedDriver.data![i].team!.name ?? "",
+          driverScore: decodedDriver.data![i].score ?? 0,
+          programmingScore: 0));
+    }
   }
 
   for (var i = 0; i < decodedProg.data!.length; i++) {
