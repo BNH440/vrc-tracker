@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'Schema/Events.dart';
