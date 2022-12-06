@@ -40,7 +40,7 @@ Future<bool> _handleLocationPermission() async {
   return true;
 }
 
-Future<bool> isLocal(Position position, double latitude, double longitude) async {
+Future<List> isLocal(Position position, double latitude, double longitude) async {
   const metersInMile = 1609.34;
 
   // check if coordinates are within 60 miles of the user
@@ -48,7 +48,7 @@ Future<bool> isLocal(Position position, double latitude, double longitude) async
   double distanceInMeters =
       Geolocator.distanceBetween(position.latitude, position.longitude, latitude, longitude);
 
-  return distanceInMeters < (metersInMile * 60);
+  return [distanceInMeters < (metersInMile * 60), distanceInMeters];
 }
 
 Future<events.Events> getEventList(DateTime date) async {
@@ -66,9 +66,15 @@ Future<events.Events> getEventList(DateTime date) async {
           await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
       for (var event in decoded.data!) {
-        event.isLocal = await isLocal(position, event.location?.coordinates?.lat?.toDouble() ?? 0.0,
+        var result = await isLocal(position, event.location?.coordinates?.lat?.toDouble() ?? 0.0,
             event.location?.coordinates?.lon?.toDouble() ?? 0.0);
+        var local = result[0];
+        var distance = result[1];
+        event.isLocal = local;
+        event.distance = distance;
       }
+
+      decoded.data!.sort((a, b) => a.distance.compareTo(b.distance));
     }
   }
 

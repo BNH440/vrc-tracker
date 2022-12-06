@@ -104,6 +104,7 @@ class Event {
   Null? eventType;
   List<Rankings>? rankings;
   bool isLocal = false;
+  double distance = double.maxFinite;
 
   Event(
       {this.id,
