@@ -38,28 +38,28 @@ class _EventPageState extends ConsumerState<EventPage> {
     return DateFormat("MMM dd, yyyy").format(humanDate);
   }
 
-  late Timer timer;
+  // late Timer timer;
 
   @override
   void initState() {
-    timer = Timer.periodic(const Duration(seconds: 5), (t) {
-      Request.getEventDetails(widget.event_old.id.toString()).then((value) {
-        if (this.mounted) {
-          setState(() {
-            _event = value;
-            event = value;
-          });
-        }
-      });
-      Request.getSkills(widget.event_old.id.toString()).then((value) {
-        if (this.mounted) {
-          setState(() {
-            _skills = value;
-            skills = value;
-          });
-        }
-      });
-    });
+    // timer = Timer.periodic(const Duration(seconds: 5), (t) {
+    //   Request.getEventDetails(widget.event_old.id.toString()).then((value) {
+    //     if (this.mounted) {
+    //       setState(() {
+    //         _event = value;
+    //         event = value;
+    //       });
+    //     }
+    //   });
+    //   Request.getSkills(widget.event_old.id.toString()).then((value) {
+    //     if (this.mounted) {
+    //       setState(() {
+    //         _skills = value;
+    //         skills = value;
+    //       });
+    //     }
+    //   });
+    // });
     super.initState();
     Request.getEventDetails(widget.event_old.id.toString()).then((value) {
       if (this.mounted) {
@@ -89,8 +89,8 @@ class _EventPageState extends ConsumerState<EventPage> {
         if (this.mounted)
           {
             setState(() {
-              event.divisions?[0].data?.data?[12].alliances?[0].score = timer.tick;
-              _event.divisions?[0].data?.data?[12].alliances?[0].score = timer.tick;
+              // event.divisions?[0].data?.data?[12].alliances?[0].score = timer.tick;
+              // _event.divisions?[0].data?.data?[12].alliances?[0].score = timer.tick;
 
               _event = event;
               event = event;
@@ -111,7 +111,9 @@ class _EventPageState extends ConsumerState<EventPage> {
     Widget MatchesTab() {
       return (event.divisions?[0].data?.data).toString() == "null"
           ? const Text("")
-          : event.divisions?[0].data?.data?.length == 0
+          : event.divisions?[0].data == null ||
+                  event.divisions?[0].data?.data == null ||
+                  event.divisions?[0].data?.data?.isEmpty == true
               ? const Center(child: Text("No matches found"))
               : RefreshIndicator(
                   child: MediaQuery(
@@ -276,7 +278,7 @@ class _EventPageState extends ConsumerState<EventPage> {
     Widget TeamsTab() {
       return (event.teams?.data).toString() == "null"
           ? const Text("")
-          : event.teams?.data?.length == 0
+          : event.teams == null || event.teams?.data == null || event.teams?.data?.isEmpty == true
               ? const Center(child: Text("No teams found"))
               : RefreshIndicator(
                   child: MediaQuery(
@@ -387,9 +389,9 @@ class _EventPageState extends ConsumerState<EventPage> {
     }
 
     Widget RankingsTab() {
-      return (event.rankings?[0]).toString() == "null"
-          ? const Text("")
-          : event.rankings?[0].data?.length == 0
+      return event.rankings?.isEmpty == true
+          ? const Center(child: Text("No rankings found"))
+          : event.rankings?[0].data?.isEmpty == true
               ? const Center(child: Text("No rankings found"))
               : RefreshIndicator(
                   child: MediaQuery(

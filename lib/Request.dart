@@ -137,6 +137,8 @@ Future<List> getTeamDetails(String teamId, String compId) async {
 
   var decoded2 = MatchListByTeam.fromJson(jsonDecode(response2.body));
 
+  decoded2.data?.sort((a, b) => a.id!.compareTo(b.id!));
+
   log("Requested team details");
   return [decoded, decoded2];
 }
@@ -197,17 +199,19 @@ Future<List<SkillsTotal>> getSkills(String compId) async {
     }
   }
 
-  for (var i = 0; i < decodedProg.data!.length; i++) {
-    if (newList.any((element) => element.teamId == decodedProg.data?[i].team?.id)) {
-      newList
-          .firstWhere((element) => element.teamId == decodedProg.data?[i].team?.id)
-          .programmingScore = decodedProg.data?[i].score ?? 0;
-    } else {
-      newList.add(SkillsTotal(
-          teamId: decodedProg.data![i].team!.id ?? 0,
-          teamNumber: decodedProg.data![i].team!.name ?? "",
-          driverScore: 0,
-          programmingScore: decodedProg.data![i].score ?? 0));
+  if (decodedProg.data != null) {
+    for (var i = 0; i < decodedProg.data!.length; i++) {
+      if (newList.any((element) => element.teamId == decodedProg.data?[i].team?.id)) {
+        newList
+            .firstWhere((element) => element.teamId == decodedProg.data?[i].team?.id)
+            .programmingScore = decodedProg.data?[i].score ?? 0;
+      } else {
+        newList.add(SkillsTotal(
+            teamId: decodedProg.data![i].team!.id ?? 0,
+            teamNumber: decodedProg.data![i].team!.name ?? "",
+            driverScore: 0,
+            programmingScore: decodedProg.data![i].score ?? 0));
+      }
     }
   }
 
