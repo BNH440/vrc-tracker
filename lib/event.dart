@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
@@ -37,28 +38,28 @@ class _EventPageState extends ConsumerState<EventPage> {
     return DateFormat("MMM dd, yyyy").format(humanDate);
   }
 
-  // late Timer timer;
+  late Timer timer;
 
   @override
   void initState() {
-    // timer = Timer.periodic(const Duration(seconds: 5), (t) {
-    //   Request.getEventDetails(widget.event_old.id.toString()).then((value) {
-    //     if (this.mounted) {
-    //       setState(() {
-    //         _event = value;
-    //         event = value;
-    //       });
-    //     }
-    //   });
-    //   Request.getSkills(widget.event_old.id.toString()).then((value) {
-    //     if (this.mounted) {
-    //       setState(() {
-    //         _skills = value;
-    //         skills = value;
-    //       });
-    //     }
-    //   });
-    // });
+    timer = Timer.periodic(const Duration(seconds: 15), (t) {
+      Request.getEventDetails(widget.event_old.id.toString()).then((value) {
+        if (this.mounted) {
+          setState(() {
+            _event = value;
+            event = value;
+          });
+        }
+      });
+      Request.getSkills(widget.event_old.id.toString()).then((value) {
+        if (this.mounted) {
+          setState(() {
+            _skills = value;
+            skills = value;
+          });
+        }
+      });
+    });
     super.initState();
     Request.getEventDetails(widget.event_old.id.toString()).then((value) {
       if (this.mounted) {
