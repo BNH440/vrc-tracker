@@ -186,8 +186,11 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                       Container(
                         margin: const EdgeInsets.all(4),
                         child: RichText(
-                            text: const TextSpan(
-                                text: "Nearby Events", style: TextStyle(fontSize: 20))),
+                            text: TextSpan(
+                                text: "Nearby Events",
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    color: Theme.of(context).textTheme.bodyMedium?.color))),
                       ),
                   for (var event in items.where((element) => element.isLocal))
                     InkWell(
@@ -221,7 +224,11 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                   Container(
                     margin: const EdgeInsets.all(4),
                     child: RichText(
-                        text: const TextSpan(text: "All Events", style: TextStyle(fontSize: 20))),
+                        text: TextSpan(
+                            text: "All Events",
+                            style: TextStyle(
+                                fontSize: 20,
+                                color: Theme.of(context).textTheme.bodyMedium?.color))),
                   ),
                   for (var event in items.where((element) => element.isLocal == false))
                     InkWell(
