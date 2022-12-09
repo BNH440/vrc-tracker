@@ -1,10 +1,12 @@
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:requests/requests.dart';
 import 'package:vrc_ranks_app/Schema/EventListByTeam.dart';
 import 'package:vrc_ranks_app/Schema/Rankings.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
+import 'package:vrc_ranks_app/Schema/TeamsSearch.dart' as TeamsSearch;
 import 'dart:convert';
 import 'Schema/Events.dart' as events;
 import 'Schema/Division.dart' as division;
@@ -165,6 +167,20 @@ Future<Team> getTeam(String teamId) async {
 
   log("Requested team details");
   return decoded;
+}
+
+Future<List<TeamsSearch.Item>> getTeams(String query, String grade) async {
+  var response = await Requests.get(
+      "${kDebugMode ? "http://localhost:3000" : "https://api.vrctracker.blakehaug.com"}/teams?search=$query&grade=$grade");
+
+  List<TeamsSearch.Item> teams = [];
+
+  for (var team in jsonDecode(response.body)) {
+    teams.add(TeamsSearch.Item.fromJson(team["item"]));
+  }
+
+  log("Requested teams with query $query");
+  return teams;
 }
 
 class SkillsTotal {

@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrc_ranks_app/events.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:vrc_ranks_app/favorites.dart';
+import 'package:vrc_ranks_app/teams.dart';
 import 'package:vrc_ranks_app/themeData.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -63,6 +64,7 @@ class _MainPageState extends ConsumerState<MainPage> {
 
   final List<Widget> _pages = <Widget>[
     const EventsPage(title: "VRC Tracker"),
+    const TeamsPage(title: "VRC Tracker"),
     const FavoritesPage()
   ];
 
@@ -109,6 +111,10 @@ class _MainPageState extends ConsumerState<MainPage> {
             BottomNavigationBarItem(
               icon: Icon(Icons.event),
               label: 'Events',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.people),
+              label: 'Teams',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.star),

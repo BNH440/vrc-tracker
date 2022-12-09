@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+    vrctracker-api:
+        build:
+            context: .
+            dockerfile: Api.Dockerfile
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./data:/app/data
+        restart: unless-stopped
+
+    restarter:
+        image: docker
+        volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+        command:
+            [
+                "/bin/sh",
+                "-c",
+                "sleep 300; docker restart api-vrctracker-api-1; while true; do sleep 86400; docker restart api-vrctracker-query-1; sleep 300; docker restart api-vrctracker-api-1; done",
+            ]
+        restart: unless-stopped
+
+    vrctracker-query:
+        build:
+            context: .
+            dockerfile: Query.Dockerfile
+        volumes:
+            - ./data:/app/data
+        environment:
+            - API_KEY=${API_KEY}

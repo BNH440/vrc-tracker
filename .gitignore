@@ -49,3 +49,6 @@ app.*.map.json
 *.env
 
 scripts/*
+
+node_modules
+teamList.json

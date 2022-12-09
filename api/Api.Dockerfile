@@ -1,0 +1,9 @@
+FROM node:latest
+RUN mkdir -p /app
+WORKDIR /app
+COPY package.json /app/
+RUN npm install
+COPY api.js /app/
+COPY ./data/teamList.json /app/
+EXPOSE 3000
+CMD [ "npm", "start" ]
