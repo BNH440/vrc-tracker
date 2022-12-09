@@ -30,3 +30,7 @@ services:
             - ./data:/app/data
         environment:
             - API_KEY=${API_KEY}
+
+networks:
+    proxy:
+        external: true
