@@ -80,6 +80,12 @@ class _EventPageState extends ConsumerState<EventPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    timer.cancel();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final favorites = ref.watch(favoriteCompsProvider);
 
