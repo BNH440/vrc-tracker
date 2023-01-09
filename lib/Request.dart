@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:requests/requests.dart';
 import 'package:vrc_ranks_app/Schema/EventListByTeam.dart';
@@ -56,8 +55,11 @@ Future<List> isLocal(Position position, double latitude, double longitude) async
 Future<events.Events> getEventList(DateTime date) async {
   var utcDate = "${date.addDays(-1).format("yyyy-MM-dd")}T00:00:00Z";
 
+  // var response = await Requests.get(
+  //     "https://www.robotevents.com/api/v2/events?season[]=173&start=$utcDate&per_page=1000",
+  //     headers: headers);
   var response = await Requests.get(
-      "https://www.robotevents.com/api/v2/events?season[]=173&start=$utcDate&per_page=1000",
+      "https://cache.vrctracker.blakehaug.com/eventList?date=$utcDate",
       headers: headers);
 
   var decoded = events.Events.fromJson(jsonDecode(response.body));
@@ -87,8 +89,9 @@ Future<events.Events> getEventList(DateTime date) async {
 
 Future<events.Event> getEventDetails(String eventId) async {
   List<Rankings> rankings = [];
-  var response =
-      await Requests.get("https://www.robotevents.com/api/v2/events/$eventId", headers: headers);
+  var response = await Requests.get(
+      "https://cache.vrctracker.blakehaug.com/eventDetails?event=$eventId",
+      headers: headers);
 
   var decoded = events.Event.fromJson(jsonDecode(response.body));
 
@@ -118,7 +121,7 @@ Future<events.Event> getEventDetails(String eventId) async {
   decoded.rankings = rankings;
 
   var response2 = await Requests.get(
-      "https://www.robotevents.com/api/v2/events/$eventId/teams?per_page=1000",
+      "https://cache.vrctracker.blakehaug.com/teamList?event=$eventId",
       headers: headers);
 
   var decoded2 = TeamList.TeamList.fromJson(jsonDecode(response2.body));
@@ -134,8 +137,9 @@ Future<events.Event> getEventDetails(String eventId) async {
 }
 
 Future<List> getTeamDetails(String teamId, String compId) async {
-  var response =
-      await Requests.get("https://www.robotevents.com/api/v2/teams/$teamId", headers: headers);
+  var response = await Requests.get(
+      "https://cache.vrctracker.blakehaug.com/teamDetails?team=$teamId",
+      headers: headers);
 
   var decoded = Team.fromJson(jsonDecode(response.body));
 
@@ -152,8 +156,9 @@ Future<List> getTeamDetails(String teamId, String compId) async {
 }
 
 Future<Team> getTeam(String teamId) async {
-  var response =
-      await Requests.get("https://www.robotevents.com/api/v2/teams/$teamId", headers: headers);
+  var response = await Requests.get(
+      "https://cache.vrctracker.blakehaug.com/teamDetails?team=$teamId",
+      headers: headers);
 
   var decoded = Team.fromJson(jsonDecode(response.body));
 

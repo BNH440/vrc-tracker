@@ -1,0 +1,5 @@
+name = "vrc-tracker"
+main = "src/index.ts"
+compatibility_date = "2023-01-05"
+
+[vars]
