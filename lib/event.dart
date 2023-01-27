@@ -196,7 +196,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                 const Spacer(),
                                 (event.divisions?[0].data?.data?[i].alliances?[0].score
                                                 .toString() !=
-                                            "0" &&
+                                            "0" ||
                                         event.divisions?[0].data?.data?[i].alliances?[1].score
                                                 .toString() !=
                                             "0")
