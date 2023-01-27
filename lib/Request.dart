@@ -78,7 +78,7 @@ Future<events.Events> getEventList(DateTime date) async {
         event.distance = distance;
       }
 
-      decoded.data!.sort((a, b) => a.distance.compareTo(b.distance));
+      // decoded.data!.sort((a, b) => a.distance.compareTo(b.distance));
     }
   }
 
