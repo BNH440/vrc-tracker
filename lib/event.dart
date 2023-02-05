@@ -361,7 +361,10 @@ class _EventPageState extends ConsumerState<EventPage> {
     Widget TeamsTab() {
       return (event.teams?.data).toString() == "null"
           ? const Text("")
-          : event.teams == null || event.teams?.data == null || event.teams?.data?.isEmpty == true
+          : event.teams == null ||
+                  event.teams?.data == null ||
+                  event.teams?.data?.isEmpty == true ||
+                  (event.divisions?[0].rankings?.data?.isEmpty ?? true)
               ? const Center(child: Text("No teams found"))
               : RefreshIndicator(
                   child: MediaQuery(
