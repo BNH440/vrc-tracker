@@ -149,24 +149,35 @@ class _EventPageState extends ConsumerState<EventPage> {
                           ? const SizedBox.shrink()
                           : Padding(
                               padding: const EdgeInsets.only(left: 10, right: 10),
-                              child: DropdownButton<String>(
-                                value: dropdownValue,
-                                icon: const Icon(Icons.arrow_downward),
-                                elevation: 16,
-                                onChanged: (String? value) {
-                                  setState(() {
-                                    dropdownValue = value!;
-                                    selectedDivison = divisions.indexOf(dropdownValue);
-                                  });
-                                },
-                                items: divisions.map<DropdownMenuItem<String>>((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
+                              child: Flex(
+                                direction: Axis.horizontal,
+                                children: [
+                                  const Text("Division",
+                                      style:
+                                          TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: DropdownButton<String>(
+                                      value: dropdownValue,
+                                      icon: const Icon(Icons.arrow_downward),
+                                      elevation: 16,
+                                      onChanged: (String? value) {
+                                        setState(() {
+                                          dropdownValue = value!;
+                                          selectedDivison = divisions.indexOf(dropdownValue);
+                                        });
+                                      },
+                                      items:
+                                          divisions.map<DropdownMenuItem<String>>((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ],
+                              )),
                       if (event.divisions?[selectedDivison].data?.data?.isEmpty ?? true)
                         const Center(
                             heightFactor: 3,
@@ -362,24 +373,35 @@ class _EventPageState extends ConsumerState<EventPage> {
                           ? const SizedBox.shrink()
                           : Padding(
                               padding: const EdgeInsets.only(left: 10, right: 10),
-                              child: DropdownButton<String>(
-                                value: dropdownValue,
-                                icon: const Icon(Icons.arrow_downward),
-                                elevation: 16,
-                                onChanged: (String? value) {
-                                  setState(() {
-                                    dropdownValue = value!;
-                                    selectedDivison = divisions.indexOf(dropdownValue);
-                                  });
-                                },
-                                items: divisions.map<DropdownMenuItem<String>>((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
+                              child: Flex(
+                                direction: Axis.horizontal,
+                                children: [
+                                  const Text("Division",
+                                      style:
+                                          TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: DropdownButton<String>(
+                                      value: dropdownValue,
+                                      icon: const Icon(Icons.arrow_downward),
+                                      elevation: 16,
+                                      onChanged: (String? value) {
+                                        setState(() {
+                                          dropdownValue = value!;
+                                          selectedDivison = divisions.indexOf(dropdownValue);
+                                        });
+                                      },
+                                      items:
+                                          divisions.map<DropdownMenuItem<String>>((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ],
+                              )),
                       if (event.divisions?[selectedDivison].rankings?.data?.isEmpty ?? true)
                         const Center(
                             heightFactor: 3,
@@ -509,24 +531,33 @@ class _EventPageState extends ConsumerState<EventPage> {
                       ? const SizedBox.shrink()
                       : Padding(
                           padding: const EdgeInsets.only(left: 10, right: 10),
-                          child: DropdownButton<String>(
-                            value: dropdownValue,
-                            icon: const Icon(Icons.arrow_downward),
-                            elevation: 16,
-                            onChanged: (String? value) {
-                              setState(() {
-                                dropdownValue = value!;
-                                selectedDivison = divisions.indexOf(dropdownValue);
-                              });
-                            },
-                            items: divisions.map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                          ),
-                        ),
+                          child: Flex(
+                            direction: Axis.horizontal,
+                            children: [
+                              const Text("Division",
+                                  style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: DropdownButton<String>(
+                                  value: dropdownValue,
+                                  icon: const Icon(Icons.arrow_downward),
+                                  elevation: 16,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      dropdownValue = value!;
+                                      selectedDivison = divisions.indexOf(dropdownValue);
+                                    });
+                                  },
+                                  items: divisions.map<DropdownMenuItem<String>>((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ],
+                          )),
                   if (event.divisions?[selectedDivison].rankings?.data?.isEmpty ?? true)
                     const Center(
                         heightFactor: 3,

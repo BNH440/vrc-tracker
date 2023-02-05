@@ -254,25 +254,35 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               SizedBox(
                                 width: 55,
                                 child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        WidgetSpan(
-                                          alignment: PlaceholderAlignment.middle,
-                                          child: Text(
-                                            "${matches.data?[i].alliances?[0].teams?[0].team?.name}\n${matches.data?[i].alliances?[0].teams?[1].team?.name}",
-                                            style: TextStyle(
-                                              color: Theme.of(context).colorScheme.tertiary,
-                                              fontSize: 14,
-                                            ),
-                                            textAlign: TextAlign.right,
-                                          ),
+                                    alignment: Alignment.centerRight,
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.tertiary,
+                                          fontSize: 14,
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                        children: <TextSpan>[
+                                          TextSpan(
+                                              text:
+                                                  "${matches.data?[i].alliances?[0].teams?[0].team?.name}",
+                                              style: TextStyle(
+                                                  color: (matches.data?[i].alliances?[0].teams?[0]
+                                                              .team?.id ==
+                                                          team.id)
+                                                      ? Colors.blue
+                                                      : null)),
+                                          TextSpan(
+                                              text:
+                                                  "\n${matches.data?[i].alliances?[0].teams?[1].team?.name}",
+                                              style: TextStyle(
+                                                  color: (matches.data?[i].alliances?[0].teams?[1]
+                                                              .team?.id ==
+                                                          team.id)
+                                                      ? Colors.blue
+                                                      : null)),
+                                        ],
+                                      ),
+                                    )),
                               ),
                               const Spacer(),
                               (matches.data?[i].alliances?[0].score.toString() != "0" ||
@@ -343,24 +353,35 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               SizedBox(
                                 width: 55,
                                 child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        WidgetSpan(
-                                          alignment: PlaceholderAlignment.middle,
-                                          child: Text(
-                                            "${matches.data?[i].alliances?[1].teams?[0].team?.name}\n${matches.data?[i].alliances?[1].teams?[1].team?.name}",
-                                            style: TextStyle(
-                                              color: Theme.of(context).colorScheme.tertiary,
-                                              fontSize: 14,
-                                            ),
-                                          ),
+                                    alignment: Alignment.centerLeft,
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.tertiary,
+                                          fontSize: 14,
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                        children: <TextSpan>[
+                                          TextSpan(
+                                              text:
+                                                  "${matches.data?[i].alliances?[1].teams?[0].team?.name}",
+                                              style: TextStyle(
+                                                  color: (matches.data?[i].alliances?[1].teams?[0]
+                                                              .team?.id ==
+                                                          team.id)
+                                                      ? Colors.red
+                                                      : null)),
+                                          TextSpan(
+                                              text:
+                                                  "\n${matches.data?[i].alliances?[1].teams?[1].team?.name}",
+                                              style: TextStyle(
+                                                  color: (matches.data?[i].alliances?[1].teams?[1]
+                                                              .team?.id ==
+                                                          team.id)
+                                                      ? Colors.red
+                                                      : null)),
+                                        ],
+                                      ),
+                                    )),
                               )
                             ],
                           ),
