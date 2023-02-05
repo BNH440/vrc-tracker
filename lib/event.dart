@@ -31,6 +31,9 @@ class _EventPageState extends ConsumerState<EventPage> {
   Event event = Event();
   List<Request.SkillsTotal> _skills = [];
   List<Request.SkillsTotal> skills = [];
+  String dropdownValue = 'Division 1';
+  List<String> divisions = ["Division 1"];
+  int selectedDivison = 0;
 
   String convertDate(String date) {
     var humanDate = DateTime.parse(date);
@@ -48,6 +51,12 @@ class _EventPageState extends ConsumerState<EventPage> {
           setState(() {
             _event = value;
             event = value;
+
+            divisions = event.divisions!.map((e) => e.name!).toList();
+            if (!divisions.contains(dropdownValue)) {
+              dropdownValue = divisions[0];
+            }
+            selectedDivison = divisions.indexOf(dropdownValue);
           });
         }
       });
@@ -66,6 +75,12 @@ class _EventPageState extends ConsumerState<EventPage> {
         setState(() {
           _event = value;
           event = value;
+
+          divisions = event.divisions!.map((e) => e.name!).toList();
+          if (!divisions.contains(dropdownValue)) {
+            dropdownValue = divisions[0];
+          }
+          selectedDivison = divisions.indexOf(dropdownValue);
         });
       }
     });
@@ -95,11 +110,14 @@ class _EventPageState extends ConsumerState<EventPage> {
         if (this.mounted)
           {
             setState(() {
-              // event.divisions?[0].data?.data?[12].alliances?[0].score = timer.tick;
-              // _event.divisions?[0].data?.data?[12].alliances?[0].score = timer.tick;
-
               _event = event;
               event = event;
+
+              divisions = event.divisions!.map((e) => e.name!).toList();
+              if (!divisions.contains(dropdownValue)) {
+                dropdownValue = divisions[0];
+              }
+              selectedDivison = divisions.indexOf(dropdownValue);
             }),
           },
         skills = await Request.getSkills(widget.event_old.id.toString()),
@@ -127,129 +145,69 @@ class _EventPageState extends ConsumerState<EventPage> {
                         .copyWith(textScaleFactor: 1.0)
                         .removePadding(removeTop: true),
                     child: ListView(children: [
-                      for (var i = 0;
-                          i <= (((event.divisions?[0].data?.data?.length ?? 1) - 1));
-                          i++)
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                  builder: (context) => MatchPage(
-                                      title: (event.divisions?[0].data?.data?[i].name).toString(),
-                                      event_old: event,
-                                      match_number:
-                                          (event.divisions?[0].data?.data?[i].id ?? 0).toInt())),
-                            );
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Theme.of(context).cardColor,
+                      divisions.length == 1
+                          ? const SizedBox.shrink()
+                          : Padding(
+                              padding: const EdgeInsets.only(left: 10, right: 10),
+                              child: DropdownButton<String>(
+                                value: dropdownValue,
+                                icon: const Icon(Icons.arrow_downward),
+                                elevation: 16,
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    dropdownValue = value!;
+                                    selectedDivison = divisions.indexOf(dropdownValue);
+                                  });
+                                },
+                                items: divisions.map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                              ),
                             ),
-                            height: 50,
-                            padding: const EdgeInsets.symmetric(horizontal: 30),
-                            margin: const EdgeInsets.all(4),
-                            child: Flex(
-                              direction: Axis.horizontal,
-                              children: [
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        WidgetSpan(
-                                          alignment: PlaceholderAlignment.middle,
-                                          child: Text(
-                                            (event.divisions?[0].data?.data?[i].name).toString(),
-                                            style: const TextStyle(fontSize: 16),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                      if (event.divisions?[selectedDivison].data?.data?.isEmpty ?? true)
+                        const Center(
+                            heightFactor: 3,
+                            child: Text(
+                              "No matches found",
+                              textAlign: TextAlign.center,
+                            )),
+                      if (event.divisions?[selectedDivison].data?.data?.isNotEmpty ?? false)
+                        for (var i = 0;
+                            i <=
+                                (((event.divisions?[selectedDivison].data?.data?.length ?? 1) - 1));
+                            i++)
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) => MatchPage(
+                                    title: (event.divisions?[selectedDivison].data?.data?[i].name)
+                                        .toString(),
+                                    event_old: event,
+                                    match_number:
+                                        (event.divisions?[selectedDivison].data?.data?[i].id ?? 0)
+                                            .toInt(),
+                                    division: selectedDivison,
                                   ),
                                 ),
-                                const Spacer(flex: 2),
-                                SizedBox(
-                                  width: 55,
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          WidgetSpan(
-                                            alignment: PlaceholderAlignment.middle,
-                                            child: Text(
-                                              "${event.divisions?[0].data?.data?[i].alliances?[0].teams?[0].team?.name}\n${event.divisions?[0].data?.data?[i].alliances?[0].teams?[1].team?.name}",
-                                              style: TextStyle(
-                                                color: Theme.of(context).colorScheme.tertiary,
-                                                fontSize: 14,
-                                              ),
-                                              textAlign: TextAlign.right,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const Spacer(),
-                                (event.divisions?[0].data?.data?[i].alliances?[0].score
-                                                .toString() !=
-                                            "0" ||
-                                        event.divisions?[0].data?.data?[i].alliances?[1].score
-                                                .toString() !=
-                                            "0")
-                                    ? SizedBox(
-                                        width: 100,
-                                        child: Align(
-                                          alignment: Alignment.center,
-                                          child: RichText(
-                                            text: TextSpan(
-                                              children: [
-                                                WidgetSpan(
-                                                    alignment: PlaceholderAlignment.middle,
-                                                    child: RichText(
-                                                      text: TextSpan(
-                                                        style: const TextStyle(
-                                                          fontSize: 20.0,
-                                                        ),
-                                                        children: <TextSpan>[
-                                                          TextSpan(
-                                                              text: event.divisions?[0].data
-                                                                      ?.data?[i].alliances?[0].score
-                                                                      .toString() ??
-                                                                  "",
-                                                              style: const TextStyle(
-                                                                  color: Colors.blue)),
-                                                          TextSpan(
-                                                            text: " - ",
-                                                            style: TextStyle(
-                                                                color: Theme.of(context)
-                                                                    .textTheme
-                                                                    .bodyLarge
-                                                                    ?.color),
-                                                          ),
-                                                          TextSpan(
-                                                              text: event.divisions?[0].data
-                                                                      ?.data?[i].alliances?[1].score
-                                                                      .toString() ??
-                                                                  "",
-                                                              style: const TextStyle(
-                                                                  color: Colors.red)),
-                                                        ],
-                                                      ),
-                                                    )),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    : Text("N/A"),
-                                const Spacer(),
-                                SizedBox(
-                                  width: 55,
-                                  child: Align(
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Theme.of(context).cardColor,
+                              ),
+                              height: 50,
+                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              margin: const EdgeInsets.all(4),
+                              child: Flex(
+                                direction: Axis.horizontal,
+                                children: [
+                                  Align(
                                     alignment: Alignment.centerLeft,
                                     child: RichText(
                                       text: TextSpan(
@@ -257,22 +215,130 @@ class _EventPageState extends ConsumerState<EventPage> {
                                           WidgetSpan(
                                             alignment: PlaceholderAlignment.middle,
                                             child: Text(
-                                              "${event.divisions?[0].data?.data?[i].alliances?[1].teams?[0].team?.name}\n${event.divisions?[0].data?.data?[i].alliances?[1].teams?[1].team?.name}",
-                                              style: TextStyle(
-                                                color: Theme.of(context).colorScheme.tertiary,
-                                                fontSize: 14,
-                                              ),
+                                              (event.divisions?[selectedDivison].data?.data?[i]
+                                                      .name)
+                                                  .toString(),
+                                              style: const TextStyle(fontSize: 16),
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
                                   ),
-                                )
-                              ],
+                                  const Spacer(flex: 2),
+                                  SizedBox(
+                                    width: 55,
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: RichText(
+                                        text: TextSpan(
+                                          children: [
+                                            WidgetSpan(
+                                              alignment: PlaceholderAlignment.middle,
+                                              child: Text(
+                                                "${event.divisions?[selectedDivison].data?.data?[i].alliances?[0].teams?[0].team?.name}\n${event.divisions?[selectedDivison].data?.data?[i].alliances?[0].teams?[1].team?.name}",
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.tertiary,
+                                                  fontSize: 14,
+                                                ),
+                                                textAlign: TextAlign.right,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  (event.divisions?[selectedDivison].data?.data?[i].alliances?[0]
+                                                  .score
+                                                  .toString() !=
+                                              "0" ||
+                                          event.divisions?[selectedDivison].data?.data?[i]
+                                                  .alliances?[1].score
+                                                  .toString() !=
+                                              "0")
+                                      ? SizedBox(
+                                          width: 100,
+                                          child: Align(
+                                            alignment: Alignment.center,
+                                            child: RichText(
+                                              text: TextSpan(
+                                                children: [
+                                                  WidgetSpan(
+                                                      alignment: PlaceholderAlignment.middle,
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style: const TextStyle(
+                                                            fontSize: 20.0,
+                                                          ),
+                                                          children: <TextSpan>[
+                                                            TextSpan(
+                                                                text: event
+                                                                        .divisions?[selectedDivison]
+                                                                        .data
+                                                                        ?.data?[i]
+                                                                        .alliances?[0]
+                                                                        .score
+                                                                        .toString() ??
+                                                                    "",
+                                                                style: const TextStyle(
+                                                                    color: Colors.blue)),
+                                                            TextSpan(
+                                                              text: " - ",
+                                                              style: TextStyle(
+                                                                  color: Theme.of(context)
+                                                                      .textTheme
+                                                                      .bodyLarge
+                                                                      ?.color),
+                                                            ),
+                                                            TextSpan(
+                                                                text: event
+                                                                        .divisions?[selectedDivison]
+                                                                        .data
+                                                                        ?.data?[i]
+                                                                        .alliances?[1]
+                                                                        .score
+                                                                        .toString() ??
+                                                                    "",
+                                                                style: const TextStyle(
+                                                                    color: Colors.red)),
+                                                          ],
+                                                        ),
+                                                      )),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      : Text("N/A"),
+                                  const Spacer(),
+                                  SizedBox(
+                                    width: 55,
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: RichText(
+                                        text: TextSpan(
+                                          children: [
+                                            WidgetSpan(
+                                              alignment: PlaceholderAlignment.middle,
+                                              child: Text(
+                                                "${event.divisions?[selectedDivison].data?.data?[i].alliances?[1].teams?[0].team?.name}\n${event.divisions?[selectedDivison].data?.data?[i].alliances?[1].teams?[1].team?.name}",
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.tertiary,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
-                        ),
                     ]),
                   ),
                   onRefresh: () async {
@@ -292,100 +358,136 @@ class _EventPageState extends ConsumerState<EventPage> {
                         .copyWith(textScaleFactor: 1.0)
                         .removePadding(removeTop: true),
                     child: ListView(children: [
-                      for (var i = 0; i <= (((_event.teams?.data?.length ?? 1) - 1)); i++)
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                builder: (context) => TeamPage(
-                                    title: (event.teams?.data?[i].number).toString(),
-                                    event_old: event,
-                                    match_id: event.id.toString(),
-                                    team_id: (event.teams?.data?[i].id).toString()),
+                      divisions.length == 1
+                          ? const SizedBox.shrink()
+                          : Padding(
+                              padding: const EdgeInsets.only(left: 10, right: 10),
+                              child: DropdownButton<String>(
+                                value: dropdownValue,
+                                icon: const Icon(Icons.arrow_downward),
+                                elevation: 16,
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    dropdownValue = value!;
+                                    selectedDivison = divisions.indexOf(dropdownValue);
+                                  });
+                                },
+                                items: divisions.map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
                               ),
-                            );
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Theme.of(context).cardColor,
                             ),
-                            height: 50,
-                            padding: const EdgeInsets.symmetric(horizontal: 30),
-                            margin: const EdgeInsets.all(4),
-                            child: Flex(
-                              direction: Axis.horizontal,
-                              children: [
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        WidgetSpan(
-                                          alignment: PlaceholderAlignment.middle,
-                                          child: Text(
-                                            (event.teams?.data?[i].number).toString(),
-                                            style: const TextStyle(fontSize: 16),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                      if (event.divisions?[selectedDivison].rankings?.data?.isEmpty ?? true)
+                        const Center(
+                            heightFactor: 3,
+                            child: Text(
+                              "No teams found\nNote: Finals divisions will not have teams",
+                              textAlign: TextAlign.center,
+                            )),
+                      if (event.divisions?[selectedDivison].rankings?.data?.isNotEmpty ?? false)
+                        for (var team in (event.teams!.data!.where((element) =>
+                            event.divisions![selectedDivison].rankings!.data!
+                                .firstWhereOrNull((element2) => element2.team!.id == element.id) !=
+                            null)))
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) => TeamPage(
+                                      title: (team.number).toString(),
+                                      event_old: event,
+                                      match_id: event.id.toString(),
+                                      team_id: (team.id).toString()),
                                 ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                if (event.teams?.data?[i].teamName != null)
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Theme.of(context).cardColor,
+                              ),
+                              height: 50,
+                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              margin: const EdgeInsets.all(4),
+                              child: Flex(
+                                direction: Axis.horizontal,
+                                children: [
                                   Align(
                                     alignment: Alignment.centerLeft,
-                                    child: SizedBox(
-                                      width: 160,
-                                      child: Text(
-                                        (event.teams?.data?[i].teamName).toString(),
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            color: Theme.of(context).colorScheme.tertiary),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                        softWrap: false,
+                                    child: RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          WidgetSpan(
+                                            alignment: PlaceholderAlignment.middle,
+                                            child: Text(
+                                              (team.number).toString(),
+                                              style: const TextStyle(fontSize: 16),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
-                                const Spacer(flex: 5),
-                                if (event.rankings?[0].data != null)
-                                  if ((event.rankings?[0].data?.length ?? 0) > 0)
-                                    if (event.rankings?[0].data
-                                            ?.firstWhereOrNull((element) =>
-                                                element.team?.id == event.teams?.data?[i].id)
-                                            .toString() !=
-                                        "null")
-                                      SizedBox(
-                                        width: 60,
-                                        child: Align(
-                                          alignment: Alignment.centerRight,
-                                          child: RichText(
-                                            text: TextSpan(
-                                              children: [
-                                                WidgetSpan(
-                                                  alignment: PlaceholderAlignment.middle,
-                                                  child: Text(
-                                                    "Rank: ${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.rank.toString()}      ${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.wins.toString()}-${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.losses.toString()}-${event.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == event.teams?.data?[i].id)?.ties.toString()}",
-                                                    style: TextStyle(
-                                                      color: Theme.of(context).colorScheme.tertiary,
-                                                      fontSize: 14,
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  if (team.teamName != null)
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: SizedBox(
+                                        width: 160,
+                                        child: Text(
+                                          (team.teamName).toString(),
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: Theme.of(context).colorScheme.tertiary),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                          softWrap: false,
+                                        ),
+                                      ),
+                                    ),
+                                  const Spacer(flex: 5),
+                                  if (event.divisions?[selectedDivison].rankings?.data != null)
+                                    if ((event.divisions?[selectedDivison].rankings?.data?.length ??
+                                            0) >
+                                        0)
+                                      if (event.divisions?[selectedDivison].rankings?.data
+                                              ?.firstWhereOrNull(
+                                                  (element) => element.team?.id == team.id)
+                                              .toString() !=
+                                          "null")
+                                        SizedBox(
+                                          width: 60,
+                                          child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: RichText(
+                                              text: TextSpan(
+                                                children: [
+                                                  WidgetSpan(
+                                                    alignment: PlaceholderAlignment.middle,
+                                                    child: Text(
+                                                      "Rank: ${event.divisions?[selectedDivison].rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.rank.toString()}      ${event.divisions?[selectedDivison].rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wins.toString()}-${event.divisions?[selectedDivison].rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.losses.toString()}-${event.divisions?[selectedDivison].rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ties.toString()}",
+                                                      style: TextStyle(
+                                                        color:
+                                                            Theme.of(context).colorScheme.tertiary,
+                                                        fontSize: 14,
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
                     ]),
                   ),
                   onRefresh: () async {
@@ -395,96 +497,133 @@ class _EventPageState extends ConsumerState<EventPage> {
     }
 
     Widget RankingsTab() {
-      return event.rankings?.isEmpty == true
+      return event.divisions?[0].rankings?.data?.isEmpty == true
           ? const Center(child: Text("No rankings found"))
-          : event.rankings?[0].data?.isEmpty == true
-              ? const Center(child: Text("No rankings found"))
-              : RefreshIndicator(
-                  child: MediaQuery(
-                    data: MediaQuery.of(context)
-                        .copyWith(textScaleFactor: 1.0)
-                        .removePadding(removeTop: true),
-                    child: ListView(children: [
-                      for (var i = (((event.rankings?[0].data?.length ?? 1) - 1)); i >= 0; i--)
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                builder: (context) => TeamPage(
-                                    title: (event.rankings?[0].data?[i].team?.name).toString(),
-                                    event_old: event,
-                                    match_id: event.id.toString(),
-                                    team_id: (event.rankings?[0].data?[i].team?.id).toString()),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Theme.of(context).cardColor,
-                            ),
-                            height: 50,
-                            padding: const EdgeInsets.symmetric(horizontal: 30),
-                            margin: const EdgeInsets.all(4),
-                            child: Flex(
-                              direction: Axis.horizontal,
-                              children: [
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        WidgetSpan(
-                                            alignment: PlaceholderAlignment.middle,
-                                            child: Text(
-                                              "${event.rankings?[0].data?[i].rank}. ",
-                                              style: TextStyle(
-                                                  color: Theme.of(context).colorScheme.secondary,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18),
-                                            )),
-                                        WidgetSpan(
-                                          alignment: PlaceholderAlignment.middle,
-                                          child: Text(
-                                            (event.rankings?[0].data?[i].team?.name).toString(),
-                                            style: const TextStyle(fontSize: 16),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const Spacer(),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        WidgetSpan(
-                                          alignment: PlaceholderAlignment.middle,
-                                          child: Text(
-                                            "WP: ${(event.rankings?[0].data?[i].wp).toString()} AP: ${(event.rankings?[0].data?[i].ap).toString()} SP: ${(event.rankings?[0].data?[i].sp).toString()}      ${event.rankings?[0].data?[i].wins}-${event.rankings?[0].data?[i].losses}-${event.rankings?[0].data?[i].ties}",
-                                            style: TextStyle(
-                                              color: Theme.of(context).colorScheme.tertiary,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+          : RefreshIndicator(
+              child: MediaQuery(
+                data: MediaQuery.of(context)
+                    .copyWith(textScaleFactor: 1.0)
+                    .removePadding(removeTop: true),
+                child: ListView(children: [
+                  divisions.length == 1
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.only(left: 10, right: 10),
+                          child: DropdownButton<String>(
+                            value: dropdownValue,
+                            icon: const Icon(Icons.arrow_downward),
+                            elevation: 16,
+                            onChanged: (String? value) {
+                              setState(() {
+                                dropdownValue = value!;
+                                selectedDivison = divisions.indexOf(dropdownValue);
+                              });
+                            },
+                            items: divisions.map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
                           ),
                         ),
-                    ]),
-                  ),
-                  onRefresh: () async {
-                    await getEventDetailsThrottled();
-                  },
-                );
+                  if (event.divisions?[selectedDivison].rankings?.data?.isEmpty ?? true)
+                    const Center(
+                        heightFactor: 3,
+                        child: Text(
+                          "No rankings found\nNote: Finals divisions will not have rankings",
+                          textAlign: TextAlign.center,
+                        )),
+                  if (event.divisions?[selectedDivison].rankings?.data?.isNotEmpty ?? false)
+                    for (var i =
+                            (((event.divisions?[selectedDivison].rankings?.data?.length ?? 1) - 1));
+                        i >= 0;
+                        i--)
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => TeamPage(
+                                  title: (event.divisions?[selectedDivison].rankings?.data?[i].team
+                                          ?.name)
+                                      .toString(),
+                                  event_old: event,
+                                  match_id: event.id.toString(),
+                                  team_id: (event
+                                          .divisions?[selectedDivison].rankings?.data?[i].team?.id)
+                                      .toString()),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Theme.of(context).cardColor,
+                          ),
+                          height: 50,
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          margin: const EdgeInsets.all(4),
+                          child: Flex(
+                            direction: Axis.horizontal,
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      WidgetSpan(
+                                          alignment: PlaceholderAlignment.middle,
+                                          child: Text(
+                                            "${event.divisions?[selectedDivison].rankings?.data?[i].rank}. ",
+                                            style: TextStyle(
+                                                color: Theme.of(context).colorScheme.secondary,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18),
+                                          )),
+                                      WidgetSpan(
+                                        alignment: PlaceholderAlignment.middle,
+                                        child: Text(
+                                          (event.divisions?[selectedDivison].rankings?.data?[i].team
+                                                  ?.name)
+                                              .toString(),
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const Spacer(),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      WidgetSpan(
+                                        alignment: PlaceholderAlignment.middle,
+                                        child: Text(
+                                          "WP: ${(event.divisions?[selectedDivison].rankings?.data?[i].wp).toString()} AP: ${(event.divisions?[selectedDivison].rankings?.data?[i].ap).toString()} SP: ${(event.divisions?[selectedDivison].rankings?.data?[i].sp).toString()}      ${event.divisions?[selectedDivison].rankings?.data?[i].wins}-${event.divisions?[selectedDivison].rankings?.data?[i].losses}-${event.divisions?[selectedDivison].rankings?.data?[i].ties}",
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.tertiary,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                ]),
+              ),
+              onRefresh: () async {
+                await getEventDetailsThrottled();
+              },
+            );
     }
 
     Widget SkillsTab() {

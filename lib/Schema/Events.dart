@@ -102,7 +102,6 @@ class Event {
   bool? ongoing;
   bool? awardsFinalized;
   Null? eventType;
-  List<Rankings>? rankings;
   bool isLocal = false;
   double distance = double.maxFinite;
 
@@ -120,8 +119,7 @@ class Event {
       this.level,
       this.ongoing,
       this.awardsFinalized,
-      this.eventType,
-      this.rankings});
+      this.eventType});
 
   Event.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -287,6 +285,7 @@ class Divisions {
   String? name;
   int? order;
   Div? data;
+  Rankings? rankings;
 
   Divisions({this.id, this.name, this.order});
 

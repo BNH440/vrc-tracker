@@ -10,12 +10,17 @@ import 'package:collection/collection.dart';
 
 class MatchPage extends StatefulWidget {
   const MatchPage(
-      {Key? key, required this.title, required this.event_old, required this.match_number})
+      {Key? key,
+      required this.title,
+      required this.event_old,
+      required this.match_number,
+      required this.division})
       : super(key: key);
 
   final String title;
   final Event event_old;
   final int match_number;
+  final int division;
 
   @override
   State<MatchPage> createState() => _MatchPageState();
@@ -54,7 +59,7 @@ class _MatchPageState extends State<MatchPage> {
       const Duration(seconds: 0),
     );
 
-    Div.Data? match = (event.divisions?[0].data?.data
+    Div.Data? match = (event.divisions?[widget.division].data?.data
         ?.firstWhereOrNull((element) => element.id == widget.match_number));
 
     return MediaQuery(
@@ -63,7 +68,7 @@ class _MatchPageState extends State<MatchPage> {
         appBar: AppBar(
           title: Text(widget.title),
         ),
-        body: (event.divisions?[0].data?.data).toString() == "null"
+        body: (event.divisions?[widget.division].data?.data).toString() == "null"
             ? const Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
@@ -97,6 +102,11 @@ class _MatchPageState extends State<MatchPage> {
                                     style: const TextStyle(fontSize: 20),
                                   ),
                                 ),
+                                if (match.division != null)
+                                  Text(
+                                    "Division: ${event.divisions?[widget.division].name.toString()}",
+                                    style: const TextStyle(fontSize: 15),
+                                  ),
                                 if (match.field.toString() != "null")
                                   Text(
                                     "Field: ${match.field.toString()}",

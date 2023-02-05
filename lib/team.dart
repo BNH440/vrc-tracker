@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrc_ranks_app/Schema/MatchListByTeam.dart';
+import 'package:vrc_ranks_app/Schema/Rankings.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart' as Events;
 import 'package:vrc_ranks_app/events.dart';
@@ -34,6 +35,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
   Team team = Team();
   MatchListByTeam _matches = MatchListByTeam();
   MatchListByTeam matches = MatchListByTeam();
+  Rankings? rankings = Rankings();
+  int division = 0;
 
   @override
   void initState() {
@@ -47,6 +50,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
           team = value[0];
           _matches = value[1];
           matches = value[1];
+
+          division = widget.event_old.divisions
+                  ?.firstWhereOrNull((element) =>
+                      element.id.toString() == matches.data?[0].division?.id.toString())
+                  ?.order ??
+              0;
+
+          rankings = widget.event_old.divisions?[division].rankings;
         });
       }
     });
@@ -68,6 +79,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               team = list[0];
               _matches = list[1];
               matches = list[1];
+
+              division = widget.event_old.divisions
+                      ?.firstWhereOrNull((element) =>
+                          element.id.toString() == matches.data?[0].division?.id.toString())
+                      ?.order ??
+                  0;
+
+              rankings = widget.event_old.divisions?[division].rankings;
             }),
           },
       },
@@ -147,8 +166,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                             "Grade: ${team.grade.toString()}",
                             style: const TextStyle(fontSize: 15),
                           ),
-                          if (widget.event_old.rankings?[0].data != null)
-                            if ((widget.event_old.rankings?[0].data!.length)! > 0)
+                          if (rankings?.data != null)
+                            if ((rankings?.data!.length)! > 0)
                               MediaQuery(
                                 data: MediaQuery.of(context)
                                     .copyWith(textScaleFactor: 1.0)
@@ -159,23 +178,27 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                   children: [
                                     const Text(""),
                                     Text(
-                                      "Rank: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.rank.toString()}",
+                                      "Division: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.division?.name.toString()}",
                                       style: const TextStyle(fontSize: 15),
                                     ),
                                     Text(
-                                      "Record: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wins.toString()}-${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.losses.toString()}-${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ties.toString()}",
+                                      "Rank: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.rank.toString()}",
                                       style: const TextStyle(fontSize: 15),
                                     ),
                                     Text(
-                                      "Avg Points: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.averagePoints.toString()}",
+                                      "Record: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wins.toString()}-${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.losses.toString()}-${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ties.toString()}",
                                       style: const TextStyle(fontSize: 15),
                                     ),
                                     Text(
-                                      "High Score: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.highScore.toString()}",
+                                      "Avg Points: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.averagePoints.toString()}",
                                       style: const TextStyle(fontSize: 15),
                                     ),
                                     Text(
-                                      "WP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wp.toString()}, AP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ap.toString()}, SP: ${widget.event_old.rankings?[0].data?.firstWhereOrNull((element) => element.team?.id == team.id)?.sp.toString()}",
+                                      "High Score: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.highScore.toString()}",
+                                      style: const TextStyle(fontSize: 15),
+                                    ),
+                                    Text(
+                                      "WP: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wp.toString()}, AP: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ap.toString()}, SP: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.sp.toString()}",
                                       style: const TextStyle(fontSize: 15),
                                     ),
                                   ],
@@ -193,9 +216,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                             context,
                             CupertinoPageRoute(
                                 builder: (context) => MatchPage(
-                                    title: (matches.data?[i].name).toString(),
-                                    event_old: widget.event_old,
-                                    match_number: (matches.data?[i].id ?? 0).toInt())),
+                                      title: (matches.data?[i].name).toString(),
+                                      event_old: widget.event_old,
+                                      match_number: (matches.data?[i].id ?? 0).toInt(),
+                                      division: division,
+                                    )),
                           );
                         },
                         child: Container(
@@ -250,7 +275,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                 ),
                               ),
                               const Spacer(),
-                              (matches.data?[i].alliances?[0].score.toString() != "0" &&
+                              (matches.data?[i].alliances?[0].score.toString() != "0" ||
                                       matches.data?[i].alliances?[1].score.toString() != "0")
                                   ? SizedBox(
                                       width: 100,
