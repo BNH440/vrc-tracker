@@ -62,6 +62,56 @@ class _MatchPageState extends State<MatchPage> {
     Div.Data? match = (event.divisions?[widget.division].data?.data
         ?.firstWhereOrNull((element) => element.id == widget.match_number));
 
+    void predictScore() {
+      if (match!.alliances!.isEmpty) return;
+      Request.predictMatch(
+              match.alliances![1].teams![0].team!.name!,
+              match.alliances![1].teams![1].team!.name!,
+              match.alliances![0].teams![0].team!.name!,
+              match.alliances![0].teams![1].team!.name!,
+              match.id.toString())
+          .then((probability) => {
+                if (probability != -1.00)
+                  {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text("Predicted Score"),
+                            content: RichText(
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  fontSize: 25.0,
+                                ),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                      text: "${(100 - probability).toStringAsFixed(2)}%",
+                                      style: const TextStyle(color: Colors.blue)),
+                                  TextSpan(
+                                    text: " - ",
+                                    style: TextStyle(
+                                        color: Theme.of(context).textTheme.bodyLarge?.color),
+                                  ),
+                                  TextSpan(
+                                      text: "${probability.toStringAsFixed(2)}%",
+                                      style: const TextStyle(color: Colors.red)),
+                                ],
+                              ),
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                child: const Text("Close"),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        })
+                  }
+              });
+    }
+
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: Scaffold(
@@ -123,29 +173,31 @@ class _MatchPageState extends State<MatchPage> {
                                 ),
                               ],
                             ),
-                            if (!(((match.alliances?[0].score ?? 0) &
-                                    (match.alliances?[0].score ?? 0)) ==
-                                0))
-                              RichText(
-                                text: TextSpan(
-                                  style: const TextStyle(
-                                    fontSize: 25.0,
-                                  ),
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                        text: match.alliances?[0].score.toString() ?? "",
-                                        style: const TextStyle(color: Colors.blue)),
-                                    TextSpan(
-                                      text: " - ",
-                                      style: TextStyle(
-                                          color: Theme.of(context).textTheme.bodyLarge?.color),
+                            !(((match.alliances?[0].score ?? 0) &
+                                        (match.alliances?[0].score ?? 0)) ==
+                                    0)
+                                ? RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontSize: 25.0,
+                                      ),
+                                      children: <TextSpan>[
+                                        TextSpan(
+                                            text: match.alliances?[0].score.toString() ?? "",
+                                            style: const TextStyle(color: Colors.blue)),
+                                        TextSpan(
+                                          text: " - ",
+                                          style: TextStyle(
+                                              color: Theme.of(context).textTheme.bodyLarge?.color),
+                                        ),
+                                        TextSpan(
+                                            text: match.alliances?[1].score.toString() ?? "",
+                                            style: const TextStyle(color: Colors.red)),
+                                      ],
                                     ),
-                                    TextSpan(
-                                        text: match.alliances?[1].score.toString() ?? "",
-                                        style: const TextStyle(color: Colors.red)),
-                                  ],
-                                ),
-                              )
+                                  )
+                                : ElevatedButton(
+                                    onPressed: predictScore, child: const Text("Predict Score")),
                           ]),
                         ),
                         if (event.divisions != null)

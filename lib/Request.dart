@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:geolocator/geolocator.dart';
 import 'package:requests/requests.dart';
 import 'package:vrc_ranks_app/Schema/EventListByTeam.dart';
+import 'package:vrc_ranks_app/Schema/MatchPrediction.dart';
 import 'package:vrc_ranks_app/Schema/Rankings.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'package:vrc_ranks_app/Schema/TeamsSearch.dart' as TeamsSearch;
@@ -249,4 +250,14 @@ Future<List<SkillsTotal>> getSkills(String compId) async {
   }
 
   return newList;
+}
+
+Future<double> predictMatch(
+    String red1, String red2, String blue1, String blue2, String matchNumber) async {
+  var response = await Requests.get(
+      "https://cache.vrctracker.blakehaug.com/predict?red1=$red1&red2=$red2&blue1=$blue1&blue2=$blue2&matchNumber=$matchNumber");
+
+  var decodedRes = MatchPrediction.fromJson(jsonDecode((response.body)));
+
+  return decodedRes.redWinProbability ?? -1.00;
 }

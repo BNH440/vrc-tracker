@@ -148,6 +148,35 @@ async function handleRequest(request: Request<unknown>, env: Env) {
             await cache.put(cacheKey, response.clone());
 
             return response;
+        } else if (pathname.startsWith("/predict")) {
+            const red1 = searchParams.get("red1");
+            const red2 = searchParams.get("red2");
+            const blue1 = searchParams.get("blue1");
+            const blue2 = searchParams.get("blue2");
+
+            let apiResponse = await fetch(`http://vrc-data-analysis.com/v1/predict/${red1}/${red2}/${blue1}/${blue2}`, {
+                headers: {
+                    Accept: "application/json",
+                },
+                cf: {
+                    cacheTtl: 86400,
+                    cacheEverything: true,
+                },
+            });
+
+            let response = new Response(apiResponse.body, {
+                ...responseHeaders,
+                status: apiResponse.status,
+            });
+
+            if (apiResponse.status == 200) {
+                response.headers.append("Cache-Control", "s-maxage=86400");
+                response.headers.append("Cache-Control", "max-age=86400");
+            }
+
+            await cache.put(cacheKey, response.clone());
+
+            return response;
         } else {
             return new Response("/ is not a valid path");
         }
