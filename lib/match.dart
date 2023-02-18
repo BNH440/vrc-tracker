@@ -29,6 +29,7 @@ class MatchPage extends StatefulWidget {
 class _MatchPageState extends State<MatchPage> {
   Event _event = Event();
   Event event = Event();
+  bool loading = false;
 
   @override
   void initState() {
@@ -64,6 +65,9 @@ class _MatchPageState extends State<MatchPage> {
 
     void predictScore() {
       if (match!.alliances!.isEmpty) return;
+      setState(() {
+        loading = true;
+      });
       Request.predictMatch(
               match.alliances![1].teams![0].team!.name!,
               match.alliances![1].teams![1].team!.name!,
@@ -73,11 +77,14 @@ class _MatchPageState extends State<MatchPage> {
           .then((probability) => {
                 if (probability != -1.00)
                   {
+                    setState(() {
+                      loading = false;
+                    }),
                     showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: const Text("Predicted Score"),
+                            title: const Text("Predicted Win %"),
                             content: RichText(
                               text: TextSpan(
                                 style: const TextStyle(
@@ -196,8 +203,13 @@ class _MatchPageState extends State<MatchPage> {
                                       ],
                                     ),
                                   )
-                                : ElevatedButton(
-                                    onPressed: predictScore, child: const Text("Predict Score")),
+                                : (loading
+                                    ? const Padding(
+                                        padding: EdgeInsets.only(bottom: 10),
+                                        child: CircularProgressIndicator())
+                                    : ElevatedButton(
+                                        onPressed: predictScore,
+                                        child: const Text("Predict Score"))),
                           ]),
                         ),
                         if (event.divisions != null)
