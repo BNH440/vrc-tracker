@@ -205,13 +205,13 @@ class SkillsTotal {
 
 Future<List<SkillsTotal>> getSkills(String compId) async {
   var responseDriver = await Requests.get(
-      "https://www.robotevents.com/api/v2/events/$compId/skills?type=driver",
+      "https://www.robotevents.com/api/v2/events/$compId/skills?type=driver&per_page=1000",
       headers: headers);
 
   var decodedDriver = Skills.Skills.fromJson(jsonDecode(responseDriver.body));
 
   var responseProg = await Requests.get(
-      "https://www.robotevents.com/api/v2/events/$compId/skills?type=programming",
+      "https://www.robotevents.com/api/v2/events/$compId/skills?type=programming&per_page=1000",
       headers: headers);
 
   var decodedProg = Skills.Skills.fromJson(jsonDecode(responseProg.body));
