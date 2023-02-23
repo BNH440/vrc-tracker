@@ -255,7 +255,7 @@ Future<List<SkillsTotal>> getSkills(String compId) async {
 Future<double> predictMatch(
     String red1, String red2, String blue1, String blue2, String matchNumber) async {
   var response = await Requests.get(
-      "https://cache.vrctracker.blakehaug.com/predict?red1=$red1&red2=$red2&blue1=$blue1&blue2=$blue2&matchNumber=$matchNumber");
+      "https://cache.vrctracker.blakehaug.com/predict?red1=$red1&red2=$red2&blue1=$blue1&blue2=$blue2");
 
   var decodedRes = MatchPrediction.fromJson(jsonDecode((response.body)));
 
