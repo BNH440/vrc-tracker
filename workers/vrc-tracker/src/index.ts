@@ -127,7 +127,7 @@ async function handleRequest(request: Request<unknown>, env: Env) {
             return response;
         } else if (pathname.startsWith("/teamEvents")) {
             const team = searchParams.get("team");
-            let apiResponse = await fetch(`https://www.robotevents.com/api/v2/teams/${team}/events?season[]=173`, {
+            let apiResponse = await fetch(`https://www.robotevents.com/api/v2/teams/${team}/events?season[]=173&per_page=1000`, {
                 ...requestHeaders,
                 cf: {
                     cacheTtl: 86400,

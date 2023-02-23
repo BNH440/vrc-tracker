@@ -146,7 +146,7 @@ Future<List> getTeamDetails(String teamId, String compId) async {
   var decoded = Team.fromJson(jsonDecode(response.body));
 
   var response2 = await Requests.get(
-      "https://www.robotevents.com/api/v2/teams/$teamId/matches?event[]=$compId",
+      "https://www.robotevents.com/api/v2/teams/$teamId/matches?event[]=$compId&per_page=1000",
       headers: headers);
 
   var decoded2 = MatchListByTeam.fromJson(jsonDecode(response2.body));
@@ -165,7 +165,7 @@ Future<Team> getTeam(String teamId) async {
   var decoded = Team.fromJson(jsonDecode(response.body));
 
   var response2 = await Requests.get(
-      "https://www.robotevents.com/api/v2/teams/$teamId/events?season[]=173",
+      "https://cache.vrctracker.blakehaug.com/teamEvents?team=$teamId",
       headers: headers);
 
   var decoded2 = EventListByTeam.fromJson(jsonDecode(response2.body));

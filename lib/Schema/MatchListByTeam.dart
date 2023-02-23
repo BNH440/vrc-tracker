@@ -44,10 +44,10 @@ class Meta {
   int? _from;
   int? _lastPage;
   String? _lastPageUrl;
-  Null? _nextPageUrl;
+  String? _nextPageUrl;
   String? _path;
   int? _perPage;
-  Null? _prevPageUrl;
+  String? _prevPageUrl;
   int? _to;
   int? _total;
 
@@ -108,14 +108,14 @@ class Meta {
   set lastPage(int? lastPage) => _lastPage = lastPage;
   String? get lastPageUrl => _lastPageUrl;
   set lastPageUrl(String? lastPageUrl) => _lastPageUrl = lastPageUrl;
-  Null? get nextPageUrl => _nextPageUrl;
-  set nextPageUrl(Null? nextPageUrl) => _nextPageUrl = nextPageUrl;
+  String? get nextPageUrl => _nextPageUrl;
+  set nextPageUrl(String? nextPageUrl) => _nextPageUrl = nextPageUrl;
   String? get path => _path;
   set path(String? path) => _path = path;
   int? get perPage => _perPage;
   set perPage(int? perPage) => _perPage = perPage;
-  Null? get prevPageUrl => _prevPageUrl;
-  set prevPageUrl(Null? prevPageUrl) => _prevPageUrl = prevPageUrl;
+  String? get prevPageUrl => _prevPageUrl;
+  set prevPageUrl(String? prevPageUrl) => _prevPageUrl = prevPageUrl;
   int? get to => _to;
   set to(int? to) => _to = to;
   int? get total => _total;
