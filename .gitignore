@@ -52,3 +52,9 @@ scripts/*
 
 node_modules
 teamList.json
+
+dist
+
+vrc-tracker-web
+
+Mockups
