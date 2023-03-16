@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:collection/collection.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:requests/requests.dart';
 import 'package:vrc_ranks_app/Schema/EventListByTeam.dart';
@@ -131,7 +132,7 @@ Future<events.Event> getEventDetails(String eventId) async {
   decoded.teams = decoded2;
 
   if (decoded.teams?.data?.isNotEmpty ?? false) {
-    decoded.teams!.data!.sort((a, b) => a.number!.compareTo(b.number!));
+    decoded.teams!.data!.sort((a, b) => compareNatural(a.number!, b.number!));
   }
 
   log("Requested event details");
