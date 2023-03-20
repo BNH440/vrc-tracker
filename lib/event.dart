@@ -213,7 +213,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                 color: Theme.of(context).cardColor,
                               ),
                               height: 50,
-                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              padding: const EdgeInsets.symmetric(horizontal: 25),
                               margin: const EdgeInsets.all(4),
                               child: Flex(
                                 direction: Axis.horizontal,
@@ -226,8 +226,8 @@ class _EventPageState extends ConsumerState<EventPage> {
                                           WidgetSpan(
                                             alignment: PlaceholderAlignment.middle,
                                             child: Text(
-                                              (event.divisions?[selectedDivison].data?.data?[i]
-                                                      .name)
+                                              (event.divisions?[selectedDivison].data?.data?[i].name
+                                                      ?.replaceFirst("Qualifier", "Qual"))
                                                   .toString(),
                                               style: const TextStyle(fontSize: 16),
                                             ),
@@ -238,7 +238,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                   ),
                                   const Spacer(flex: 2),
                                   SizedBox(
-                                    width: 55,
+                                    width: 60,
                                     child: Align(
                                       alignment: Alignment.centerRight,
                                       child: RichText(
@@ -436,7 +436,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                 color: Theme.of(context).cardColor,
                               ),
                               height: 50,
-                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              padding: const EdgeInsets.symmetric(horizontal: 25),
                               margin: const EdgeInsets.all(4),
                               child: Flex(
                                 direction: Axis.horizontal,
@@ -596,7 +596,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                             color: Theme.of(context).cardColor,
                           ),
                           height: 50,
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          padding: const EdgeInsets.symmetric(horizontal: 25),
                           margin: const EdgeInsets.all(4),
                           child: Flex(
                             direction: Axis.horizontal,
@@ -689,7 +689,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                           color: Theme.of(context).cardColor,
                         ),
                         height: 50,
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
                         margin: const EdgeInsets.all(4),
                         child: Flex(
                           direction: Axis.horizontal,
@@ -918,6 +918,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                   ),
                                   TabBar(
                                     indicatorColor: Theme.of(context).colorScheme.secondary,
+                                    labelPadding: const EdgeInsets.all(0),
                                     tabs: const [
                                       Tab(icon: Icon(Icons.schedule), text: "Matches"),
                                       Tab(icon: Icon(Icons.people), text: "Teams"),
