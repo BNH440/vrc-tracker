@@ -91,7 +91,7 @@ Future<events.Events> getEventList(DateTime date) async {
 
 Future<events.Event> getEventDetails(String eventId) async {
   var response = await Requests.get(
-      "https://cache.vrctracker.blakehaug.com/eventDetails?event=$eventId",
+      "https://cache.vrctracker.blakehaug.com/eventDetails?event=$eventId", // eventDetails
       headers: headers);
 
   var decoded = events.Event.fromJson(jsonDecode(response.body));
@@ -103,7 +103,7 @@ Future<events.Event> getEventDetails(String eventId) async {
       var divIndex = i;
       var divId = div.id;
       var divResponse = await Requests.get(
-          "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches?per_page=1000",
+          "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches?per_page=1000", // events-divisions-matches-divx
           headers: headers);
       var divDecoded = division.Div.fromJson(jsonDecode(divResponse.body));
 
@@ -113,7 +113,7 @@ Future<events.Event> getEventDetails(String eventId) async {
       decoded.divisions![divIndex].order = i;
 
       var rankingsResponse = await Requests.get(
-          "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/rankings?per_page=1000",
+          "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/rankings?per_page=1000", // events-divisions-rankings-divx
           headers: headers);
 
       var rankingsDecoded = Rankings.fromJson(jsonDecode(rankingsResponse.body));
@@ -124,7 +124,7 @@ Future<events.Event> getEventDetails(String eventId) async {
   }
 
   var response2 = await Requests.get(
-      "https://cache.vrctracker.blakehaug.com/teamList?event=$eventId",
+      "https://cache.vrctracker.blakehaug.com/teamList?event=$eventId", // teamList
       headers: headers);
 
   var decoded2 = TeamList.TeamList.fromJson(jsonDecode(response2.body));
