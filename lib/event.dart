@@ -325,7 +325,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                       : Text("N/A"),
                                   const Spacer(),
                                   SizedBox(
-                                    width: 55,
+                                    width: 60,
                                     child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: RichText(
