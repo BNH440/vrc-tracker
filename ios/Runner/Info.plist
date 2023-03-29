@@ -49,5 +49,7 @@
 	<string>VRC Tracker uses your location to find nearby events.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>VRC Tracker uses your location to find nearby events.</string>
 </dict>
 </plist>
