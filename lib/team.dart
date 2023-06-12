@@ -262,7 +262,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               ),
                               const Spacer(flex: 2),
                               SizedBox(
-                                width: 55,
+                                width: 60,
                                 child: Align(
                                     alignment: Alignment.centerRight,
                                     child: RichText(
@@ -361,7 +361,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                   : Text("N/A"),
                               const Spacer(),
                               SizedBox(
-                                width: 55,
+                                width: 60,
                                 child: Align(
                                     alignment: Alignment.centerLeft,
                                     child: RichText(
