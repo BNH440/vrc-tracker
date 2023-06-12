@@ -322,7 +322,18 @@ class _EventPageState extends ConsumerState<EventPage> {
                                             ),
                                           ),
                                         )
-                                      : Text("N/A"),
+                                      : Text(((event.divisions?[selectedDivison].data?.data?[i]
+                                                      .scheduled ??
+                                                  "")
+                                              .isNotEmpty
+                                          ? DateFormat.jm().format(DateTime.parse((event
+                                                      .divisions?[selectedDivison]
+                                                      .data
+                                                      ?.data?[i]
+                                                      .scheduled)
+                                                  .toString())
+                                              .toLocal())
+                                          : "N/A")),
                                   const Spacer(),
                                   SizedBox(
                                     width: 60,

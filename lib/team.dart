@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrc_ranks_app/Schema/MatchListByTeam.dart';
@@ -358,7 +359,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                         ),
                                       ),
                                     )
-                                  : Text("N/A"),
+                                  : Text(((matches.data?[i].scheduled ?? "").isNotEmpty
+                                      ? DateFormat.jm().format(
+                                          DateTime.parse((matches.data?[i].scheduled).toString())
+                                              .toLocal())
+                                      : "N/A")),
                               const Spacer(),
                               SizedBox(
                                 width: 60,
