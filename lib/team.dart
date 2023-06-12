@@ -251,7 +251,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                       WidgetSpan(
                                         alignment: PlaceholderAlignment.middle,
                                         child: Text(
-                                          (matches.data?[i].name).toString(),
+                                          (matches.data?[i].name?.replaceFirst("Qualifier", "Qual"))
+                                              .toString(),
                                           style: const TextStyle(fontSize: 16),
                                         ),
                                       ),
