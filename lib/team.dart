@@ -8,6 +8,7 @@ import 'package:vrc_ranks_app/Schema/Rankings.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart' as Events;
 import 'package:vrc_ranks_app/events.dart';
+import 'package:vrc_ranks_app/teamEvents.dart';
 import 'Request.dart' as Request;
 import 'match.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -214,6 +215,31 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                     ],
                                   ),
                                 ),
+                          team.id != null
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: ConstrainedBox(
+                                      constraints: const BoxConstraints.tightFor(
+                                        width: 200,
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => TeamEventsPage(
+                                                      title: team.teamName.toString(),
+                                                      team_id: team.id!,
+                                                    )),
+                                          );
+                                        },
+                                        child: const Text('Team Details'),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : const Text(""),
                         ],
                       )
                     ]),
