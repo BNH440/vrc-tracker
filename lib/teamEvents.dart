@@ -27,7 +27,7 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
     super.initState();
     final favoriteTeams = ref.read(favoriteTeamsProvider);
     Request.getTeam((widget.team_id).toString()).then((value) {
-      if (this.mounted) {
+      if (mounted) {
         setState(() {
           _team = value;
           team = value;
