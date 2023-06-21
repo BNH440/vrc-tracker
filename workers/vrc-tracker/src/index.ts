@@ -26,7 +26,7 @@ async function handleRequest(request: Request<unknown>, env: Env) {
     const { pathname, searchParams } = new URL(request.url);
     const cacheUrl = new URL(request.url);
 
-    const cacheKey = request.url;
+    const cacheKey = request;
     const cache = caches.default;
 
     var cacheResponse = await cache.match(cacheKey);
