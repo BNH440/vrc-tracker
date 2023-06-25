@@ -4,8 +4,10 @@ import 'dart:isolate';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:upgrader/upgrader.dart';
+import 'package:vrc_ranks_app/Hive/Team.dart';
 import 'package:vrc_ranks_app/events.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:vrc_ranks_app/favorites.dart';
@@ -33,6 +35,11 @@ Future main() async {
     await FirebaseAnalytics.instance.logEvent(name: 'app_open');
 
     await dotenv.load(fileName: ".env");
+
+    // Init Hive
+    await Hive.initFlutter();
+    await Hive.openBox<Team>('teams');
+    Hive.registerAdapter(TeamAdapter());
 
     // if (kDebugMode) await Upgrader.clearSavedSettings();
 

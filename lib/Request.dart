@@ -2,7 +2,9 @@ import 'dart:developer';
 
 import 'package:collection/collection.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hive/hive.dart';
 import 'package:requests/requests.dart';
+import 'package:vrc_ranks_app/Hive/Team.dart' as hiveTeam;
 import 'package:vrc_ranks_app/Schema/EventListByTeam.dart';
 import 'package:vrc_ranks_app/Schema/MatchPrediction.dart';
 import 'package:vrc_ranks_app/Schema/Rankings.dart';
@@ -159,11 +161,26 @@ Future<List> getTeamDetails(String teamId, String compId) async {
 }
 
 Future<Team> getTeam(String teamId) async {
-  var response = await Requests.get(
-      "https://cache.vrctracker.blakehaug.com/teamDetails?team=$teamId",
-      headers: headers);
+  var decoded;
 
-  var decoded = Team.fromJson(jsonDecode(response.body));
+  var team = Hive.box<hiveTeam.Team>("teams").get(teamId);
+
+  var cachedTeam = (team?.isValid() ?? false) ? hiveTeam.hiveTeamToTeam(team) : null;
+
+  if (cachedTeam == null) {
+    log("No cached team found");
+    var response = await Requests.get(
+        "https://cache.vrctracker.blakehaug.com/teamDetails?team=$teamId",
+        headers: headers);
+
+    decoded = Team.fromJson(jsonDecode(response.body));
+
+    Hive.box<hiveTeam.Team>("teams").put(teamId, hiveTeam.teamToHiveTeam(decoded));
+    log("Cached team");
+  } else {
+    log("Cached team found");
+    decoded = cachedTeam;
+  }
 
   var response2 = await Requests.get(
       "https://cache.vrctracker.blakehaug.com/teamEvents?team=$teamId",
