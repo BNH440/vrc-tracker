@@ -28,7 +28,6 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
     Team response = await Request.getTeamEvents(team);
     if (this.mounted) {
       setState(() {
-        log("response");
         _team = response;
         team = response;
       });
@@ -74,7 +73,6 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
         if (this.mounted)
           {
             setState(() {
-              log("response");
               _team = response;
               team = response;
             }),

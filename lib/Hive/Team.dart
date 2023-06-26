@@ -41,6 +41,9 @@ class Team extends HiveObject {
   @HiveField(7)
   String schemaVersion;
 
+  @HiveField(8)
+  DateTime lastUpdated = DateTime.now();
+
   bool isValid() {
     var currentSeason = seasonId == dotenv.env['SEASON_ID'];
     var currentSchema = schemaVersion == dotenv.env['TEAM_SCHEMA_VERSION'];
