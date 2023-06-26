@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rate_limiter/rate_limiter.dart';
@@ -22,6 +24,17 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
   Team _team = Team();
   Team team = Team();
 
+  void _getTeamEvents() async {
+    Team response = await Request.getTeamEvents(team);
+    if (this.mounted) {
+      setState(() {
+        log("response");
+        _team = response;
+        team = response;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +44,7 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
         setState(() {
           _team = value;
           team = value;
+          _getTeamEvents();
         });
       }
     });
@@ -46,6 +60,21 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
         if (this.mounted)
           {
             setState(() {
+              _team = response;
+              team = response;
+            }),
+          },
+      },
+      const Duration(seconds: 0),
+    );
+
+    final getTeamEventsThrottled = throttle(
+      () async => {
+        response = await Request.getTeamEvents(team),
+        if (this.mounted)
+          {
+            setState(() {
+              log("response");
               _team = response;
               team = response;
             }),
@@ -131,41 +160,56 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
                       )
                     ]),
                   ),
-                  if (team.events != null)
-                    for (var i = 0; i <= (((team.events?.data?.length ?? 1) - 1)); i++)
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                              builder: (context) => EventPage(
-                                title: (team.events?.data?[i].name).toString(),
-                                event_old: team.events!.data![i],
-                              ),
+                  team.events != null
+                      ? ListView(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: <Widget>[
+                              for (var i = 0; i <= (((team.events?.data?.length ?? 1) - 1)); i++)
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      CupertinoPageRoute(
+                                        builder: (context) => EventPage(
+                                          title: (team.events?.data?[i].name).toString(),
+                                          event_old: team.events!.data![i],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: Theme.of(context).cardColor,
+                                    ),
+                                    height: 50,
+                                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                                    margin: const EdgeInsets.all(4),
+                                    child: Center(
+                                      child: Text(
+                                        (team.events?.data?[i].name).toString(),
+                                        overflow: TextOverflow.fade,
+                                        maxLines: 1,
+                                        softWrap: false,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ])
+                      : const Align(
+                          alignment: Alignment.topCenter,
+                          child: Padding(
+                            padding: EdgeInsets.all(20),
+                            child: CircularProgressIndicator(
+                              color: Colors.red,
                             ),
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Theme.of(context).cardColor,
                           ),
-                          height: 50,
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          margin: const EdgeInsets.all(4),
-                          child: Center(
-                            child: Text(
-                              (team.events?.data?[i].name).toString(),
-                              overflow: TextOverflow.fade,
-                              maxLines: 1,
-                              softWrap: false,
-                            ),
-                          ),
-                        ),
-                      ),
+                        )
                 ]),
                 onRefresh: () async {
                   await getTeamDetailsThrottled();
+                  await getTeamEventsThrottled();
                 },
               ),
       ),

@@ -122,6 +122,16 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                   child: ListView(
                     padding: const EdgeInsets.all(8),
                     children: <Widget>[
+                      if (favoriteCompsDetails.isNotEmpty)
+                        Container(
+                          margin: const EdgeInsets.all(4),
+                          child: RichText(
+                              text: TextSpan(
+                                  text: "Events",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Theme.of(context).textTheme.bodyMedium?.color))),
+                        ),
                       for (var event in favoriteCompsDetails)
                         if (event.name != null)
                           InkWell(
@@ -151,6 +161,16 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                               ),
                             ),
                           ),
+                      if (favoriteTeamsDetails.isNotEmpty)
+                        Container(
+                          margin: const EdgeInsets.all(4),
+                          child: RichText(
+                              text: TextSpan(
+                                  text: "Teams",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Theme.of(context).textTheme.bodyMedium?.color))),
+                        ),
                       for (var team in favoriteTeamsDetails)
                         if (team.number != null)
                           InkWell(
@@ -170,13 +190,41 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                               height: 50,
                               padding: const EdgeInsets.symmetric(horizontal: 30),
                               margin: const EdgeInsets.all(4),
-                              child: Center(
-                                child: Text(
-                                  (team.number).toString(),
-                                  overflow: TextOverflow.fade,
-                                  maxLines: 1,
-                                  softWrap: false,
-                                ),
+                              child: Flex(
+                                direction: Axis.horizontal,
+                                children: [
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          WidgetSpan(
+                                            alignment: PlaceholderAlignment.middle,
+                                            child: Text(
+                                              (team.number).toString(),
+                                              style: const TextStyle(fontSize: 16),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  if (team.organization != null)
+                                    Flexible(
+                                      child: Text(
+                                        (team.organization).toString(),
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: Theme.of(context).colorScheme.tertiary),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        softWrap: false,
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
                           ),

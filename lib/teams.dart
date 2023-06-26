@@ -145,18 +145,14 @@ class _TeamsPageState extends State<TeamsPage> {
                         width: 10,
                       ),
                       if (team.organization != null)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.5,
-                            child: Text(
-                              (team.organization).toString(),
-                              style: TextStyle(
-                                  fontSize: 16, color: Theme.of(context).colorScheme.tertiary),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              softWrap: false,
-                            ),
+                        Flexible(
+                          child: Text(
+                            (team.organization).toString(),
+                            style: TextStyle(
+                                fontSize: 16, color: Theme.of(context).colorScheme.tertiary),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            softWrap: false,
                           ),
                         ),
                     ],
