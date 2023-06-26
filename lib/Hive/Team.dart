@@ -2,6 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import '../Schema/Team.dart' as schema;
 import '../Schema/Team.dart' show Location;
+import 'package:vrc_ranks_app/globals.dart' as globals;
 
 part 'Team.g.dart';
 
@@ -45,8 +46,8 @@ class Team extends HiveObject {
   DateTime lastUpdated = DateTime.now();
 
   bool isValid() {
-    var currentSeason = seasonId == dotenv.env['SEASON_ID'];
-    var currentSchema = schemaVersion == dotenv.env['TEAM_SCHEMA_VERSION'];
+    var currentSeason = seasonId == globals.seasonId;
+    var currentSchema = schemaVersion == globals.teamSchemaVersion;
     if (currentSeason == false || currentSchema == false) {
       delete();
       return false;
@@ -63,8 +64,8 @@ Team teamToHiveTeam(schema.Team team) {
       organization: team.organization!,
       grade: team.grade!,
       location: team.location!,
-      seasonId: dotenv.env['SEASON_ID']!,
-      schemaVersion: dotenv.env['TEAM_SCHEMA_VERSION']!);
+      seasonId: globals.seasonId,
+      schemaVersion: globals.teamSchemaVersion);
 }
 
 schema.Team? hiveTeamToTeam(Team? team) {
