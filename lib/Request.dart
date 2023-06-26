@@ -161,7 +161,7 @@ Future<List> getTeamDetails(String teamId, String compId) async {
 }
 
 Future<Team> getTeam(String teamId) async {
-  var decoded;
+  Team decoded;
 
   var team = Hive.box<hiveTeam.Team>("teams").get(teamId);
 
@@ -182,16 +182,31 @@ Future<Team> getTeam(String teamId) async {
     decoded = cachedTeam;
   }
 
+  // var response2 = await Requests.get(
+  //     "https://cache.vrctracker.blakehaug.com/teamEvents?team=$teamId",
+  //     headers: headers);
+
+  // var decoded2 = EventListByTeam.fromJson(jsonDecode(response2.body));
+
+  decoded.events = null;
+
+  log("Requested team details");
+  return decoded;
+}
+
+Future<Team> getTeamEvents(Team team) async {
+  var teamId = team.id;
+
   var response2 = await Requests.get(
       "https://cache.vrctracker.blakehaug.com/teamEvents?team=$teamId",
       headers: headers);
 
   var decoded2 = EventListByTeam.fromJson(jsonDecode(response2.body));
 
-  decoded.events = decoded2;
+  team.events = decoded2;
 
-  log("Requested team details");
-  return decoded;
+  log("Requested team events");
+  return team;
 }
 
 Future<List<TeamsSearch.Item>> getTeams(String query, String grade) async {

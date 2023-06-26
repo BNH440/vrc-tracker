@@ -22,14 +22,16 @@ class TeamAdapter extends TypeAdapter<Team> {
       teamName: fields[2] as String,
       organization: fields[3] as String,
       grade: fields[4] as String,
-      seasonId: fields[5] as String,
+      location: fields[5] as Location,
+      seasonId: fields[6] as String,
+      schemaVersion: fields[7] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Team obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,7 +43,11 @@ class TeamAdapter extends TypeAdapter<Team> {
       ..writeByte(4)
       ..write(obj.grade)
       ..writeByte(5)
-      ..write(obj.seasonId);
+      ..write(obj.location)
+      ..writeByte(6)
+      ..write(obj.seasonId)
+      ..writeByte(7)
+      ..write(obj.schemaVersion);
   }
 
   @override

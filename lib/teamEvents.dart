@@ -120,7 +120,7 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
                             style: const TextStyle(fontSize: 15),
                           ),
                           Text(
-                            "Location: ${team.location?.city.toString()}, ${team.location?.region.toString()}",
+                            "Location: ${team.location?.city.toString()}, ${(team.location?.region ?? team.location?.country).toString()}",
                             style: const TextStyle(fontSize: 15),
                           ),
                           Text(

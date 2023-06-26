@@ -1,6 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import '../Schema/Team.dart' as schema;
+import '../Schema/Team.dart' show Location;
 
 part 'Team.g.dart';
 
@@ -12,7 +13,9 @@ class Team extends HiveObject {
       required this.teamName,
       required this.organization,
       required this.grade,
-      required this.seasonId});
+      required this.location,
+      required this.seasonId,
+      required this.schemaVersion});
 
   @HiveField(0)
   int id;
@@ -30,10 +33,22 @@ class Team extends HiveObject {
   String grade;
 
   @HiveField(5)
+  Location location;
+
+  @HiveField(6)
   String seasonId;
 
+  @HiveField(7)
+  String schemaVersion;
+
   bool isValid() {
-    return seasonId == dotenv.env['SEASON_ID'];
+    var currentSeason = seasonId == dotenv.env['SEASON_ID'];
+    var currentSchema = schemaVersion == dotenv.env['TEAM_SCHEMA_VERSION'];
+    if (currentSeason == false || currentSchema == false) {
+      delete();
+      return false;
+    }
+    return true;
   }
 }
 
@@ -44,7 +59,9 @@ Team teamToHiveTeam(schema.Team team) {
       teamName: team.teamName!,
       organization: team.organization!,
       grade: team.grade!,
-      seasonId: dotenv.env['SEASON_ID']!);
+      location: team.location!,
+      seasonId: dotenv.env['SEASON_ID']!,
+      schemaVersion: dotenv.env['TEAM_SCHEMA_VERSION']!);
 }
 
 schema.Team? hiveTeamToTeam(Team? team) {
@@ -57,5 +74,6 @@ schema.Team? hiveTeamToTeam(Team? team) {
       number: team.number,
       teamName: team.teamName,
       organization: team.organization,
-      grade: team.grade);
+      grade: team.grade,
+      location: team.location);
 }

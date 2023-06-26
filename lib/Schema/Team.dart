@@ -1,5 +1,8 @@
+import 'package:hive/hive.dart';
 import 'package:vrc_ranks_app/Schema/EventListByTeam.dart';
 import 'package:vrc_ranks_app/Schema/Rankings.dart';
+
+part 'Team.g.dart';
 
 class Team {
   int? _id;
@@ -145,14 +148,23 @@ class Program {
   }
 }
 
+@HiveType(typeId: 2)
 class Location {
+  @HiveField(0)
   String? _venue;
+  @HiveField(1)
   String? _address1;
+  @HiveField(2)
   String? _address2;
+  @HiveField(3)
   String? _city;
+  @HiveField(4)
   String? _region;
+  @HiveField(5)
   String? _postcode;
+  @HiveField(6)
   String? _country;
+  @HiveField(7)
   Coordinates? _coordinates;
 
   Location(
@@ -235,8 +247,11 @@ class Location {
   }
 }
 
+@HiveType(typeId: 3)
 class Coordinates {
+  @HiveField(0)
   double? _lat;
+  @HiveField(1)
   double? _lon;
 
   Coordinates({double? lat, double? lon}) {
