@@ -112,11 +112,13 @@ class _MainPageState extends ConsumerState<MainPage> {
       });
     }
 
+    const titleList = ["Events", "Teams", "Favorites"];
+
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('VRC Tracker'),
+          title: Text(titleList[_selectedIndex]),
         ),
         body: Center(
           child: _pages.elementAt(_selectedIndex),
