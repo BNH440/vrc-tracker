@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:upgrader/upgrader.dart';
+import 'package:vrc_ranks_app/Hive/Event.dart';
 import 'package:vrc_ranks_app/Hive/Team.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart' hide Team;
 import 'package:vrc_ranks_app/events.dart';
@@ -42,7 +43,9 @@ Future main() async {
     Hive.registerAdapter<Coordinates>(CoordinatesAdapter());
     Hive.registerAdapter<Location>(LocationAdapter());
     Hive.registerAdapter<Team>(TeamAdapter());
+    Hive.registerAdapter<Event>(EventAdapter());
     await Hive.openBox<Team>('teams');
+    await Hive.openBox<Event>('eventNames');
 
     // if (kDebugMode) await Upgrader.clearSavedSettings();
 

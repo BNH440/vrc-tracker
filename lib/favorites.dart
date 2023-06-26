@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'package:vrc_ranks_app/event.dart';
+import 'Hive/Event.dart';
 import 'package:vrc_ranks_app/teamEvents.dart';
-import 'Schema/Events.dart';
 import 'events.dart';
 import 'Request.dart' as Request;
 
@@ -19,8 +19,6 @@ class FavoritesPage extends ConsumerStatefulWidget {
 }
 
 class _FavoritesPageState extends ConsumerState<FavoritesPage> {
-  List<Event> favoritesEvents = [];
-  List<Team> favoritesTeams = [];
   List<Event> favoriteCompsDetails = [];
   List<Team> favoriteTeamsDetails = [];
 
@@ -31,13 +29,10 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
     final favoriteComps = ref.read(favoriteCompsProvider);
     final favoriteTeams = ref.read(favoriteTeamsProvider);
 
-    Event currentEvent;
-    Team currentTeam;
-
     favoriteCompsDetails.clear();
     for (var event in favoriteComps) {
       log("Getting event details for ${event.toString()}");
-      Request.getEventDetails(event).then((val) => {
+      Request.getHiveEvent(event).then((val) => {
             if (mounted)
               {
                 setState(() {
@@ -75,7 +70,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
         for (var event in favoriteComps)
           {
             log("Getting event details for ${event.toString()}"),
-            currentEvent = await Request.getEventDetails(event),
+            currentEvent = await Request.getHiveEvent(event),
             if (this.mounted)
               {
                 setState(() {
@@ -140,7 +135,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                                 context,
                                 CupertinoPageRoute(
                                     builder: (context) => EventPage(
-                                        title: (event.name).toString(), event_old: event)),
+                                        title: (event.name).toString(), id: event.id.toString())),
                               );
                             },
                             child: Container(

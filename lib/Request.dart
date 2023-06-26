@@ -18,6 +18,7 @@ import 'package:dart_date/dart_date.dart';
 import 'Schema/MatchListByTeam.dart';
 import 'Schema/Skills.dart' as Skills;
 import 'Schema/TeamList.dart' as TeamList;
+import 'Hive/Event.dart' as hiveEvent;
 
 var headers = {
   'Accept': 'application/json',
@@ -293,4 +294,26 @@ Future<double> predictMatch(
   var decodedRes = MatchPrediction.fromJson(jsonDecode((response.body)));
 
   return decodedRes.redWinProbability ?? -1.00;
+}
+
+Future<hiveEvent.Event> getHiveEvent(String compId) async {
+  var event = Hive.box<hiveEvent.Event>("eventNames").get(compId);
+
+  if (event == null) {
+    log("No cached event found");
+    var response = await Requests.get(
+        "https://cache.vrctracker.blakehaug.com/eventDetails?event=$compId",
+        headers: headers);
+
+    var decoded = events.Event.fromJson(jsonDecode(response.body));
+
+    var newEvent = hiveEvent.Event(id: decoded.id!, name: decoded.name!);
+
+    Hive.box<hiveEvent.Event>("eventNames").put(compId, newEvent);
+    log("Cached event");
+    return newEvent;
+  } else {
+    log("Cached event found");
+    return event;
+  }
 }

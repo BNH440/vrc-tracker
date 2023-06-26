@@ -25,13 +25,13 @@ class TeamAdapter extends TypeAdapter<Team> {
       location: fields[5] as Location,
       seasonId: fields[6] as String,
       schemaVersion: fields[7] as String,
-    );
+    )..lastUpdated = fields[8] as DateTime;
   }
 
   @override
   void write(BinaryWriter writer, Team obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -47,7 +47,9 @@ class TeamAdapter extends TypeAdapter<Team> {
       ..writeByte(6)
       ..write(obj.seasonId)
       ..writeByte(7)
-      ..write(obj.schemaVersion);
+      ..write(obj.schemaVersion)
+      ..writeByte(8)
+      ..write(obj.lastUpdated);
   }
 
   @override

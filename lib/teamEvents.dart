@@ -171,7 +171,7 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
                                       CupertinoPageRoute(
                                         builder: (context) => EventPage(
                                           title: (team.events?.data?[i].name).toString(),
-                                          event_old: team.events!.data![i],
+                                          id: team.events!.data![i].id.toString(),
                                         ),
                                       ),
                                     );

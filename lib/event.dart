@@ -17,10 +17,10 @@ import 'dart:io' show Platform;
 import 'package:collection/collection.dart';
 
 class EventPage extends ConsumerStatefulWidget {
-  const EventPage({Key? key, required this.title, required this.event_old}) : super(key: key);
+  const EventPage({Key? key, required this.title, required this.id}) : super(key: key);
 
   final String title;
-  final Event event_old;
+  final String id;
 
   @override
   _EventPageState createState() => _EventPageState();
@@ -46,7 +46,7 @@ class _EventPageState extends ConsumerState<EventPage> {
   @override
   void initState() {
     timer = Timer.periodic(const Duration(seconds: 15), (t) {
-      Request.getEventDetails(widget.event_old.id.toString()).then((value) {
+      Request.getEventDetails(widget.id).then((value) {
         if (this.mounted) {
           setState(() {
             _event = value;
@@ -60,7 +60,7 @@ class _EventPageState extends ConsumerState<EventPage> {
           });
         }
       });
-      Request.getSkills(widget.event_old.id.toString()).then((value) {
+      Request.getSkills(widget.id).then((value) {
         if (this.mounted) {
           setState(() {
             _skills = value;
@@ -70,7 +70,7 @@ class _EventPageState extends ConsumerState<EventPage> {
       });
     });
     super.initState();
-    Request.getEventDetails(widget.event_old.id.toString()).then((value) {
+    Request.getEventDetails(widget.id).then((value) {
       if (this.mounted) {
         setState(() {
           _event = value;
@@ -84,7 +84,7 @@ class _EventPageState extends ConsumerState<EventPage> {
         });
       }
     });
-    Request.getSkills(widget.event_old.id.toString()).then((value) {
+    Request.getSkills(widget.id).then((value) {
       if (this.mounted) {
         setState(() {
           _skills = value;
@@ -106,7 +106,7 @@ class _EventPageState extends ConsumerState<EventPage> {
 
     final getEventDetailsThrottled = throttle(
       () async => {
-        event = await Request.getEventDetails(widget.event_old.id.toString()),
+        event = await Request.getEventDetails(widget.id),
         if (this.mounted)
           {
             setState(() {
@@ -120,7 +120,7 @@ class _EventPageState extends ConsumerState<EventPage> {
               selectedDivison = divisions.indexOf(dropdownValue);
             }),
           },
-        skills = await Request.getSkills(widget.event_old.id.toString()),
+        skills = await Request.getSkills(widget.id),
         if (this.mounted)
           {
             setState(() {

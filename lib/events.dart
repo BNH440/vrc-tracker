@@ -198,8 +198,8 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                         Navigator.push(
                           context,
                           CupertinoPageRoute(
-                              builder: (context) =>
-                                  EventPage(title: (event.name).toString(), event_old: event)),
+                              builder: (context) => EventPage(
+                                  title: (event.name).toString(), id: event.id.toString())),
                         );
                       },
                       child: Container(
@@ -236,8 +236,8 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                         Navigator.push(
                           context,
                           CupertinoPageRoute(
-                              builder: (context) =>
-                                  EventPage(title: (event.name).toString(), event_old: event)),
+                              builder: (context) => EventPage(
+                                  title: (event.name).toString(), id: event.id.toString())),
                         );
                       },
                       child: Container(
