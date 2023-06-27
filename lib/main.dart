@@ -81,8 +81,8 @@ class _MainPageState extends ConsumerState<MainPage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = <Widget>[
-    const EventsPage(title: "VRC Tracker"),
-    const TeamsPage(title: "VRC Tracker"),
+    const EventsPage(),
+    const TeamsPage(),
     const FavoritesPage()
   ];
 

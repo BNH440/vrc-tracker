@@ -11,9 +11,7 @@ import 'Request.dart' as Request;
 import 'package:fuzzy/fuzzy.dart';
 
 class EventsPage extends ConsumerStatefulWidget {
-  const EventsPage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  const EventsPage({Key? key}) : super(key: key);
 
   @override
   _EventsPageState createState() => _EventsPageState();

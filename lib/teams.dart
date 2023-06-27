@@ -5,9 +5,7 @@ import 'Request.dart' as Request;
 import 'Schema/TeamsSearch.dart' as TeamsSearch;
 
 class TeamsPage extends StatefulWidget {
-  const TeamsPage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  const TeamsPage({Key? key}) : super(key: key);
 
   @override
   State<TeamsPage> createState() => _TeamsPageState();
