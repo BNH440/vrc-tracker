@@ -2,6 +2,8 @@ export interface Env {
     API_KEY: string;
 }
 
+const seasonId = 173;
+
 export default {
     async fetch(request: Request, env: Env, ctx: ExecutionContext) {
         const API_KEY = env.API_KEY;
@@ -174,6 +176,51 @@ async function handleRequest(request: Request<unknown>, env: Env) {
             if (apiResponse.status == 200) {
                 response.headers.append("Cache-Control", "s-maxage=86400");
                 response.headers.append("Cache-Control", "max-age=86400");
+            }
+
+            await cache.put(cacheKey, response.clone());
+
+            return response;
+        } else if (pathname.startsWith("/v2/eventList")) {
+            const date = searchParams.get("date");
+            let apiResponse = await fetch(`https://www.robotevents.com/api/v2/events?season[]=${seasonId}&start=${date}&per_page=250`, {
+                ...requestHeaders,
+                cf: {
+                    cacheTtl: 7200,
+                    cacheEverything: true,
+                },
+            });
+
+            var data: any = await apiResponse.json();
+
+            var responseData = data.data;
+
+            if (data.meta.last_page > 1) {
+                for (let i = 2; i <= data.meta.last_page; i++) {
+                    let apiResponse = await fetch(
+                        `https://www.robotevents.com/api/v2/events?season[]=${seasonId}&start=${date}&per_page=250&page=${i}`,
+                        {
+                            ...requestHeaders,
+                            cf: {
+                                cacheTtl: 7200,
+                                cacheEverything: true,
+                            },
+                        }
+                    );
+
+                    var newData: any = await apiResponse.json();
+                    responseData = responseData.concat(newData.data);
+                }
+            }
+
+            let response = new Response(JSON.stringify(responseData), {
+                ...responseHeaders,
+                status: apiResponse.status,
+            });
+
+            if (apiResponse.status == 200) {
+                response.headers.append("Cache-Control", "s-maxage=7200");
+                response.headers.append("Cache-Control", "max-age=7200");
             }
 
             await cache.put(cacheKey, response.clone());
