@@ -1,7 +1,6 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import '../Schema/Team.dart' as schema;
-import '../Schema/Team.dart' show Location;
+import '../Schema/Events.dart' show Location;
 import 'package:vrc_ranks_app/globals.dart' as globals;
 
 part 'Team.g.dart';

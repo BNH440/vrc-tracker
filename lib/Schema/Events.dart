@@ -1,6 +1,9 @@
+import 'package:hive/hive.dart';
 import 'package:vrc_ranks_app/Schema/Division.dart';
 import 'package:vrc_ranks_app/Schema/Rankings.dart';
 import 'package:vrc_ranks_app/Schema/TeamList.dart';
+
+part 'Events.g.dart';
 
 class Events {
   Meta? meta;
@@ -119,7 +122,9 @@ class Event {
       this.level,
       this.ongoing,
       this.awardsFinalized,
-      this.eventType});
+      this.eventType,
+      this.isLocal = false,
+      this.distance = double.maxFinite});
 
   Event.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -213,56 +218,110 @@ class Program {
   }
 }
 
+@HiveType(typeId: 2)
 class Location {
-  String? venue;
-  String? address1;
-  Null? address2;
-  String? city;
-  String? region;
-  String? postcode;
-  String? country;
-  Coordinates? coordinates;
+  @HiveField(0)
+  String? _venue;
+  @HiveField(1)
+  String? _address1;
+  @HiveField(2)
+  String? _address2;
+  @HiveField(3)
+  String? _city;
+  @HiveField(4)
+  String? _region;
+  @HiveField(5)
+  String? _postcode;
+  @HiveField(6)
+  String? _country;
+  @HiveField(7)
+  Coordinates? _coordinates;
 
   Location(
-      {this.venue,
-      this.address1,
-      this.address2,
-      this.city,
-      this.region,
-      this.postcode,
-      this.country,
-      this.coordinates});
+      {String? venue,
+      String? address1,
+      String? address2,
+      String? city,
+      String? region,
+      String? postcode,
+      String? country,
+      Coordinates? coordinates}) {
+    if (venue != null) {
+      this._venue = venue;
+    }
+    if (address1 != null) {
+      this._address1 = address1;
+    }
+    if (address2 != null) {
+      this._address2 = address2;
+    }
+    if (city != null) {
+      this._city = city;
+    }
+    if (region != null) {
+      this._region = region;
+    }
+    if (postcode != null) {
+      this._postcode = postcode;
+    }
+    if (country != null) {
+      this._country = country;
+    }
+    if (coordinates != null) {
+      this._coordinates = coordinates;
+    }
+  }
+
+  String? get venue => _venue;
+  set venue(String? venue) => _venue = venue;
+  String? get address1 => _address1;
+  set address1(String? address1) => _address1 = address1;
+  String? get address2 => _address2;
+  set address2(String? address2) => _address2 = address2;
+  String? get city => _city;
+  set city(String? city) => _city = city;
+  String? get region => _region;
+  set region(String? region) => _region = region;
+  String? get postcode => _postcode;
+  set postcode(String? postcode) => _postcode = postcode;
+  String? get country => _country;
+  set country(String? country) => _country = country;
+  Coordinates? get coordinates => _coordinates;
+  set coordinates(Coordinates? coordinates) => _coordinates = coordinates;
 
   Location.fromJson(Map<String, dynamic> json) {
-    venue = json['venue'];
-    address1 = json['address_1'];
-    address2 = json['address_2'];
-    city = json['city'];
-    region = json['region'];
-    postcode = json['postcode'];
-    country = json['country'];
-    coordinates =
+    _venue = json['venue'];
+    _address1 = json['address_1'];
+    _address2 = json['address_2'];
+    _city = json['city'];
+    _region = json['region'];
+    _postcode = json['postcode'];
+    _country = json['country'];
+    _coordinates =
         json['coordinates'] != null ? new Coordinates.fromJson(json['coordinates']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['venue'] = this.venue;
-    data['address_1'] = this.address1;
-    data['address_2'] = this.address2;
-    data['city'] = this.city;
-    data['region'] = this.region;
-    data['postcode'] = this.postcode;
-    data['country'] = this.country;
-    if (this.coordinates != null) {
-      data['coordinates'] = this.coordinates!.toJson();
+    data['venue'] = this._venue;
+    data['address_1'] = this._address1;
+    data['address_2'] = this._address2;
+    data['city'] = this._city;
+    data['region'] = this._region;
+    data['postcode'] = this._postcode;
+    data['country'] = this._country;
+    if (this._coordinates != null) {
+      data['coordinates'] = this._coordinates!.toJson();
     }
     return data;
   }
 }
 
+@HiveType(typeId: 3)
 class Coordinates {
+  @HiveField(0)
   num? lat;
+  @HiveField(1)
   num? lon;
 
   Coordinates({this.lat, this.lon});
@@ -280,11 +339,17 @@ class Coordinates {
   }
 }
 
+@HiveType(typeId: 5)
 class Divisions {
+  @HiveField(0)
   int? id;
+  @HiveField(1)
   String? name;
+  @HiveField(2)
   int? order;
+  @HiveField(3)
   Div? data;
+
   Rankings? rankings;
 
   Divisions({this.id, this.name, this.order});

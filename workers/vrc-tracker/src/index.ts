@@ -183,6 +183,8 @@ async function handleRequest(request: Request<unknown>, env: Env) {
             return response;
         } else if (pathname.startsWith("/v2/eventList")) {
             const date = searchParams.get("date");
+            const limit = searchParams.get("limit");
+
             let apiResponse = await fetch(`https://www.robotevents.com/api/v2/events?season[]=${seasonId}&start=${date}&per_page=250`, {
                 ...requestHeaders,
                 cf: {
@@ -195,7 +197,7 @@ async function handleRequest(request: Request<unknown>, env: Env) {
 
             var responseData = data.data;
 
-            if (data.meta.last_page > 1) {
+            if (data.meta.last_page > 1 && limit != "true") {
                 for (let i = 2; i <= data.meta.last_page; i++) {
                     let apiResponse = await fetch(
                         `https://www.robotevents.com/api/v2/events?season[]=${seasonId}&start=${date}&per_page=250&page=${i}`,

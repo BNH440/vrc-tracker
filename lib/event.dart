@@ -776,28 +776,31 @@ class _EventPageState extends ConsumerState<EventPage> {
                         overflow: TextOverflow.fade,
                       )),
                   actions: [
-                    IconButton(
-                      icon: ref
-                              .read(favoriteCompsProvider.notifier)
-                              .state
-                              .contains(event.id.toString())
-                          ? const Icon(Icons.star)
-                          : const Icon(Icons.star_border_outlined),
-                      onPressed: () {
-                        List<String> oldState = ref.read(favoriteCompsProvider.notifier).state;
-                        if (oldState.contains(event.id.toString())) {
-                          oldState.remove(event.id.toString());
-                        } else {
-                          oldState.add(event.id.toString());
-                        }
-                        ref
-                            .read(favoriteCompsProvider.notifier)
-                            .update((state) => oldState.toList());
+                    event.id.toString() != ""
+                        ? IconButton(
+                            icon: ref
+                                    .read(favoriteCompsProvider.notifier)
+                                    .state
+                                    .contains(event.id.toString())
+                                ? const Icon(Icons.star)
+                                : const Icon(Icons.star_border_outlined),
+                            onPressed: () {
+                              List<String> oldState =
+                                  ref.read(favoriteCompsProvider.notifier).state;
+                              if (oldState.contains(event.id.toString())) {
+                                oldState.remove(event.id.toString());
+                              } else {
+                                if (event.id.toString() != null) oldState.add(event.id.toString());
+                              }
+                              ref
+                                  .read(favoriteCompsProvider.notifier)
+                                  .update((state) => oldState.toList());
 
-                        SharedPreferences.getInstance().then(
-                            (prefs) => prefs.setStringList('favoriteComps', oldState.toList()));
-                      },
-                    ),
+                              SharedPreferences.getInstance().then((prefs) =>
+                                  prefs.setStringList('favoriteComps', oldState.toList()));
+                            },
+                          )
+                        : Container(),
                   ],
                   pinned: true,
                   forceElevated: innerBoxIsScrolled,

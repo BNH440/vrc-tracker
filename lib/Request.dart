@@ -5,7 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:requests/requests.dart';
 import 'package:vrc_ranks_app/Hive/Team.dart' as hiveTeam;
-import 'package:vrc_ranks_app/Schema/EventListByTeam.dart';
+import 'package:vrc_ranks_app/Schema/EventListByTeam.dart' hide Location;
 import 'package:vrc_ranks_app/Schema/MatchPrediction.dart';
 import 'package:vrc_ranks_app/Schema/Rankings.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
@@ -19,6 +19,7 @@ import 'Schema/MatchListByTeam.dart';
 import 'Schema/Skills.dart' as Skills;
 import 'Schema/TeamList.dart' as TeamList;
 import 'Hive/Event.dart' as hiveEvent;
+import 'Schema/Team.dart' show Location;
 
 var headers = {
   'Accept': 'application/json',
@@ -297,7 +298,9 @@ Future<double> predictMatch(
 }
 
 Future<hiveEvent.Event> getHiveEvent(String compId) async {
-  var event = Hive.box<hiveEvent.Event>("eventNames").get(compId);
+  var event = Hive.box<hiveEvent.Event>("events").get(compId);
+
+  Hive.box<hiveEvent.Event>("events").containsKey(compId);
 
   if (event == null) {
     log("No cached event found");
@@ -307,13 +310,111 @@ Future<hiveEvent.Event> getHiveEvent(String compId) async {
 
     var decoded = events.Event.fromJson(jsonDecode(response.body));
 
-    var newEvent = hiveEvent.Event(id: decoded.id!, name: decoded.name!);
+    bool isLocationAllowed = await _handleLocationPermission();
 
-    Hive.box<hiveEvent.Event>("eventNames").put(compId, newEvent);
+    late Position position;
+    if (isLocationAllowed) {
+      position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    }
+
+    events.Event event = decoded;
+
+    if (isLocationAllowed) {
+      var result = await isLocal(position, event.location?.coordinates?.lat?.toDouble() ?? 0.0,
+          event.location?.coordinates?.lon?.toDouble() ?? 0.0);
+      var local = result[0];
+      var distance = result[1];
+      event.isLocal = local;
+      event.distance = distance;
+    }
+
+    var newEvent = hiveEvent.eventToHiveEvent(event);
+
+    Hive.box<hiveEvent.Event>("events").put(compId, newEvent);
     log("Cached event");
     return newEvent;
   } else {
     log("Cached event found");
     return event;
   }
+}
+
+void getFullEventList(DateTime date) async {
+  var utcDate = "${date.addDays(-1).format("yyyy-MM-dd")}T00:00:00Z";
+
+  var response = await Requests.get(
+      "https://cache.vrctracker.blakehaug.com/v2/eventList?date=$utcDate",
+      headers: headers);
+
+  var data = jsonDecode(response.body);
+
+  bool isLocationAllowed = await _handleLocationPermission();
+  late Position position;
+  if (isLocationAllowed) {
+    position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  }
+
+  var entries = <String, hiveEvent.Event>{};
+
+  for (var rawEvent in data) {
+    events.Event event = events.Event.fromJson(rawEvent);
+
+    if (isLocationAllowed) {
+      var result = await isLocal(position, event.location?.coordinates?.lat?.toDouble() ?? 0.0,
+          event.location?.coordinates?.lon?.toDouble() ?? 0.0);
+      var local = result[0];
+      var distance = result[1];
+      event.isLocal = local;
+      event.distance = distance;
+    }
+
+    //**
+    //  Note: String and int keys can exist simultaneously in a Hive box, String keys are being used for the 'events' box
+    // */
+    entries[event.id.toString()] = hiveEvent.eventToHiveEvent(event);
+  }
+
+  Hive.box<hiveEvent.Event>("events").putAll(entries);
+
+  log("Cached event list from $utcDate containing ${data.length} events");
+}
+
+void getSmallEventList(DateTime date) async {
+  var utcDate = "${date.addDays(-1).format("yyyy-MM-dd")}T00:00:00Z";
+
+  var response = await Requests.get(
+      "https://cache.vrctracker.blakehaug.com/v2/eventList?date=$utcDate&limit=true",
+      headers: headers);
+
+  var data = jsonDecode(response.body);
+
+  bool isLocationAllowed = await _handleLocationPermission();
+  late Position position;
+  if (isLocationAllowed) {
+    position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  }
+
+  var entries = <String, hiveEvent.Event>{};
+
+  for (var rawEvent in data) {
+    events.Event event = events.Event.fromJson(rawEvent);
+
+    if (isLocationAllowed) {
+      var result = await isLocal(position, event.location?.coordinates?.lat?.toDouble() ?? 0.0,
+          event.location?.coordinates?.lon?.toDouble() ?? 0.0);
+      var local = result[0];
+      var distance = result[1];
+      event.isLocal = local;
+      event.distance = distance;
+    }
+
+    //**
+    //  Note: String and int keys can exist simultaneously in a Hive box, String keys are being used for the 'events' box
+    // */
+    entries[event.id.toString()] = hiveEvent.eventToHiveEvent(event);
+  }
+
+  Hive.box<hiveEvent.Event>("events").putAll(entries);
+
+  log("Cached *limited* event list from $utcDate containing ${data.length} events");
 }

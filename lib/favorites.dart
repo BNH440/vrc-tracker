@@ -25,34 +25,37 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
   @override
   void initState() {
     super.initState();
-
     final favoriteComps = ref.read(favoriteCompsProvider);
     final favoriteTeams = ref.read(favoriteTeamsProvider);
 
     favoriteCompsDetails.clear();
     for (var event in favoriteComps) {
       log("Getting event details for ${event.toString()}");
-      Request.getHiveEvent(event).then((val) => {
-            if (mounted)
-              {
-                setState(() {
-                  favoriteCompsDetails.add(val);
-                }),
-              }
-          });
+      if (event != "null" && event != "") {
+        Request.getHiveEvent(event).then((val) => {
+              if (mounted)
+                {
+                  setState(() {
+                    favoriteCompsDetails.add(val);
+                  }),
+                }
+            });
+      }
     }
 
     favoriteTeamsDetails.clear();
     for (var team in favoriteTeams) {
       log("Getting team details for ${team.toString()}");
-      Request.getTeam(team.toString()).then((val) => {
-            if (this.mounted)
-              {
-                setState(() {
-                  favoriteTeamsDetails.add(val);
-                }),
-              }
-          });
+      if (team != "null" && team != "") {
+        Request.getTeam(team.toString()).then((val) => {
+              if (this.mounted)
+                {
+                  setState(() {
+                    favoriteTeamsDetails.add(val);
+                  }),
+                }
+            });
+      }
     }
   }
 
@@ -67,15 +70,18 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
     final getEventDetailsThrottled = throttle(
       () async => {
         favoriteCompsDetails.clear(),
-        for (var event in favoriteComps)
+        for (var event in ref.watch(favoriteCompsProvider))
           {
             log("Getting event details for ${event.toString()}"),
-            currentEvent = await Request.getHiveEvent(event),
-            if (this.mounted)
+            if (event != "null" && event != "")
               {
-                setState(() {
-                  favoriteCompsDetails.add(currentEvent);
-                })
+                currentEvent = await Request.getHiveEvent(event),
+                if (this.mounted)
+                  {
+                    setState(() {
+                      favoriteCompsDetails.add(currentEvent);
+                    })
+                  }
               }
           }
       },
@@ -87,12 +93,15 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
         for (var team in favoriteTeams)
           {
             log("Getting team details for ${team.toString()}"),
-            currentTeam = await Request.getTeam(team.toString()),
-            if (this.mounted)
+            if (team != "null" && team != "")
               {
-                setState(() {
-                  favoriteTeamsDetails.add(currentTeam);
-                })
+                currentTeam = await Request.getTeam(team.toString()),
+                if (this.mounted)
+                  {
+                    setState(() {
+                      favoriteTeamsDetails.add(currentTeam);
+                    })
+                  }
               }
           }
       },
@@ -101,7 +110,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
 
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-      child: favoriteComps.isEmpty && favoriteTeams.isEmpty
+      child: ref.watch(favoriteCompsProvider).isEmpty && favoriteTeams.isEmpty
           ? const Text("No favorites found")
           : favoriteCompsDetails.isEmpty && favoriteTeamsDetails.isEmpty
               ? const Align(
@@ -128,7 +137,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                                       color: Theme.of(context).textTheme.bodyMedium?.color))),
                         ),
                       for (var event in favoriteCompsDetails)
-                        if (event.name != null)
+                        if (event.name != "")
                           InkWell(
                             onTap: () {
                               Navigator.push(

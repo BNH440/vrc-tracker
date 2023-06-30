@@ -1,14 +1,18 @@
 import 'dart:developer';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'Schema/Events.dart';
 import 'event.dart';
 import 'Request.dart' as Request;
 import 'package:fuzzy/fuzzy.dart';
+import 'Hive/Event.dart' as hiveEvent;
 
 class EventsPage extends ConsumerStatefulWidget {
   const EventsPage({Key? key}) : super(key: key);
@@ -27,15 +31,16 @@ final favoriteTeamsProvider = StateProvider<List<String>>((ref) {
 
 class _EventsPageState extends ConsumerState<EventsPage> {
   void getEvents() {
-    Request.getEventList(selectedDate).then((value) {
-      if (this.mounted) {
-        setState(() {
-          _events = value;
-          events = value;
-          filterSearchResults("");
-        });
-      }
-    });
+    Request.getSmallEventList(selectedDate);
+    // Request.getEventList(selectedDate).then((value) {
+    //   if (this.mounted) {
+    //     setState(() {
+    //       _events = value;
+    //       events = value;
+    //       filterSearchResults("");
+    //     });
+    //   }
+    // });
   }
 
   DateTime selectedDate = DateTime.now();
@@ -96,16 +101,17 @@ class _EventsPageState extends ConsumerState<EventsPage> {
   @override
   void initState() {
     super.initState();
-    final value = ref.read(favoriteCompsProvider);
-    Request.getEventList(selectedDate).then((value) {
-      if (this.mounted) {
-        setState(() {
-          _events = value;
-          events = value;
-          filterSearchResults("");
-        });
-      }
-    });
+    Request.getSmallEventList(selectedDate);
+    // final value = ref.read(favoriteCompsProvider);
+    // Request.getEventList(selectedDate).then((value) {
+    //   if (this.mounted) {
+    //     setState(() {
+    //       _events = value;
+    //       events = value;
+    //       filterSearchResults("");
+    //     });
+    //   }
+    // });
   }
 
   var items = <Event>[];
@@ -117,15 +123,16 @@ class _EventsPageState extends ConsumerState<EventsPage> {
 
     final getEventsThrottled = throttle(
       () async => {
-        events = await Request.getEventList(selectedDate),
-        if (this.mounted)
-          {
-            setState(() {
-              _events = events;
-              events = events;
-              filterSearchResults("");
-            }),
-          },
+        Request.getSmallEventList(selectedDate),
+        // events = await Request.getEventList(selectedDate),
+        // if (this.mounted)
+        //   {
+        //     setState(() {
+        //       _events = events;
+        //       events = events;
+        //       filterSearchResults("");
+        //     }),
+        //   },
       },
       const Duration(seconds: 0),
     );
@@ -135,133 +142,195 @@ class _EventsPageState extends ConsumerState<EventsPage> {
       const Duration(seconds: 0),
     );
 
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-      child: (_events.data).toString() == "null"
-          ? const Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: CircularProgressIndicator(
-                  color: Colors.red,
+    List<Widget> buildLocalEventsList(Box<hiveEvent.Event> box) {
+      var localEvents = box.values
+          .where((element) => element.isLocal)
+          .where((element) =>
+              DateTime.parse(element.start!)
+                  .isAfter(selectedDate.subtract(const Duration(days: 3))) &&
+              DateTime.parse(element.start!).isBefore(selectedDate.add(const Duration(days: 3))))
+          .sortedBy((element) => DateTime.parse(element.start!))
+          .toList();
+
+      if (localEvents.isEmpty) {
+        return [];
+      }
+
+      return [
+        SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.all(4),
+            child: RichText(
+                text: TextSpan(
+                    text: "Nearby Events",
+                    style: TextStyle(
+                        fontSize: 20, color: Theme.of(context).textTheme.bodyMedium?.color))),
+          ),
+        ),
+        SliverFixedExtentList.builder(
+          itemExtent: 60,
+          itemCount: localEvents.length,
+          itemBuilder: (context, index) {
+            final event = localEvents.elementAt(index);
+            return InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (context) => EventPage(
+                      title: event.name.toString(),
+                      id: event.id.toString(),
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Theme.of(context).cardColor,
+                ),
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                margin: const EdgeInsets.all(4),
+                child: Center(
+                  child: Text(
+                    event.name.toString(),
+                    overflow: TextOverflow.fade,
+                    maxLines: 1,
+                    softWrap: false,
+                  ),
                 ),
               ),
-            )
-          : RefreshIndicator(
-              child: ListView(
-                padding: const EdgeInsets.all(8),
-                children: <Widget>[
-                  Flex(direction: Axis.horizontal, children: [
-                    Expanded(
-                      flex: 6,
-                      child: ElevatedButton(
-                        onPressed: () => _selectDate(context),
-                        child: Text(DateFormat.yMMMd().format(selectedDate)),
-                      ),
-                    ),
-                    const Spacer(
-                      flex: 1,
-                    ),
-                    Expanded(
-                      flex: 10,
-                      child: TextField(
-                        onChanged: (value) {
-                          filterSearchResults(value);
-                        },
-                        decoration: InputDecoration(
-                            labelText: "Search",
-                            labelStyle: TextStyle(
-                              color: Theme.of(context).textTheme.bodyMedium?.color,
-                            ),
-                            prefixIcon: const Icon(Icons.search),
-                            border: const OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(25.0)))),
-                      ),
-                    ),
-                  ]),
-                  if (_events.data != null)
-                    if (items.where((element) => element.isLocal).isNotEmpty)
-                      Container(
-                        margin: const EdgeInsets.all(4),
-                        child: RichText(
-                            text: TextSpan(
-                                text: "Nearby Events",
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    color: Theme.of(context).textTheme.bodyMedium?.color))),
-                      ),
-                  for (var event in items.where((element) => element.isLocal))
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                              builder: (context) => EventPage(
-                                  title: (event.name).toString(), id: event.id.toString())),
-                        );
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Theme.of(context).cardColor,
-                        ),
-                        height: 50,
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
-                        margin: const EdgeInsets.all(4),
-                        child: Center(
-                          child: Text(
-                            (event.name).toString(),
-                            overflow: TextOverflow.fade,
-                            maxLines: 1,
-                            softWrap: false,
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (items.where((element) => element.isLocal).length > 0) const Divider(),
-                  Container(
-                    margin: const EdgeInsets.all(4),
-                    child: RichText(
-                        text: TextSpan(
-                            text: "All Events",
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Theme.of(context).textTheme.bodyMedium?.color))),
-                  ),
-                  for (var event in items.where((element) => element.isLocal == false))
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                              builder: (context) => EventPage(
-                                  title: (event.name).toString(), id: event.id.toString())),
-                        );
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Theme.of(context).cardColor,
-                        ),
-                        height: 50,
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
-                        margin: const EdgeInsets.all(4),
-                        child: Center(
-                          child: Text(
-                            (event.name).toString(),
-                            overflow: TextOverflow.fade,
-                            maxLines: 1,
-                            softWrap: false,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              onRefresh: () async {
-                await getEventsThrottled();
+            );
+          },
+        ),
+        const SliverToBoxAdapter(child: Divider()),
+      ];
+    }
+
+    List<Widget> buildEventsList(Box<hiveEvent.Event> box) {
+      var events = box.values
+          .where((element) => !element.isLocal)
+          .where((element) => DateTime.parse(element.start!)
+              .isAfter(selectedDate.subtract(const Duration(days: 1))))
+          .sortedBy((element) => DateTime.parse(element.start!))
+          .toList();
+
+      if (events.isEmpty) {
+        return [SliverToBoxAdapter(child: const Text("Loading Events..."))];
+      }
+
+      return [
+        SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.all(4),
+            child: RichText(
+                text: TextSpan(
+                    text: "All Events",
+                    style: TextStyle(
+                        fontSize: 20, color: Theme.of(context).textTheme.bodyMedium?.color))),
+          ),
+        ),
+        SliverFixedExtentList.builder(
+          itemExtent: 60,
+          itemCount: events.length,
+          itemBuilder: (context, index) {
+            final event = events.elementAt(index);
+            return InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) =>
+                          EventPage(title: (event.name).toString(), id: event.id.toString())),
+                );
               },
-            ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Theme.of(context).cardColor,
+                ),
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                margin: const EdgeInsets.all(4),
+                child: Center(
+                  child: Text(
+                    (event.name).toString(),
+                    overflow: TextOverflow.fade,
+                    maxLines: 1,
+                    softWrap: false,
+                  ),
+                ),
+              ),
+            );
+          },
+        )
+      ];
+    }
+
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+      child: RefreshIndicator(
+        child: ListView(
+          padding: const EdgeInsets.all(8),
+          children: <Widget>[
+            Flex(direction: Axis.horizontal, children: [
+              Expanded(
+                flex: 6,
+                child: ElevatedButton(
+                  onPressed: () => _selectDate(context),
+                  child: Text(DateFormat.yMMMd().format(selectedDate)),
+                ),
+              ),
+              const Spacer(
+                flex: 1,
+              ),
+              Expanded(
+                flex: 10,
+                child: TextField(
+                  onChanged: (value) {
+                    filterSearchResults(value);
+                  },
+                  decoration: InputDecoration(
+                      labelText: "Search",
+                      labelStyle: TextStyle(
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
+                      prefixIcon: const Icon(Icons.search),
+                      border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(25.0)))),
+                ),
+              ),
+            ]),
+            ValueListenableBuilder(
+                valueListenable: Hive.box<hiveEvent.Event>('events').listenable(),
+                builder: (context, Box<hiveEvent.Event> box, _) {
+                  if (box.values.isEmpty) {
+                    return const Align(
+                      alignment: Alignment.topCenter,
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: CircularProgressIndicator(
+                          color: Colors.red,
+                        ),
+                      ),
+                    );
+                  }
+                  return CustomScrollView(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    slivers: [
+                      ...buildLocalEventsList(box),
+                      ...buildEventsList(box),
+                    ],
+                  );
+                }),
+          ],
+        ),
+        onRefresh: () async {
+          await getEventsThrottled();
+        },
+      ),
     );
   }
 }

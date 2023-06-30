@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'Team.dart';
+part of 'Events.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
@@ -70,9 +70,10 @@ class CoordinatesAdapter extends TypeAdapter<Coordinates> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Coordinates()
-      .._lat = fields[0] as double?
-      .._lon = fields[1] as double?;
+    return Coordinates(
+      lat: fields[0] as num?,
+      lon: fields[1] as num?,
+    );
   }
 
   @override
@@ -80,9 +81,9 @@ class CoordinatesAdapter extends TypeAdapter<Coordinates> {
     writer
       ..writeByte(2)
       ..writeByte(0)
-      ..write(obj._lat)
+      ..write(obj.lat)
       ..writeByte(1)
-      ..write(obj._lon);
+      ..write(obj.lon);
   }
 
   @override
@@ -92,6 +93,48 @@ class CoordinatesAdapter extends TypeAdapter<Coordinates> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is CoordinatesAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class DivisionsAdapter extends TypeAdapter<Divisions> {
+  @override
+  final int typeId = 5;
+
+  @override
+  Divisions read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return Divisions(
+      id: fields[0] as int?,
+      name: fields[1] as String?,
+      order: fields[2] as int?,
+    )..data = fields[3] as Div?;
+  }
+
+  @override
+  void write(BinaryWriter writer, Divisions obj) {
+    writer
+      ..writeByte(4)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.name)
+      ..writeByte(2)
+      ..write(obj.order)
+      ..writeByte(3)
+      ..write(obj.data);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DivisionsAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

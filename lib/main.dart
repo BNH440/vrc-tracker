@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:dart_date/dart_date.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +10,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:vrc_ranks_app/Hive/Event.dart';
 import 'package:vrc_ranks_app/Hive/Team.dart';
-import 'package:vrc_ranks_app/Schema/Team.dart' hide Team;
+import 'package:vrc_ranks_app/Request.dart';
+import 'package:vrc_ranks_app/Schema/Events.dart'
+    show Divisions, DivisionsAdapter, Location, LocationAdapter, Coordinates, CoordinatesAdapter;
 import 'package:vrc_ranks_app/events.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:vrc_ranks_app/favorites.dart';
@@ -43,9 +46,14 @@ Future main() async {
     Hive.registerAdapter<Coordinates>(CoordinatesAdapter());
     Hive.registerAdapter<Location>(LocationAdapter());
     Hive.registerAdapter<Team>(TeamAdapter());
+    Hive.registerAdapter<Divisions>(DivisionsAdapter());
     Hive.registerAdapter<Event>(EventAdapter());
     await Hive.openBox<Team>('teams');
-    await Hive.openBox<Event>('eventNames');
+    await Hive.openBox<Event>('events');
+
+    getFullEventList(DateTime.now().subYears(2));
+
+    // getFullEventList(DateTime.now().subYears(2)); // TODO remove
 
     // if (kDebugMode) await Upgrader.clearSavedSettings();
 
