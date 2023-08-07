@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:isolate';
 
 import 'package:dart_date/dart_date.dart';
@@ -47,13 +48,18 @@ Future main() async {
     Hive.registerAdapter<Location>(LocationAdapter());
     Hive.registerAdapter<Team>(TeamAdapter());
     Hive.registerAdapter<Divisions>(DivisionsAdapter());
+
+    Hive.registerAdapter<Division>(DivisionAdapter());
     Hive.registerAdapter<Event>(EventAdapter());
+
     await Hive.openBox<Team>('teams');
     await Hive.openBox<Event>('events');
 
     getFullEventList(DateTime.now().subYears(2));
 
-    // getFullEventList(DateTime.now().subYears(2)); // TODO remove
+    checkEvents();
+
+    log(Hive.box<Event>('events').length.toString()); // TODO Remove
 
     // if (kDebugMode) await Upgrader.clearSavedSettings();
 

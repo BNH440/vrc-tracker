@@ -60,7 +60,7 @@ class _MatchPageState extends State<MatchPage> {
       const Duration(seconds: 0),
     );
 
-    Div.Data? match = (event.divisions?[widget.division].data?.data
+    Div.Match? match = (event.divisions?[widget.division].data?.data
         ?.firstWhereOrNull((element) => element.id == widget.match_number));
 
     void predictScore() {

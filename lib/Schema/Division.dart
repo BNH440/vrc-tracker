@@ -1,15 +1,15 @@
 class Div {
   Meta? meta;
-  List<Data>? data;
+  List<Match>? data;
 
   Div({this.meta, this.data});
 
   Div.fromJson(Map<String, dynamic> json) {
     meta = json['meta'] != null ? new Meta.fromJson(json['meta']) : null;
     if (json['data'] != null) {
-      data = <Data>[];
+      data = <Match>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(new Match.fromJson(v));
       });
     }
   }
@@ -83,7 +83,7 @@ class Meta {
   }
 }
 
-class Data {
+class Match {
   int? id;
   Event? event;
   Division? division;
@@ -97,7 +97,7 @@ class Data {
   String? name;
   List<Alliances>? alliances;
 
-  Data(
+  Match(
       {this.id,
       this.event,
       this.division,
@@ -111,12 +111,10 @@ class Data {
       this.name,
       this.alliances});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  Match.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     event = json['event'] != null ? new Event.fromJson(json['event']) : null;
-    division = json['division'] != null
-        ? new Division.fromJson(json['division'])
-        : null;
+    division = json['division'] != null ? new Division.fromJson(json['division']) : null;
     round = json['round'];
     instance = json['instance'];
     matchnum = json['matchnum'];

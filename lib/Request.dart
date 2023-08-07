@@ -414,7 +414,86 @@ void getSmallEventList(DateTime date) async {
     entries[event.id.toString()] = hiveEvent.eventToHiveEvent(event);
   }
 
+  for (var event in entries.values) {
+    // get event from db if exists and update only changed fields
+    var cachedEvent = Hive.box<hiveEvent.Event>("events").get(event.id);
+    var newEvent;
+
+    if (cachedEvent != null) {
+      newEvent = cachedEvent.copyWith(
+        start: event.start,
+        end: event.end,
+        location: event.location,
+        level: event.level,
+        ongoing: event.ongoing,
+        awardsFinalized: event.awardsFinalized,
+        seasonName: event.seasonName,
+      );
+    } else {
+      newEvent = event;
+    }
+
+    entries[event.id.toString()] = newEvent;
+  }
+
   Hive.box<hiveEvent.Event>("events").putAll(entries);
 
   log("Cached *limited* event list from $utcDate containing ${data.length} events");
+}
+
+// void updateEvent(String eventId) async {
+//   var response = await Requests.get(
+//       "https://cache.vrctracker.blakehaug.com/eventDetails?event=$eventId", // eventDetails
+//       headers: headers);
+
+//   var decoded = events.Event.fromJson(jsonDecode(response.body));
+
+//   if (decoded.divisions != null) {
+//     int i = 0;
+//     for (var div in decoded.divisions!) {
+//       // get div ids and fetch info
+//       var divIndex = i;
+//       var divId = div.id;
+//       var divResponse = await Requests.get(
+//           "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches?per_page=1000", // events-divisions-matches-divx
+//           headers: headers);
+//       var divDecoded = division.Div.fromJson(jsonDecode(divResponse.body));
+
+//       divDecoded.data?.sort((a, b) => a.id!.compareTo(b.id!));
+
+//       decoded.divisions![divIndex].data = divDecoded;
+//       decoded.divisions![divIndex].order = i;
+
+//       var rankingsResponse = await Requests.get(
+//           "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/rankings?per_page=1000", // events-divisions-rankings-divx
+//           headers: headers);
+
+//       var rankingsDecoded = Rankings.fromJson(jsonDecode(rankingsResponse.body));
+
+//       decoded.divisions![divIndex].rankings = rankingsDecoded;
+//       i++;
+//     }
+//   }
+
+//   var response2 = await Requests.get(
+//       "https://cache.vrctracker.blakehaug.com/teamList?event=$eventId", // teamList
+//       headers: headers);
+
+//   var decoded2 = TeamList.TeamList.fromJson(jsonDecode(response2.body));
+
+//   decoded.teams = decoded2;
+
+//   if (decoded.teams?.data?.isNotEmpty ?? false) {
+//     decoded.teams!.data!.sort((a, b) => compareNatural(a.number!, b.number!));
+//   }
+// }
+
+void checkEvents() async {
+  var events = Hive.box<hiveEvent.Event>("events").values;
+  for (var event in events) {
+    if (event.isValid() == false) {
+      log("Invalid Event, discarding: ${event.name}");
+    }
+    // log("Valid Event: ${event.name}");
+  }
 }

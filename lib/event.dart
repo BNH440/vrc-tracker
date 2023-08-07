@@ -15,6 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io' show Platform;
 import 'package:collection/collection.dart';
+import 'Hive/Event.dart' as hive_event;
 
 class EventPage extends ConsumerStatefulWidget {
   const EventPage({Key? key, required this.title, required this.id}) : super(key: key);
@@ -29,6 +30,7 @@ class EventPage extends ConsumerStatefulWidget {
 class _EventPageState extends ConsumerState<EventPage> {
   Event _event = Event();
   Event event = Event();
+  hive_event.Event? hiveEvent;
   List<Request.SkillsTotal> _skills = [];
   List<Request.SkillsTotal> skills = [];
   String dropdownValue = 'Division 1';
@@ -45,6 +47,15 @@ class _EventPageState extends ConsumerState<EventPage> {
 
   @override
   void initState() {
+    Request.getHiveEvent(widget.id).then((value) {
+      if (this.mounted) {
+        setState(() {
+          hiveEvent = value;
+          log(hiveEvent.toString());
+        });
+      }
+    });
+
     timer = Timer.periodic(const Duration(seconds: 15), (t) {
       Request.getEventDetails(widget.id).then((value) {
         if (this.mounted) {
@@ -808,7 +819,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                 SliverList(
                   delegate: SliverChildListDelegate(
                     [
-                      (event.divisions?[0].data?.data).toString() == "null"
+                      hiveEvent == null
                           ? const Align(
                               alignment: Alignment.topCenter,
                               child: Padding(
@@ -839,23 +850,23 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                 Padding(
                                                   padding: const EdgeInsets.only(bottom: 5),
                                                   child: Text(
-                                                    event.name.toString(),
+                                                    hiveEvent!.name.toString(),
                                                     style: const TextStyle(fontSize: 20),
                                                   ),
                                                 ),
                                                 Padding(
                                                   padding: const EdgeInsets.only(bottom: 10),
                                                   child: Text(
-                                                    "${convertDate(event.start.toString())} - ${convertDate(event.end.toString())}",
+                                                    "${convertDate(hiveEvent!.start.toString())} - ${convertDate(hiveEvent!.end.toString())}",
                                                     style: const TextStyle(fontSize: 15),
                                                   ),
                                                 ),
                                                 Text(
-                                                  "Ongoing: ${event.ongoing.toString() == "true" ? "Yes" : "No"}",
+                                                  "Ongoing: ${hiveEvent!.ongoing.toString() == "true" ? "Yes" : "No"}",
                                                   style: const TextStyle(fontSize: 15),
                                                 ),
                                                 Text(
-                                                  "Competition: ${event.season?.name.toString()}",
+                                                  "Competition: ${hiveEvent!.seasonName.toString()}",
                                                   style: const TextStyle(fontSize: 15),
                                                 ),
                                               ]),
@@ -871,13 +882,13 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                             if (Platform.isAndroid) {
                                                               launchUrl(
                                                                   Uri.parse(
-                                                                      "https://maps.google.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
+                                                                      "https://maps.google.com/?q=${hiveEvent!.location?.venue.toString()} ${hiveEvent!.location?.address1.toString()}, ${hiveEvent!.location?.city.toString()} ${hiveEvent!.location?.country.toString()}"),
                                                                   mode: LaunchMode
                                                                       .externalApplication);
                                                             } else if (Platform.isIOS) {
                                                               launchUrl(
                                                                   Uri.parse(
-                                                                      "https://maps.apple.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
+                                                                      "https://maps.apple.com/?q=${hiveEvent!.location?.venue.toString()} ${hiveEvent!.location?.address1.toString()}, ${hiveEvent!.location?.city.toString()} ${hiveEvent!.location?.country.toString()}"),
                                                                   mode: LaunchMode
                                                                       .externalApplication);
                                                             }
@@ -906,7 +917,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                           onTap: () {
                                                             launchUrl(
                                                                 Uri.parse(
-                                                                    "https://www.robotevents.com/robot-competitions/vex-robotics-competition/${event.sku}.html"),
+                                                                    "https://www.robotevents.com/robot-competitions/vex-robotics-competition/${hiveEvent!.sku}.html"),
                                                                 mode:
                                                                     LaunchMode.externalApplication);
                                                             log("Redirect to web browser with comp link");
@@ -930,18 +941,28 @@ class _EventPageState extends ConsumerState<EventPage> {
                                       await getEventDetailsThrottled();
                                     },
                                   ),
-                                  TabBar(
-                                    indicatorColor: Theme.of(context).colorScheme.secondary,
-                                    labelPadding: const EdgeInsets.all(0),
-                                    tabs: const [
-                                      Tab(icon: Icon(Icons.schedule), text: "Matches"),
-                                      Tab(icon: Icon(Icons.people), text: "Teams"),
-                                      Tab(icon: Icon(Icons.bar_chart), text: "Rankings"),
-                                      Tab(
-                                          icon: Icon(Icons.precision_manufacturing),
-                                          text: "Skills"),
-                                    ],
-                                  ),
+                                  (event.divisions?[0].data?.data).toString() == "null"
+                                      ? const Align(
+                                          alignment: Alignment.topCenter,
+                                          child: Padding(
+                                            padding: EdgeInsets.all(20),
+                                            child: CircularProgressIndicator(
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                        )
+                                      : TabBar(
+                                          indicatorColor: Theme.of(context).colorScheme.secondary,
+                                          labelPadding: const EdgeInsets.all(0),
+                                          tabs: const [
+                                            Tab(icon: Icon(Icons.schedule), text: "Matches"),
+                                            Tab(icon: Icon(Icons.people), text: "Teams"),
+                                            Tab(icon: Icon(Icons.bar_chart), text: "Rankings"),
+                                            Tab(
+                                                icon: Icon(Icons.precision_manufacturing),
+                                                text: "Skills"),
+                                          ],
+                                        ),
                                 ],
                               ),
                             )
