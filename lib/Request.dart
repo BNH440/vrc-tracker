@@ -162,12 +162,10 @@ Future<List> getTeamDetails(String teamId, String compId) async {
   return [decoded, decoded2];
 }
 
-Future<Team> getTeam(String teamId) async {
-  Team decoded;
+Future<hiveTeam.Team> getTeam(String teamId) async {
+  hiveTeam.Team team;
 
-  var team = Hive.box<hiveTeam.Team>("teams").get(teamId);
-
-  var cachedTeam = (team?.isValid() ?? false) ? hiveTeam.hiveTeamToTeam(team) : null;
+  var cachedTeam = Hive.box<hiveTeam.Team>("teams").get(teamId);
 
   if (cachedTeam == null) {
     log("No cached team found");
@@ -175,13 +173,16 @@ Future<Team> getTeam(String teamId) async {
         "https://cache.vrctracker.blakehaug.com/teamDetails?team=$teamId",
         headers: headers);
 
-    decoded = Team.fromJson(jsonDecode(response.body));
+    var decoded = Team.fromJson(jsonDecode(response.body));
 
-    Hive.box<hiveTeam.Team>("teams").put(teamId, hiveTeam.teamToHiveTeam(decoded));
+    team = hiveTeam.teamToHiveTeam(decoded);
+
+    Hive.box<hiveTeam.Team>("teams").put(teamId, team);
+
     log("Cached team");
   } else {
     log("Cached team found");
-    decoded = cachedTeam;
+    team = cachedTeam;
   }
 
   // var response2 = await Requests.get(
@@ -189,14 +190,13 @@ Future<Team> getTeam(String teamId) async {
   //     headers: headers);
 
   // var decoded2 = EventListByTeam.fromJson(jsonDecode(response2.body));
-
-  decoded.events = null;
+  // TODO team events should be loaded on team events page not in team data, shouldn't be stored at all, should load separately like event page
 
   log("Requested team details");
-  return decoded;
+  return team;
 }
 
-Future<Team> getTeamEvents(Team team) async {
+Future<hiveTeam.Team> getTeamEvents(hiveTeam.Team team) async {
   var teamId = team.id;
 
   var response2 = await Requests.get(
@@ -205,7 +205,13 @@ Future<Team> getTeamEvents(Team team) async {
 
   var decoded2 = EventListByTeam.fromJson(jsonDecode(response2.body));
 
-  team.events = decoded2;
+  List<hiveEvent.Event> events = [];
+
+  for (var event in decoded2.data ?? []) {
+    events.add(await hiveEvent.eventToHiveEvent(event));
+  }
+
+  team.events = events;
 
   log("Requested team events");
   return team;
@@ -328,7 +334,7 @@ Future<hiveEvent.Event> getHiveEvent(String compId) async {
       event.distance = distance;
     }
 
-    var newEvent = hiveEvent.eventToHiveEvent(event);
+    var newEvent = await hiveEvent.eventToHiveEvent(event);
 
     Hive.box<hiveEvent.Event>("events").put(compId, newEvent);
     log("Cached event");
@@ -371,7 +377,7 @@ void getFullEventList(DateTime date) async {
     //**
     //  Note: String and int keys can exist simultaneously in a Hive box, String keys are being used for the 'events' box
     // */
-    entries[event.id.toString()] = hiveEvent.eventToHiveEvent(event);
+    entries[event.id.toString()] = await hiveEvent.eventToHiveEvent(event);
   }
 
   Hive.box<hiveEvent.Event>("events").putAll(entries);
@@ -411,7 +417,7 @@ void getSmallEventList(DateTime date) async {
     //**
     //  Note: String and int keys can exist simultaneously in a Hive box, String keys are being used for the 'events' box
     // */
-    entries[event.id.toString()] = hiveEvent.eventToHiveEvent(event);
+    entries[event.id.toString()] = await hiveEvent.eventToHiveEvent(event);
   }
 
   for (var event in entries.values) {
@@ -496,4 +502,58 @@ void checkEvents() async {
     }
     // log("Valid Event: ${event.name}");
   }
+}
+
+void updateHiveEventDetails(String eventId) async {
+  var response = await Requests.get(
+      "https://cache.vrctracker.blakehaug.com/eventDetails?event=$eventId", // eventDetails
+      headers: headers);
+
+  var decoded = events.Event.fromJson(jsonDecode(response.body));
+
+  if (decoded.divisions != null) {
+    int i = 0;
+    for (var div in decoded.divisions!) {
+      // get div ids and fetch info
+      var divIndex = i;
+      var divId = div.id;
+      var divResponse = await Requests.get(
+          "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches?per_page=1000", // events-divisions-matches-divx
+          headers: headers);
+      var divDecoded = division.Div.fromJson(jsonDecode(divResponse.body));
+
+      divDecoded.data?.sort((a, b) => a.id!.compareTo(b.id!));
+
+      decoded.divisions![divIndex].data = divDecoded;
+      decoded.divisions![divIndex].order = i;
+
+      var rankingsResponse = await Requests.get(
+          "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/rankings?per_page=1000", // events-divisions-rankings-divx
+          headers: headers);
+
+      var rankingsDecoded = Rankings.fromJson(jsonDecode(rankingsResponse.body));
+
+      decoded.divisions![divIndex].rankings = rankingsDecoded;
+      i++;
+    }
+  }
+
+  var response2 = await Requests.get(
+      // TODO split team list into a separate async function
+      "https://cache.vrctracker.blakehaug.com/teamList?event=$eventId", // teamList
+      headers: headers);
+
+  var decoded2 = TeamList.TeamList.fromJson(jsonDecode(response2.body));
+
+  decoded.teams = decoded2;
+
+  if (decoded.teams?.data?.isNotEmpty ?? false) {
+    decoded.teams!.data!.sort((a, b) => compareNatural(a.number!, b.number!));
+  }
+
+  Hive.box<hiveEvent.Event>("events").put(eventId, await hiveEvent.eventToHiveEvent(decoded));
+
+  var testEvent = Hive.box<hiveEvent.Event>("events").get(eventId);
+
+  log("Updated hive event details");
 }

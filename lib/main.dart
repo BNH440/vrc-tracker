@@ -49,7 +49,11 @@ Future main() async {
     Hive.registerAdapter<Team>(TeamAdapter());
     Hive.registerAdapter<Divisions>(DivisionsAdapter());
 
+    Hive.registerAdapter<Match>(MatchAdapter());
     Hive.registerAdapter<Division>(DivisionAdapter());
+    Hive.registerAdapter<Alliance>(AllianceAdapter());
+    Hive.registerAdapter<Rank>(RankAdapter());
+    Hive.registerAdapter<AllianceColor>(AllianceColorAdapter());
     Hive.registerAdapter<Event>(EventAdapter());
 
     await Hive.openBox<Team>('teams');

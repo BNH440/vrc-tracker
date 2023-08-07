@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart';
@@ -28,7 +29,6 @@ class EventPage extends ConsumerStatefulWidget {
 }
 
 class _EventPageState extends ConsumerState<EventPage> {
-  Event _event = Event();
   Event event = Event();
   hive_event.Event? hiveEvent;
   List<Request.SkillsTotal> _skills = [];
@@ -56,11 +56,22 @@ class _EventPageState extends ConsumerState<EventPage> {
       }
     });
 
+    Hive.box<hive_event.Event>('events').watch(key: widget.id.toString()).listen((event) => {
+          if (this.mounted)
+            {
+              setState(() {
+                log("event changed");
+                hiveEvent = event.value;
+              })
+            }
+        });
+
+    Request.updateHiveEventDetails(widget.id);
+
     timer = Timer.periodic(const Duration(seconds: 15), (t) {
       Request.getEventDetails(widget.id).then((value) {
         if (this.mounted) {
           setState(() {
-            _event = value;
             event = value;
 
             divisions = event.divisions!.map((e) => e.name!).toList();
@@ -84,7 +95,6 @@ class _EventPageState extends ConsumerState<EventPage> {
     Request.getEventDetails(widget.id).then((value) {
       if (this.mounted) {
         setState(() {
-          _event = value;
           event = value;
 
           divisions = event.divisions!.map((e) => e.name!).toList();
@@ -121,7 +131,6 @@ class _EventPageState extends ConsumerState<EventPage> {
         if (this.mounted)
           {
             setState(() {
-              _event = event;
               event = event;
 
               divisions = event.divisions!.map((e) => e.name!).toList();

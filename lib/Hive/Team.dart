@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:vrc_ranks_app/Hive/Event.dart' show Event;
 import '../Schema/Team.dart' as schema;
 import '../Schema/Events.dart' show Location;
 import 'package:vrc_ranks_app/globals.dart' as globals;
@@ -43,6 +44,8 @@ class Team extends HiveObject {
 
   @HiveField(8)
   DateTime lastUpdated = DateTime.now();
+
+  List<Event>? events = [];
 
   bool isValid() {
     var currentSeason = seasonId == globals.seasonId;

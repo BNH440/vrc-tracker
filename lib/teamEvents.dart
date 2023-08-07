@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vrc_ranks_app/Schema/Team.dart';
+import 'Hive/Team.dart';
 import 'package:vrc_ranks_app/event.dart';
 import 'package:vrc_ranks_app/events.dart';
 import 'Request.dart' as Request;
@@ -21,14 +21,12 @@ class TeamEventsPage extends ConsumerStatefulWidget {
 }
 
 class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
-  Team _team = Team();
-  Team team = Team();
+  late Team team;
 
   void _getTeamEvents() async {
     Team response = await Request.getTeamEvents(team);
     if (this.mounted) {
       setState(() {
-        _team = response;
         team = response;
       });
     }
@@ -41,7 +39,6 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
     Request.getTeam((widget.team_id).toString()).then((value) {
       if (mounted) {
         setState(() {
-          _team = value;
           team = value;
           _getTeamEvents();
         });
@@ -59,7 +56,6 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
         if (this.mounted)
           {
             setState(() {
-              _team = response;
               team = response;
             }),
           },
@@ -73,7 +69,6 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
         if (this.mounted)
           {
             setState(() {
-              _team = response;
               team = response;
             }),
           },
@@ -163,15 +158,15 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           children: <Widget>[
-                              for (var i = 0; i <= (((team.events?.data?.length ?? 1) - 1)); i++)
+                              for (var i = 0; i <= (((team.events?.length ?? 1) - 1)); i++)
                                 InkWell(
                                   onTap: () {
                                     Navigator.push(
                                       context,
                                       CupertinoPageRoute(
                                         builder: (context) => EventPage(
-                                          title: (team.events?.data?[i].name).toString(),
-                                          id: team.events!.data![i].id.toString(),
+                                          title: (team.events?[i].name).toString(),
+                                          id: team.events![i].id.toString(),
                                         ),
                                       ),
                                     );
@@ -186,7 +181,7 @@ class _TeamEventsPageState extends ConsumerState<TeamEventsPage> {
                                     margin: const EdgeInsets.all(4),
                                     child: Center(
                                       child: Text(
-                                        (team.events?.data?[i].name).toString(),
+                                        (team.events?[i].name).toString(),
                                         overflow: TextOverflow.fade,
                                         maxLines: 1,
                                         softWrap: false,

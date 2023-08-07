@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rate_limiter/rate_limiter.dart';
-import 'package:vrc_ranks_app/Schema/Team.dart';
+import 'Hive/Team.dart';
 import 'package:vrc_ranks_app/event.dart';
 import 'Hive/Event.dart';
 import 'package:vrc_ranks_app/teamEvents.dart';

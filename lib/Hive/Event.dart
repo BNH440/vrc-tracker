@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:hive/hive.dart';
 import 'package:vrc_ranks_app/Hive/Team.dart';
+import 'package:vrc_ranks_app/Request.dart';
 import 'package:vrc_ranks_app/globals.dart' as globals;
 import '../Schema/Events.dart' show Location;
 import '../Schema/Events.dart' as schema;
@@ -139,7 +140,7 @@ class Event extends HiveObject {
       );
 }
 
-Event eventToHiveEvent(schema.Event event) {
+Future<Event> eventToHiveEvent(schema.Event event) async {
   var hiveEvent = Event(
       id: event.id!,
       sku: event.sku!,
@@ -161,16 +162,21 @@ Event eventToHiveEvent(schema.Event event) {
   if (event.divisions?.isNotEmpty ?? false) {
     hiveEvent.divisions = <Division>[];
     for (var div in event.divisions ?? []) {
-      hiveEvent.divisions?.add(divisionToHiveDivision(div));
+      hiveEvent.divisions?.add(await divisionToHiveDivision(div));
     }
   }
 // TODO  left off here: Implementing rank as a rankings object so there's a rank list per division
-  if (event.divisions?.isNotEmpty ?? false) {
+  if (event.teams?.data?.isNotEmpty ?? false) {
     hiveEvent.teams = HiveList<Team>(Hive.box<Team>('teams'));
 
     if (event.teams != null) {
       for (var team in event.teams!.data!) {
-        hiveEvent.teams?.add(Hive.box<Team>('teams').get(team.id)!);
+        try {
+          var hiveTeam = await getTeam(team.id!.toString());
+          hiveEvent.teams?.add(hiveTeam);
+        } catch (e) {
+          print('ERROR: Team ${team.id} not found in hive');
+        }
       }
     }
   }
@@ -178,25 +184,25 @@ Event eventToHiveEvent(schema.Event event) {
   return hiveEvent;
 }
 
-Division divisionToHiveDivision(schema.Divisions division) {
+Future<Division> divisionToHiveDivision(schema.Divisions division) async {
   var hiveDivision = Division(
       id: division.id!,
       name: division.name,
       order: division.order,
-      matches: matchesToHiveMatches(division.data?.data ?? []),
-      rankings: rankingsToHiveRankings(division.rankings?.data!));
+      matches: await matchesToHiveMatches(division.data?.data ?? []),
+      rankings: await rankingsToHiveRankings(division.rankings?.data!));
   return hiveDivision;
 }
 
-List<Match> matchesToHiveMatches(List<divschema.Match> matches) {
+Future<List<Match>> matchesToHiveMatches(List<divschema.Match> matches) async {
   var hiveMatches = <Match>[];
   for (var match in matches) {
-    hiveMatches.add(matchToHiveMatch(match));
+    hiveMatches.add(await matchToHiveMatch(match));
   }
   return hiveMatches;
 }
 
-Match matchToHiveMatch(divschema.Match match) {
+Future<Match> matchToHiveMatch(divschema.Match match) async {
   var hiveMatch = Match(
       id: match.id!,
       round: match.round!,
@@ -207,18 +213,19 @@ Match matchToHiveMatch(divschema.Match match) {
       field: match.field,
       scored: match.scored,
       name: match.name!,
-      redAlliance: allianceToHiveAlliance(match.alliances![1], AllianceColor.red),
-      blueAlliance: allianceToHiveAlliance(match.alliances![0], AllianceColor.blue));
+      redAlliance: await allianceToHiveAlliance(match.alliances![1], AllianceColor.red),
+      blueAlliance: await allianceToHiveAlliance(match.alliances![0], AllianceColor.blue));
   return hiveMatch;
 }
 
-Alliance allianceToHiveAlliance(divschema.Alliances alliance, AllianceColor color) {
+Future<Alliance> allianceToHiveAlliance(divschema.Alliances alliance, AllianceColor color) async {
   HiveList<Team> teams = HiveList(Hive.box<Team>('teams'));
 
   log(teams.length.toString());
 
   for (var team in alliance.teams!) {
-    teams.add(Hive.box<Team>('teams').get(team.team!.id)!);
+    var hiveTeam = await getTeam(team.team!.id.toString());
+    teams.add(hiveTeam);
   }
 
   var hiveAlliance = Alliance(
@@ -229,19 +236,20 @@ Alliance allianceToHiveAlliance(divschema.Alliances alliance, AllianceColor colo
   return hiveAlliance;
 }
 
-List<Rank>? rankingsToHiveRankings(List<rankschema.Data>? rankings) {
+Future<List<Rank>?> rankingsToHiveRankings(List<rankschema.Data>? rankings) async {
   if (rankings == null) return null;
   var hiveRankings = <Rank>[];
   for (var rank in rankings) {
-    hiveRankings.add(rankToHiveRank(rank));
+    hiveRankings.add(await rankToHiveRank(rank));
   }
   return hiveRankings;
 }
 
-Rank rankToHiveRank(rankschema.Data rank) {
+Future<Rank> rankToHiveRank(rankschema.Data rank) async {
   HiveList<Team> teamList = HiveList(Hive.box<Team>('teams'));
 
-  teamList.add(Hive.box<Team>('teams').get(rank.team!.id)!);
+  var hiveTeam = await getTeam(rank.team!.id.toString());
+  teamList.add(hiveTeam);
 
   var hiveRank = Rank(
     id: rank.id!,
