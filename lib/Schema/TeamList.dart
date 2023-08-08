@@ -1,15 +1,17 @@
+import 'package:vrc_ranks_app/Schema/Team.dart';
+
 class TeamList {
   Meta? meta;
-  List<Data>? data;
+  List<Team>? data;
 
   TeamList({this.meta, this.data});
 
   TeamList.fromJson(Map<String, dynamic> json) {
     meta = json['meta'] != null ? new Meta.fromJson(json['meta']) : null;
     if (json['data'] != null) {
-      data = <Data>[];
+      data = <Team>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(new Team.fromJson(v));
       });
     }
   }
@@ -144,9 +146,8 @@ class Location {
     region = json['region'];
     postcode = json['postcode'];
     country = json['country'];
-    coordinates = json['coordinates'] != null
-      ? new Coordinates.fromJson(json['coordinates'])
-      : null;
+    coordinates =
+        json['coordinates'] != null ? new Coordinates.fromJson(json['coordinates']) : null;
   }
 
   Map<String, dynamic> toJson() {

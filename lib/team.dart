@@ -13,6 +13,7 @@ import 'Request.dart' as Request;
 import 'match.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
+import 'Hive/Event.dart' as hiveEvent;
 
 class TeamPage extends ConsumerStatefulWidget {
   const TeamPage(
@@ -26,7 +27,7 @@ class TeamPage extends ConsumerStatefulWidget {
   final String title;
   final String team_id;
   final String match_id;
-  final Events.Event event_old;
+  final hiveEvent.Event event_old;
 
   @override
   _TeamPageState createState() => _TeamPageState();
@@ -37,7 +38,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
   Team team = Team();
   MatchListByTeam _matches = MatchListByTeam();
   MatchListByTeam matches = MatchListByTeam();
-  Rankings? rankings = Rankings();
+  List<hiveEvent.Rank>? rankings = [];
   int division = 0;
 
   @override
@@ -176,45 +177,45 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                             "Grade: ${team.grade.toString()}",
                             style: const TextStyle(fontSize: 15),
                           ),
-                          if (rankings?.data != null)
-                            if ((rankings?.data!.length)! > 0)
-                              if (division != -1)
-                                MediaQuery(
-                                  data: MediaQuery.of(context)
-                                      .copyWith(textScaleFactor: 1.0)
-                                      .removePadding(removeTop: true, removeBottom: true),
-                                  child: ListView(
-                                    shrinkWrap: true,
-                                    physics: const NeverScrollableScrollPhysics(),
-                                    children: [
-                                      const Text(""),
-                                      Text(
-                                        "Division: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.division?.name.toString()}",
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                      Text(
-                                        "Rank: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.rank.toString()}",
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                      Text(
-                                        "Record: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wins.toString()}-${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.losses.toString()}-${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ties.toString()}",
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                      Text(
-                                        "Avg Points: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.averagePoints.toString()}",
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                      Text(
-                                        "High Score: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.highScore.toString()}",
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                      Text(
-                                        "WP: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wp.toString()}, AP: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ap.toString()}, SP: ${rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.sp.toString()}",
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                    ],
-                                  ),
+                          if (rankings?.isNotEmpty ?? false)
+                            if (division != -1)
+                              MediaQuery(
+                                data: MediaQuery.of(context)
+                                    .copyWith(textScaleFactor: 1.0)
+                                    .removePadding(removeTop: true, removeBottom: true),
+                                child: ListView(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  children: [
+                                    const Text(""),
+                                    Text(
+                                      // "Division: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.division?.name.toString()}", // TODO add division name string in class
+                                      "Division: FIX THIS", // TODO add division name string in class
+                                      style: const TextStyle(fontSize: 15),
+                                    ),
+                                    Text(
+                                      "Rank: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.rank.toString()}",
+                                      style: const TextStyle(fontSize: 15),
+                                    ),
+                                    Text(
+                                      "Record: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.wins.toString()}-${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.losses.toString()}-${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.ties.toString()}",
+                                      style: const TextStyle(fontSize: 15),
+                                    ),
+                                    Text(
+                                      "Avg Points: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.averagePoints.toString()}",
+                                      style: const TextStyle(fontSize: 15),
+                                    ),
+                                    Text(
+                                      "High Score: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.highScore.toString()}",
+                                      style: const TextStyle(fontSize: 15),
+                                    ),
+                                    Text(
+                                      "WP: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.wp.toString()}, AP: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.ap.toString()}, SP: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.sp.toString()}",
+                                      style: const TextStyle(fontSize: 15),
+                                    ),
+                                  ],
                                 ),
+                              ),
                           team.id != null
                               ? Center(
                                   child: Padding(
@@ -293,33 +294,33 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                 child: Align(
                                     alignment: Alignment.centerRight,
                                     child: RichText(
-                                      text: TextSpan(
-                                        style: TextStyle(
-                                          color: Theme.of(context).colorScheme.tertiary,
-                                          fontSize: 14,
+                                        text: TextSpan(
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.tertiary,
+                                            fontSize: 14,
+                                          ),
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                                text:
+                                                    "${matches.data?[i].alliances?[0].teams?[0].team?.name}",
+                                                style: TextStyle(
+                                                    color: (matches.data?[i].alliances?[0].teams?[0]
+                                                                .team?.id ==
+                                                            team.id)
+                                                        ? Colors.blue
+                                                        : null)),
+                                            TextSpan(
+                                                text:
+                                                    "\n${matches.data?[i].alliances?[0].teams?[1].team?.name}",
+                                                style: TextStyle(
+                                                    color: (matches.data?[i].alliances?[0].teams?[1]
+                                                                .team?.id ==
+                                                            team.id)
+                                                        ? Colors.blue
+                                                        : null)),
+                                          ],
                                         ),
-                                        children: <TextSpan>[
-                                          TextSpan(
-                                              text:
-                                                  "${matches.data?[i].alliances?[0].teams?[0].team?.name}",
-                                              style: TextStyle(
-                                                  color: (matches.data?[i].alliances?[0].teams?[0]
-                                                              .team?.id ==
-                                                          team.id)
-                                                      ? Colors.blue
-                                                      : null)),
-                                          TextSpan(
-                                              text:
-                                                  "\n${matches.data?[i].alliances?[0].teams?[1].team?.name}",
-                                              style: TextStyle(
-                                                  color: (matches.data?[i].alliances?[0].teams?[1]
-                                                              .team?.id ==
-                                                          team.id)
-                                                      ? Colors.blue
-                                                      : null)),
-                                        ],
-                                      ),
-                                    )),
+                                        textAlign: TextAlign.right)),
                               ),
                               const Spacer(),
                               (matches.data?[i].alliances?[0].score.toString() != "0" ||

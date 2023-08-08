@@ -48,6 +48,14 @@ class Event extends HiveObject {
     required this.schemaVersion,
   });
 
+  Event.empty({
+    this.id = -1,
+    this.sku = "",
+    this.name = "",
+    this.seasonId = "",
+    this.schemaVersion = "",
+  });
+
   @HiveField(0)
   int id;
 
@@ -110,6 +118,7 @@ class Event extends HiveObject {
   }
 
   Event copyWith({
+    String? name,
     String? start,
     String? end,
     Location? location,
@@ -123,7 +132,7 @@ class Event extends HiveObject {
       Event(
         id: this.id,
         sku: this.sku,
-        name: this.name,
+        name: name ?? this.name,
         start: start ?? this.start,
         end: end ?? this.end,
         location: location ?? this.location,
@@ -159,50 +168,65 @@ Future<Event> eventToHiveEvent(schema.Event event) async {
       schemaVersion: globals.eventSchemaVersion,
       seasonName: event.season?.name);
 
-  if (event.divisions?.isNotEmpty ?? false) {
-    hiveEvent.divisions = <Division>[];
-    for (var div in event.divisions ?? []) {
-      hiveEvent.divisions?.add(await divisionToHiveDivision(div));
-    }
-  }
-// TODO  left off here: Implementing rank as a rankings object so there's a rank list per division
+  // TODO  left off here: Implementing rank as a rankings object so there's a rank list per division
   if (event.teams?.data?.isNotEmpty ?? false) {
     hiveEvent.teams = HiveList<Team>(Hive.box<Team>('teams'));
 
     if (event.teams != null) {
       for (var team in event.teams!.data!) {
-        try {
-          var hiveTeam = await getTeam(team.id!.toString());
-          hiveEvent.teams?.add(hiveTeam);
-        } catch (e) {
-          print('ERROR: Team ${team.id} not found in hive');
-        }
+        // if (teamExists(team.id!.toString())) {
+        //   var hiveTeam = await getTeam(team.id!.toString());
+        //   hiveEvent.teams?.add(hiveTeam);
+        //   continue;
+        // }
+
+        Hive.box<Team>("teams").put(
+            team.id!.toString(),
+            Team(
+              id: team.id!,
+              number: team.number!,
+              teamName: team.teamName!,
+              organization: team.organization!,
+              grade: team.grade!,
+              location: team.location!,
+              seasonId: globals.seasonId,
+              schemaVersion: globals.teamSchemaVersion,
+            ));
+
+        hiveEvent.teams?.add(await getTeam(team.id!.toString()));
       }
+    }
+  }
+
+  if (event.divisions?.isNotEmpty ?? false) {
+    hiveEvent.divisions = <Division>[];
+    for (var div in event.divisions ?? []) {
+      hiveEvent.divisions?.add(await divisionToHiveDivision(div, hiveEvent));
     }
   }
 
   return hiveEvent;
 }
 
-Future<Division> divisionToHiveDivision(schema.Divisions division) async {
+Future<Division> divisionToHiveDivision(schema.Divisions division, Event e) async {
   var hiveDivision = Division(
       id: division.id!,
       name: division.name,
       order: division.order,
-      matches: await matchesToHiveMatches(division.data?.data ?? []),
-      rankings: await rankingsToHiveRankings(division.rankings?.data!));
+      matches: await matchesToHiveMatches(division.data?.data ?? [], e),
+      rankings: await rankingsToHiveRankings(division.rankings?.data!, e));
   return hiveDivision;
 }
 
-Future<List<Match>> matchesToHiveMatches(List<divschema.Match> matches) async {
+Future<List<Match>> matchesToHiveMatches(List<divschema.Match> matches, Event e) async {
   var hiveMatches = <Match>[];
   for (var match in matches) {
-    hiveMatches.add(await matchToHiveMatch(match));
+    hiveMatches.add(await matchToHiveMatch(match, e));
   }
   return hiveMatches;
 }
 
-Future<Match> matchToHiveMatch(divschema.Match match) async {
+Future<Match> matchToHiveMatch(divschema.Match match, Event e) async {
   var hiveMatch = Match(
       id: match.id!,
       round: match.round!,
@@ -213,18 +237,21 @@ Future<Match> matchToHiveMatch(divschema.Match match) async {
       field: match.field,
       scored: match.scored,
       name: match.name!,
-      redAlliance: await allianceToHiveAlliance(match.alliances![1], AllianceColor.red),
-      blueAlliance: await allianceToHiveAlliance(match.alliances![0], AllianceColor.blue));
+      redAlliance: await allianceToHiveAlliance(match.alliances![1], AllianceColor.red, e),
+      blueAlliance: await allianceToHiveAlliance(match.alliances![0], AllianceColor.blue, e));
   return hiveMatch;
 }
 
-Future<Alliance> allianceToHiveAlliance(divschema.Alliances alliance, AllianceColor color) async {
+Future<Alliance> allianceToHiveAlliance(
+    divschema.Alliances alliance, AllianceColor color, Event e) async {
   HiveList<Team> teams = HiveList(Hive.box<Team>('teams'));
 
-  log(teams.length.toString());
+  // log(teams.length.toString());
 
   for (var team in alliance.teams!) {
-    var hiveTeam = await getTeam(team.team!.id.toString());
+    // var hiveTeam = await getTeam(team.team!.id.toString());
+    var hiveTeam = e.teams!.firstWhere((element) => element.id == team.team!.id);
+
     teams.add(hiveTeam);
   }
 
@@ -236,19 +263,20 @@ Future<Alliance> allianceToHiveAlliance(divschema.Alliances alliance, AllianceCo
   return hiveAlliance;
 }
 
-Future<List<Rank>?> rankingsToHiveRankings(List<rankschema.Data>? rankings) async {
+Future<List<Rank>?> rankingsToHiveRankings(List<rankschema.Data>? rankings, Event e) async {
   if (rankings == null) return null;
   var hiveRankings = <Rank>[];
   for (var rank in rankings) {
-    hiveRankings.add(await rankToHiveRank(rank));
+    hiveRankings.add(await rankToHiveRank(rank, e));
   }
   return hiveRankings;
 }
 
-Future<Rank> rankToHiveRank(rankschema.Data rank) async {
+Future<Rank> rankToHiveRank(rankschema.Data rank, Event e) async {
   HiveList<Team> teamList = HiveList(Hive.box<Team>('teams'));
 
-  var hiveTeam = await getTeam(rank.team!.id.toString());
+  // var hiveTeam = await getTeam(rank.team!.id.toString());
+  var hiveTeam = e.teams!.firstWhere((element) => element.id == rank.team!.id);
   teamList.add(hiveTeam);
 
   var hiveRank = Rank(

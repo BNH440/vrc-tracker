@@ -179,9 +179,9 @@ Future<hiveTeam.Team> getTeam(String teamId) async {
 
     Hive.box<hiveTeam.Team>("teams").put(teamId, team);
 
-    log("Cached team");
+    log("Requested team details and cached: $teamId");
   } else {
-    log("Cached team found");
+    log("Cached team found: $teamId");
     team = cachedTeam;
   }
 
@@ -192,8 +192,18 @@ Future<hiveTeam.Team> getTeam(String teamId) async {
   // var decoded2 = EventListByTeam.fromJson(jsonDecode(response2.body));
   // TODO team events should be loaded on team events page not in team data, shouldn't be stored at all, should load separately like event page
 
-  log("Requested team details");
+  // log("Got team details");
   return team;
+}
+
+bool teamExists(String teamId) {
+  var cachedTeam = Hive.box<hiveTeam.Team>("teams").get(teamId);
+
+  if (cachedTeam == null) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 Future<hiveTeam.Team> getTeamEvents(hiveTeam.Team team) async {
@@ -380,6 +390,29 @@ void getFullEventList(DateTime date) async {
     entries[event.id.toString()] = await hiveEvent.eventToHiveEvent(event);
   }
 
+  for (var event in entries.values) {
+    // get event from db if exists and update only changed fields
+    var cachedEvent = Hive.box<hiveEvent.Event>("events").get(event.id.toString());
+    hiveEvent.Event newEvent;
+
+    if (cachedEvent != null) {
+      newEvent = cachedEvent.copyWith(
+        name: event.name,
+        start: event.start,
+        end: event.end,
+        location: event.location,
+        level: event.level,
+        ongoing: event.ongoing,
+        awardsFinalized: event.awardsFinalized,
+        seasonName: event.seasonName,
+      );
+    } else {
+      newEvent = event;
+    }
+
+    entries[event.id.toString()] = newEvent;
+  }
+
   Hive.box<hiveEvent.Event>("events").putAll(entries);
 
   log("Cached event list from $utcDate containing ${data.length} events");
@@ -422,11 +455,12 @@ void getSmallEventList(DateTime date) async {
 
   for (var event in entries.values) {
     // get event from db if exists and update only changed fields
-    var cachedEvent = Hive.box<hiveEvent.Event>("events").get(event.id);
-    var newEvent;
+    var cachedEvent = Hive.box<hiveEvent.Event>("events").get(event.id.toString());
+    hiveEvent.Event newEvent;
 
     if (cachedEvent != null) {
       newEvent = cachedEvent.copyWith(
+        name: event.name,
         start: event.start,
         end: event.end,
         location: event.location,
@@ -504,7 +538,7 @@ void checkEvents() async {
   }
 }
 
-void updateHiveEventDetails(String eventId) async {
+Future<bool> updateHiveEventDetails(String eventId) async {
   var response = await Requests.get(
       "https://cache.vrctracker.blakehaug.com/eventDetails?event=$eventId", // eventDetails
       headers: headers);
@@ -553,7 +587,9 @@ void updateHiveEventDetails(String eventId) async {
 
   Hive.box<hiveEvent.Event>("events").put(eventId, await hiveEvent.eventToHiveEvent(decoded));
 
-  var testEvent = Hive.box<hiveEvent.Event>("events").get(eventId);
+  var testEvent = Hive.box<hiveEvent.Event>("events").get(eventId); // TODO remove
 
   log("Updated hive event details");
+
+  return true;
 }

@@ -29,13 +29,12 @@ class EventPage extends ConsumerStatefulWidget {
 }
 
 class _EventPageState extends ConsumerState<EventPage> {
-  Event event = Event();
-  hive_event.Event? hiveEvent;
-  List<Request.SkillsTotal> _skills = [];
+  hive_event.Event event = hive_event.Event.empty();
   List<Request.SkillsTotal> skills = [];
   String dropdownValue = 'Division 1';
   List<String> divisions = ["Division 1"];
   int selectedDivison = 0;
+  bool initialLoading = true;
 
   String convertDate(String date) {
     var humanDate = DateTime.parse(date);
@@ -48,71 +47,65 @@ class _EventPageState extends ConsumerState<EventPage> {
   @override
   void initState() {
     Request.getHiveEvent(widget.id).then((value) {
-      if (this.mounted) {
-        setState(() {
-          hiveEvent = value;
-          log(hiveEvent.toString());
-        });
-      }
-    });
-
-    Hive.box<hive_event.Event>('events').watch(key: widget.id.toString()).listen((event) => {
-          if (this.mounted)
-            {
-              setState(() {
-                log("event changed");
-                hiveEvent = event.value;
-              })
-            }
-        });
-
-    Request.updateHiveEventDetails(widget.id);
-
-    timer = Timer.periodic(const Duration(seconds: 15), (t) {
-      Request.getEventDetails(widget.id).then((value) {
-        if (this.mounted) {
-          setState(() {
-            event = value;
-
-            divisions = event.divisions!.map((e) => e.name!).toList();
-            if (!divisions.contains(dropdownValue)) {
-              dropdownValue = divisions[0];
-            }
-            selectedDivison = divisions.indexOf(dropdownValue);
-          });
-        }
-      });
-      Request.getSkills(widget.id).then((value) {
-        if (this.mounted) {
-          setState(() {
-            _skills = value;
-            skills = value;
-          });
-        }
-      });
-    });
-    super.initState();
-    Request.getEventDetails(widget.id).then((value) {
+      // set event to an initial value
       if (this.mounted) {
         setState(() {
           event = value;
 
-          divisions = event.divisions!.map((e) => e.name!).toList();
-          if (!divisions.contains(dropdownValue)) {
-            dropdownValue = divisions[0];
+          if (event?.divisions != null) {
+            // ! what does this code do
+            divisions = event!.divisions!.map((e) => e.name!).toList();
+            if (divisions.contains(dropdownValue)) {
+              dropdownValue = divisions[0];
+              selectedDivison = divisions.indexOf(dropdownValue);
+            }
           }
-          selectedDivison = divisions.indexOf(dropdownValue);
         });
       }
     });
     Request.getSkills(widget.id).then((value) {
       if (this.mounted) {
         setState(() {
-          _skills = value;
           skills = value;
         });
       }
     });
+    Request.updateHiveEventDetails(widget.id).then((value) => {
+          if (this.mounted)
+            {
+              setState(() {
+                initialLoading = false;
+              })
+            }
+        }); // ! Need this to update event on page load
+
+    Hive.box<hive_event.Event>('events')
+        .watch(key: widget.id.toString())
+        .listen((listenerEvent) => {
+              // listen for changes to event in hive db and set state when those changes occur
+              if (this.mounted)
+                {
+                  setState(() {
+                    log("event changed");
+                    event = listenerEvent.value as hive_event.Event;
+                  })
+                }
+            });
+
+    timer = Timer.periodic(const Duration(seconds: 15), (t) {
+      // Update event every 15 seconds
+      Request.updateHiveEventDetails(widget.id);
+
+      Request.getSkills(widget.id).then((value) {
+        // TODO implement skills into event class
+        if (this.mounted) {
+          setState(() {
+            skills = value;
+          });
+        }
+      });
+    });
+    super.initState();
   }
 
   @override
@@ -126,38 +119,16 @@ class _EventPageState extends ConsumerState<EventPage> {
     final favorites = ref.watch(favoriteCompsProvider);
 
     final getEventDetailsThrottled = throttle(
-      () async => {
-        event = await Request.getEventDetails(widget.id),
-        if (this.mounted)
-          {
-            setState(() {
-              event = event;
-
-              divisions = event.divisions!.map((e) => e.name!).toList();
-              if (!divisions.contains(dropdownValue)) {
-                dropdownValue = divisions[0];
-              }
-              selectedDivison = divisions.indexOf(dropdownValue);
-            }),
-          },
-        skills = await Request.getSkills(widget.id),
-        if (this.mounted)
-          {
-            setState(() {
-              _skills = skills;
-              skills = skills;
-            }),
-          },
+      () => {
+        Request.updateHiveEventDetails(widget.id),
       },
       const Duration(seconds: 0),
     );
 
     Widget MatchesTab() {
-      return (event.divisions?[0].data?.data).toString() == "null"
+      return (event.divisions?[0]).toString() == "null"
           ? const Text("")
-          : event.divisions?[0].data == null ||
-                  event.divisions?[0].data?.data == null ||
-                  event.divisions?[0].data?.data?.isEmpty == true
+          : event.divisions?[0] == null || event.divisions?[0].matches?.isEmpty == true
               ? const Center(child: Text("No matches found"))
               : RefreshIndicator(
                   child: MediaQuery(
@@ -198,17 +169,16 @@ class _EventPageState extends ConsumerState<EventPage> {
                                   ),
                                 ],
                               )),
-                      if (event.divisions?[selectedDivison].data?.data?.isEmpty ?? true)
+                      if (event.divisions?[selectedDivison].matches?.isEmpty ?? true)
                         const Center(
                             heightFactor: 3,
                             child: Text(
                               "No matches found",
                               textAlign: TextAlign.center,
                             )),
-                      if (event.divisions?[selectedDivison].data?.data?.isNotEmpty ?? false)
+                      if (event.divisions?[selectedDivison].matches?.isNotEmpty ?? false)
                         for (var i = 0;
-                            i <=
-                                (((event.divisions?[selectedDivison].data?.data?.length ?? 1) - 1));
+                            i <= (((event.divisions?[selectedDivison].matches?.length ?? 1) - 1));
                             i++)
                           InkWell(
                             onTap: () {
@@ -216,11 +186,11 @@ class _EventPageState extends ConsumerState<EventPage> {
                                 context,
                                 CupertinoPageRoute(
                                   builder: (context) => MatchPage(
-                                    title: (event.divisions?[selectedDivison].data?.data?[i].name)
+                                    title: (event.divisions?[selectedDivison].matches?[i].name)
                                         .toString(),
                                     event_old: event,
                                     match_number:
-                                        (event.divisions?[selectedDivison].data?.data?[i].id ?? 0)
+                                        (event.divisions?[selectedDivison].matches?[i].id ?? 0)
                                             .toInt(),
                                     division: selectedDivison,
                                   ),
@@ -246,7 +216,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                           WidgetSpan(
                                             alignment: PlaceholderAlignment.middle,
                                             child: Text(
-                                              (event.divisions?[selectedDivison].data?.data?[i].name
+                                              (event.divisions?[selectedDivison].matches?[i].name
                                                       ?.replaceFirst("Qualifier", "Qual"))
                                                   .toString(),
                                               style: const TextStyle(fontSize: 16),
@@ -267,7 +237,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                             WidgetSpan(
                                               alignment: PlaceholderAlignment.middle,
                                               child: Text(
-                                                "${event.divisions?[selectedDivison].data?.data?[i].alliances?[0].teams?[0].team?.name}\n${event.divisions?[selectedDivison].data?.data?[i].alliances?[0].teams?[1].team?.name}",
+                                                "${event.divisions?[selectedDivison].matches?[i].blueAlliance.teams[0].number}\n${event.divisions?[selectedDivison].matches?[i].blueAlliance.teams[1].number}",
                                                 style: TextStyle(
                                                   color: Theme.of(context).colorScheme.tertiary,
                                                   fontSize: 14,
@@ -281,12 +251,11 @@ class _EventPageState extends ConsumerState<EventPage> {
                                     ),
                                   ),
                                   const Spacer(),
-                                  (event.divisions?[selectedDivison].data?.data?[i].alliances?[0]
-                                                  .score
+                                  (event.divisions?[selectedDivison].matches?[i].blueAlliance.score
                                                   .toString() !=
                                               "0" ||
-                                          event.divisions?[selectedDivison].data?.data?[i]
-                                                  .alliances?[1].score
+                                          event.divisions?[selectedDivison].matches?[i].redAlliance
+                                                  .score
                                                   .toString() !=
                                               "0")
                                       ? SizedBox(
@@ -307,9 +276,8 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                             TextSpan(
                                                                 text: event
                                                                         .divisions?[selectedDivison]
-                                                                        .data
-                                                                        ?.data?[i]
-                                                                        .alliances?[0]
+                                                                        .matches?[i]
+                                                                        .blueAlliance
                                                                         .score
                                                                         .toString() ??
                                                                     "",
@@ -326,9 +294,8 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                             TextSpan(
                                                                 text: event
                                                                         .divisions?[selectedDivison]
-                                                                        .data
-                                                                        ?.data?[i]
-                                                                        .alliances?[1]
+                                                                        .matches?[i]
+                                                                        .redAlliance
                                                                         .score
                                                                         .toString() ??
                                                                     "",
@@ -342,14 +309,13 @@ class _EventPageState extends ConsumerState<EventPage> {
                                             ),
                                           ),
                                         )
-                                      : Text(((event.divisions?[selectedDivison].data?.data?[i]
+                                      : Text(((event.divisions?[selectedDivison].matches?[i]
                                                       .scheduled ??
                                                   "")
                                               .isNotEmpty
                                           ? DateFormat.jm().format(DateTime.parse((event
                                                       .divisions?[selectedDivison]
-                                                      .data
-                                                      ?.data?[i]
+                                                      .matches?[i]
                                                       .scheduled)
                                                   .toString())
                                               .toLocal())
@@ -365,7 +331,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                             WidgetSpan(
                                               alignment: PlaceholderAlignment.middle,
                                               child: Text(
-                                                "${event.divisions?[selectedDivison].data?.data?[i].alliances?[1].teams?[0].team?.name}\n${event.divisions?[selectedDivison].data?.data?[i].alliances?[1].teams?[1].team?.name}",
+                                                "${event.divisions?[selectedDivison].matches?[i].redAlliance.teams[0].number}\n${event.divisions?[selectedDivison].matches?[i].redAlliance.teams[1].number}",
                                                 style: TextStyle(
                                                   color: Theme.of(context).colorScheme.tertiary,
                                                   fontSize: 14,
@@ -390,12 +356,11 @@ class _EventPageState extends ConsumerState<EventPage> {
     }
 
     Widget TeamsTab() {
-      return (event.teams?.data).toString() == "null"
+      return (event.teams).toString() == "null"
           ? const Text("")
           : event.teams == null ||
-                  event.teams?.data == null ||
-                  event.teams?.data?.isEmpty == true ||
-                  (event.divisions?[0].rankings?.data?.isEmpty ?? true)
+                  event.teams?.isEmpty == true ||
+                  (event.divisions?[0].rankings?.isEmpty ?? true)
               ? const Center(child: Text("No teams found"))
               : RefreshIndicator(
                   child: MediaQuery(
@@ -436,17 +401,17 @@ class _EventPageState extends ConsumerState<EventPage> {
                                   ),
                                 ],
                               )),
-                      if (event.divisions?[selectedDivison].rankings?.data?.isEmpty ?? true)
+                      if (event.divisions?[selectedDivison].rankings?.isEmpty ?? true)
                         const Center(
                             heightFactor: 3,
                             child: Text(
                               "No teams found\nNote: Finals divisions will not have teams",
                               textAlign: TextAlign.center,
                             )),
-                      if (event.divisions?[selectedDivison].rankings?.data?.isNotEmpty ?? false)
-                        for (var team in (event.teams!.data!.where((element) =>
-                            event.divisions![selectedDivison].rankings!.data!
-                                .firstWhereOrNull((element2) => element2.team!.id == element.id) !=
+                      if (event.divisions?[selectedDivison].rankings?.isNotEmpty ?? false)
+                        for (var team in (event.teams!.where((element) =>
+                            event.divisions![selectedDivison].rankings!.firstWhereOrNull(
+                                (element2) => element2.team.single.id == element.id) !=
                             null)))
                           InkWell(
                             onTap: () {
@@ -508,13 +473,12 @@ class _EventPageState extends ConsumerState<EventPage> {
                                       ),
                                     ),
                                   const Spacer(flex: 5),
-                                  if (event.divisions?[selectedDivison].rankings?.data != null)
-                                    if ((event.divisions?[selectedDivison].rankings?.data?.length ??
-                                            0) >
+                                  if (event.divisions?[selectedDivison].rankings != null)
+                                    if ((event.divisions?[selectedDivison].rankings?.length ?? 0) >
                                         0)
-                                      if (event.divisions?[selectedDivison].rankings?.data
+                                      if (event.divisions?[selectedDivison].rankings
                                               ?.firstWhereOrNull(
-                                                  (element) => element.team?.id == team.id)
+                                                  (element) => element.team.single.id == team.id)
                                               .toString() !=
                                           "null")
                                         SizedBox(
@@ -527,7 +491,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                   WidgetSpan(
                                                     alignment: PlaceholderAlignment.middle,
                                                     child: Text(
-                                                      "Rank: ${event.divisions?[selectedDivison].rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.rank.toString()}      ${event.divisions?[selectedDivison].rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.wins.toString()}-${event.divisions?[selectedDivison].rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.losses.toString()}-${event.divisions?[selectedDivison].rankings?.data?.firstWhereOrNull((element) => element.team?.id == team.id)?.ties.toString()}",
+                                                      "Rank: ${event.divisions?[selectedDivison].rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.rank.toString()}      ${event.divisions?[selectedDivison].rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.wins.toString()}-${event.divisions?[selectedDivison].rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.losses.toString()}-${event.divisions?[selectedDivison].rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.ties.toString()}",
                                                       style: TextStyle(
                                                         color:
                                                             Theme.of(context).colorScheme.tertiary,
@@ -553,7 +517,7 @@ class _EventPageState extends ConsumerState<EventPage> {
     }
 
     Widget RankingsTab() {
-      return event.divisions?[0].rankings?.data?.isEmpty == true
+      return event.divisions?[0].rankings?.isEmpty == true
           ? const Center(child: Text("No rankings found"))
           : RefreshIndicator(
               child: MediaQuery(
@@ -592,16 +556,15 @@ class _EventPageState extends ConsumerState<EventPage> {
                               ),
                             ],
                           )),
-                  if (event.divisions?[selectedDivison].rankings?.data?.isEmpty ?? true)
+                  if (event.divisions?[selectedDivison].rankings?.isEmpty ?? true)
                     const Center(
                         heightFactor: 3,
                         child: Text(
                           "No rankings found\nNote: Finals divisions will not have rankings",
                           textAlign: TextAlign.center,
                         )),
-                  if (event.divisions?[selectedDivison].rankings?.data?.isNotEmpty ?? false)
-                    for (var i =
-                            (((event.divisions?[selectedDivison].rankings?.data?.length ?? 1) - 1));
+                  if (event.divisions?[selectedDivison].rankings?.isNotEmpty ?? false)
+                    for (var i = (((event.divisions?[selectedDivison].rankings?.length ?? 1) - 1));
                         i >= 0;
                         i--)
                       InkWell(
@@ -610,13 +573,13 @@ class _EventPageState extends ConsumerState<EventPage> {
                             context,
                             CupertinoPageRoute(
                               builder: (context) => TeamPage(
-                                  title: (event.divisions?[selectedDivison].rankings?.data?[i].team
-                                          ?.name)
+                                  title: (event.divisions?[selectedDivison].rankings?[i].team.single
+                                          .number)
                                       .toString(),
                                   event_old: event,
                                   match_id: event.id.toString(),
                                   team_id: (event
-                                          .divisions?[selectedDivison].rankings?.data?[i].team?.id)
+                                          .divisions?[selectedDivison].rankings?[i].team.single.id)
                                       .toString()),
                             ),
                           );
@@ -640,7 +603,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                       WidgetSpan(
                                           alignment: PlaceholderAlignment.middle,
                                           child: Text(
-                                            "${event.divisions?[selectedDivison].rankings?.data?[i].rank}. ",
+                                            "${event.divisions?[selectedDivison].rankings?[i].rank}. ",
                                             style: TextStyle(
                                                 color: Theme.of(context).colorScheme.secondary,
                                                 fontWeight: FontWeight.bold,
@@ -649,8 +612,8 @@ class _EventPageState extends ConsumerState<EventPage> {
                                       WidgetSpan(
                                         alignment: PlaceholderAlignment.middle,
                                         child: Text(
-                                          (event.divisions?[selectedDivison].rankings?.data?[i].team
-                                                  ?.name)
+                                          (event.divisions?[selectedDivison].rankings?[i].team
+                                                  .single.number)
                                               .toString(),
                                           style: const TextStyle(fontSize: 16),
                                         ),
@@ -668,7 +631,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                       WidgetSpan(
                                         alignment: PlaceholderAlignment.middle,
                                         child: Text(
-                                          "WP: ${(event.divisions?[selectedDivison].rankings?.data?[i].wp).toString()} AP: ${(event.divisions?[selectedDivison].rankings?.data?[i].ap).toString()} SP: ${(event.divisions?[selectedDivison].rankings?.data?[i].sp).toString()}      ${event.divisions?[selectedDivison].rankings?.data?[i].wins}-${event.divisions?[selectedDivison].rankings?.data?[i].losses}-${event.divisions?[selectedDivison].rankings?.data?[i].ties}",
+                                          "WP: ${(event.divisions?[selectedDivison].rankings?[i].wp).toString()} AP: ${(event.divisions?[selectedDivison].rankings?[i].ap).toString()} SP: ${(event.divisions?[selectedDivison].rankings?[i].sp).toString()}      ${event.divisions?[selectedDivison].rankings?[i].wins}-${event.divisions?[selectedDivison].rankings?[i].losses}-${event.divisions?[selectedDivison].rankings?[i].ties}",
                                           style: TextStyle(
                                             color: Theme.of(context).colorScheme.tertiary,
                                             fontSize: 14,
@@ -692,7 +655,7 @@ class _EventPageState extends ConsumerState<EventPage> {
     }
 
     Widget SkillsTab() {
-      return _skills.isEmpty
+      return skills.isEmpty
           ? const Center(child: Text("No skills found"))
           : RefreshIndicator(
               child: MediaQuery(
@@ -700,17 +663,17 @@ class _EventPageState extends ConsumerState<EventPage> {
                     .copyWith(textScaleFactor: 1.0)
                     .removePadding(removeTop: true),
                 child: ListView(children: [
-                  for (var i = 0; i < _skills.length; i++)
+                  for (var i = 0; i < skills.length; i++)
                     InkWell(
                       onTap: () {
                         Navigator.push(
                           context,
                           CupertinoPageRoute(
                             builder: (context) => TeamPage(
-                                title: (_skills[i].teamNumber).toString(),
+                                title: (skills[i].teamNumber).toString(),
                                 event_old: event,
                                 match_id: event.id.toString(),
-                                team_id: (_skills[i].teamId).toString()),
+                                team_id: (skills[i].teamId).toString()),
                           ),
                         );
                       },
@@ -742,7 +705,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                     WidgetSpan(
                                       alignment: PlaceholderAlignment.middle,
                                       child: Text(
-                                        (_skills[i].teamNumber).toString(),
+                                        (skills[i].teamNumber).toString(),
                                         style: const TextStyle(fontSize: 16),
                                       ),
                                     ),
@@ -759,7 +722,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                     WidgetSpan(
                                       alignment: PlaceholderAlignment.middle,
                                       child: Text(
-                                        "Total: ${_skills[i].driverScore + _skills[i].programmingScore}   Driver: ${_skills[i].driverScore}   Prog: ${_skills[i].programmingScore}",
+                                        "Total: ${skills[i].driverScore + skills[i].programmingScore}   Driver: ${skills[i].driverScore}   Prog: ${skills[i].programmingScore}",
                                         style: TextStyle(
                                           color: Theme.of(context).colorScheme.tertiary,
                                           fontSize: 14,
@@ -810,7 +773,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                               if (oldState.contains(event.id.toString())) {
                                 oldState.remove(event.id.toString());
                               } else {
-                                if (event.id.toString() != null) oldState.add(event.id.toString());
+                                if (event.id != -1) oldState.add(event.id.toString());
                               }
                               ref
                                   .read(favoriteCompsProvider.notifier)
@@ -828,7 +791,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                 SliverList(
                   delegate: SliverChildListDelegate(
                     [
-                      hiveEvent == null
+                      event.id == -1
                           ? const Align(
                               alignment: Alignment.topCenter,
                               child: Padding(
@@ -859,23 +822,23 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                 Padding(
                                                   padding: const EdgeInsets.only(bottom: 5),
                                                   child: Text(
-                                                    hiveEvent!.name.toString(),
+                                                    event.name.toString(),
                                                     style: const TextStyle(fontSize: 20),
                                                   ),
                                                 ),
                                                 Padding(
                                                   padding: const EdgeInsets.only(bottom: 10),
                                                   child: Text(
-                                                    "${convertDate(hiveEvent!.start.toString())} - ${convertDate(hiveEvent!.end.toString())}",
+                                                    "${convertDate(event.start.toString())} - ${convertDate(event.end.toString())}",
                                                     style: const TextStyle(fontSize: 15),
                                                   ),
                                                 ),
                                                 Text(
-                                                  "Ongoing: ${hiveEvent!.ongoing.toString() == "true" ? "Yes" : "No"}",
+                                                  "Ongoing: ${event.ongoing.toString() == "true" ? "Yes" : "No"}",
                                                   style: const TextStyle(fontSize: 15),
                                                 ),
                                                 Text(
-                                                  "Competition: ${hiveEvent!.seasonName.toString()}",
+                                                  "Competition: ${event.seasonName.toString()}",
                                                   style: const TextStyle(fontSize: 15),
                                                 ),
                                               ]),
@@ -891,13 +854,13 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                             if (Platform.isAndroid) {
                                                               launchUrl(
                                                                   Uri.parse(
-                                                                      "https://maps.google.com/?q=${hiveEvent!.location?.venue.toString()} ${hiveEvent!.location?.address1.toString()}, ${hiveEvent!.location?.city.toString()} ${hiveEvent!.location?.country.toString()}"),
+                                                                      "https://maps.google.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
                                                                   mode: LaunchMode
                                                                       .externalApplication);
                                                             } else if (Platform.isIOS) {
                                                               launchUrl(
                                                                   Uri.parse(
-                                                                      "https://maps.apple.com/?q=${hiveEvent!.location?.venue.toString()} ${hiveEvent!.location?.address1.toString()}, ${hiveEvent!.location?.city.toString()} ${hiveEvent!.location?.country.toString()}"),
+                                                                      "https://maps.apple.com/?q=${event.location?.venue.toString()} ${event.location?.address1.toString()}, ${event.location?.city.toString()} ${event.location?.country.toString()}"),
                                                                   mode: LaunchMode
                                                                       .externalApplication);
                                                             }
@@ -926,7 +889,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                           onTap: () {
                                                             launchUrl(
                                                                 Uri.parse(
-                                                                    "https://www.robotevents.com/robot-competitions/vex-robotics-competition/${hiveEvent!.sku}.html"),
+                                                                    "https://www.robotevents.com/robot-competitions/vex-robotics-competition/${event.sku}.html"),
                                                                 mode:
                                                                     LaunchMode.externalApplication);
                                                             log("Redirect to web browser with comp link");
@@ -950,7 +913,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                       await getEventDetailsThrottled();
                                     },
                                   ),
-                                  (event.divisions?[0].data?.data).toString() == "null"
+                                  (event.divisions?[0]).toString() == "null"
                                       ? const Align(
                                           alignment: Alignment.topCenter,
                                           child: Padding(
@@ -980,9 +943,21 @@ class _EventPageState extends ConsumerState<EventPage> {
                 )
               ];
             },
-            body: TabBarView(
-              children: [MatchesTab(), TeamsTab(), RankingsTab(), SkillsTab()],
-            ),
+            body: (event.divisions?.any((element) => element.matches != null) ?? true) &&
+                    event.teams == null &&
+                    initialLoading // this logic makes it so the page will only show loading indicator if it hasn't finished loading and there is no data in cache
+                ? const Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(
+                        color: Colors.red,
+                      ),
+                    ),
+                  )
+                : TabBarView(
+                    children: [MatchesTab(), TeamsTab(), RankingsTab(), SkillsTab()],
+                  ),
           ),
         ),
       ),

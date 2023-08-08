@@ -7,6 +7,7 @@ import 'package:vrc_ranks_app/Schema/Events.dart';
 import 'package:vrc_ranks_app/team.dart';
 import 'Request.dart' as Request;
 import 'package:collection/collection.dart';
+import 'Hive/Event.dart' as hiveEvent;
 
 class MatchPage extends StatefulWidget {
   const MatchPage(
@@ -18,7 +19,7 @@ class MatchPage extends StatefulWidget {
       : super(key: key);
 
   final String title;
-  final Event event_old;
+  final hiveEvent.Event event_old;
   final int match_number;
   final int division;
 
@@ -225,7 +226,8 @@ class _MatchPageState extends State<MatchPage> {
                                             builder: (context) => TeamPage(
                                                 title: (prop2.team?.name).toString(),
                                                 match_id: event.id.toString(),
-                                                event_old: event,
+                                                event_old: widget
+                                                    .event_old, // TODO this used to be the main event, replace it with that after converting this page
                                                 team_id: (prop2.team?.id).toString())),
                                       );
                                     },

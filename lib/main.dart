@@ -59,6 +59,11 @@ Future main() async {
     await Hive.openBox<Team>('teams');
     await Hive.openBox<Event>('events');
 
+    // // TODO Remove
+    // await Hive.deleteBoxFromDisk('events');
+    // await Hive.openBox<Event>('events');
+    // // !
+
     getFullEventList(DateTime.now().subYears(2));
 
     checkEvents();
