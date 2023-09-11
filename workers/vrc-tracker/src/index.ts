@@ -9,6 +9,8 @@ export default {
     },
 };
 
+const seasonId = 181; // 173 for spin up
+
 async function handleRequest(request: Request<unknown>, env: Env) {
     const requestHeaders = {
         headers: {
@@ -35,7 +37,7 @@ async function handleRequest(request: Request<unknown>, env: Env) {
         console.log(`Cache miss for: ${request.url}.`);
         if (pathname.startsWith("/eventList")) {
             const date = searchParams.get("date");
-            let apiResponse = await fetch(`https://www.robotevents.com/api/v2/events?season[]=173&start=${date}&per_page=1000`, {
+            let apiResponse = await fetch(`https://www.robotevents.com/api/v2/events?season[]=${seasonId}&start=${date}&per_page=1000`, {
                 ...requestHeaders,
                 cf: {
                     cacheTtl: 7200,
@@ -127,7 +129,7 @@ async function handleRequest(request: Request<unknown>, env: Env) {
             return response;
         } else if (pathname.startsWith("/teamEvents")) {
             const team = searchParams.get("team");
-            let apiResponse = await fetch(`https://www.robotevents.com/api/v2/teams/${team}/events?season[]=173&per_page=1000`, {
+            let apiResponse = await fetch(`https://www.robotevents.com/api/v2/teams/${team}/events?season[]=${seasonId}&per_page=1000`, {
                 ...requestHeaders,
                 cf: {
                     cacheTtl: 86400,
