@@ -16,7 +16,7 @@ class TeamsPage extends StatefulWidget {
 class _TeamsPageState extends State<TeamsPage> {
   void searchTeams(String query, String grade) {
     Request.getTeams(query, grade).then((value) {
-      if (this.mounted) {
+      if (mounted) {
         setState(() {
           _teams = value;
           teams = value;

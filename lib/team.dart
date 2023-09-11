@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrc_ranks_app/Schema/MatchListByTeam.dart';
@@ -7,6 +8,7 @@ import 'package:vrc_ranks_app/Schema/Rankings.dart';
 import 'package:vrc_ranks_app/Schema/Team.dart';
 import 'package:vrc_ranks_app/Schema/Events.dart' as Events;
 import 'package:vrc_ranks_app/events.dart';
+import 'package:vrc_ranks_app/teamEvents.dart';
 import 'Request.dart' as Request;
 import 'match.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -213,6 +215,31 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                     ],
                                   ),
                                 ),
+                          team.id != null
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: ConstrainedBox(
+                                      constraints: const BoxConstraints.tightFor(
+                                        width: 200,
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => TeamEventsPage(
+                                                      title: team.teamName.toString(),
+                                                      team_id: team.id!,
+                                                    )),
+                                          );
+                                        },
+                                        child: const Text('Team Details'),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : const Text(""),
                         ],
                       )
                     ]),
@@ -251,7 +278,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                       WidgetSpan(
                                         alignment: PlaceholderAlignment.middle,
                                         child: Text(
-                                          (matches.data?[i].name).toString(),
+                                          (matches.data?[i].name?.replaceFirst("Qualifier", "Qual"))
+                                              .toString(),
                                           style: const TextStyle(fontSize: 16),
                                         ),
                                       ),
@@ -261,7 +289,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               ),
                               const Spacer(flex: 2),
                               SizedBox(
-                                width: 55,
+                                width: 60,
                                 child: Align(
                                     alignment: Alignment.centerRight,
                                     child: RichText(
@@ -357,10 +385,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                         ),
                                       ),
                                     )
-                                  : Text("N/A"),
+                                  : Text(((matches.data?[i].scheduled ?? "").isNotEmpty
+                                      ? DateFormat.jm().format(
+                                          DateTime.parse((matches.data?[i].scheduled).toString())
+                                              .toLocal())
+                                      : "N/A")),
                               const Spacer(),
                               SizedBox(
-                                width: 55,
+                                width: 60,
                                 child: Align(
                                     alignment: Alignment.centerLeft,
                                     child: RichText(

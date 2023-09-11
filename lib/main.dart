@@ -5,6 +5,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:upgrader/upgrader.dart';
 import 'package:vrc_ranks_app/events.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:vrc_ranks_app/favorites.dart';
@@ -33,6 +34,8 @@ Future main() async {
 
     await dotenv.load(fileName: ".env");
 
+    // if (kDebugMode) await Upgrader.clearSavedSettings();
+
     runApp(const ProviderScope(child: MyApp()));
   }, (error, stack) => FirebaseCrashlytics.instance.recordError(error, stack, fatal: true));
 }
@@ -46,7 +49,9 @@ class MyApp extends StatelessWidget {
       theme: Styles.themeData(false, context),
       darkTheme: Styles.themeData(true, context),
       themeMode: ThemeMode.system,
-      home: const MainPage(),
+      home: UpgradeAlert(
+        child: const MainPage(),
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
