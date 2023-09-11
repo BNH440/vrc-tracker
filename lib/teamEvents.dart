@@ -9,7 +9,7 @@ import 'package:vrc_ranks_app/event.dart';
 import 'package:vrc_ranks_app/events.dart';
 import 'Request.dart' as Request;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+// TODO left off with this error when you go to the team details page, need to fix team events
 class TeamEventsPage extends ConsumerStatefulWidget {
   const TeamEventsPage({Key? key, required this.title, required this.team_id}) : super(key: key);
 

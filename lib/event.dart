@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vrc_ranks_app/Schema/Events.dart';
 import 'package:vrc_ranks_app/events.dart';
 import 'package:vrc_ranks_app/team.dart';
 import 'Request.dart' as Request;
@@ -77,7 +76,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                 initialLoading = false;
               })
             }
-        }); // ! Need this to update event on page load
+        }); // TODO Need this to update event on page load
 
     Hive.box<hive_event.Event>('events')
         .watch(key: widget.id.toString())
@@ -237,7 +236,11 @@ class _EventPageState extends ConsumerState<EventPage> {
                                             WidgetSpan(
                                               alignment: PlaceholderAlignment.middle,
                                               child: Text(
-                                                "${event.divisions?[selectedDivison].matches?[i].blueAlliance.teams[0].number}\n${event.divisions?[selectedDivison].matches?[i].blueAlliance.teams[1].number}",
+                                                event.divisions?[selectedDivison].matches?[i]
+                                                            .blueAlliance.teams.length ==
+                                                        2 // Added new check to make sure there are two teams in the alliance
+                                                    ? "${event.divisions?[selectedDivison].matches?[i].blueAlliance.teams[0].number}\n${event.divisions?[selectedDivison].matches?[i].blueAlliance.teams[1].number}"
+                                                    : "N/A",
                                                 style: TextStyle(
                                                   color: Theme.of(context).colorScheme.tertiary,
                                                   fontSize: 14,
@@ -251,13 +254,13 @@ class _EventPageState extends ConsumerState<EventPage> {
                                     ),
                                   ),
                                   const Spacer(),
-                                  (event.divisions?[selectedDivison].matches?[i].blueAlliance.score
+                                  ((event.divisions?[selectedDivison].matches?[i].blueAlliance.score
                                                   .toString() !=
                                               "0" ||
                                           event.divisions?[selectedDivison].matches?[i].redAlliance
                                                   .score
                                                   .toString() !=
-                                              "0")
+                                              "0"))
                                       ? SizedBox(
                                           width: 100,
                                           child: Align(
@@ -331,7 +334,11 @@ class _EventPageState extends ConsumerState<EventPage> {
                                             WidgetSpan(
                                               alignment: PlaceholderAlignment.middle,
                                               child: Text(
-                                                "${event.divisions?[selectedDivison].matches?[i].redAlliance.teams[0].number}\n${event.divisions?[selectedDivison].matches?[i].redAlliance.teams[1].number}",
+                                                event.divisions?[selectedDivison].matches?[i]
+                                                            .redAlliance.teams.length ==
+                                                        2 // Added new check to make sure there are two teams in the alliance
+                                                    ? "${event.divisions?[selectedDivison].matches?[i].redAlliance.teams[0].number}\n${event.divisions?[selectedDivison].matches?[i].redAlliance.teams[1].number}"
+                                                    : "N/A",
                                                 style: TextStyle(
                                                   color: Theme.of(context).colorScheme.tertiary,
                                                   fontSize: 14,
@@ -420,9 +427,8 @@ class _EventPageState extends ConsumerState<EventPage> {
                                 CupertinoPageRoute(
                                   builder: (context) => TeamPage(
                                       title: (team.number).toString(),
-                                      event_old: event,
-                                      match_id: event.id.toString(),
-                                      team_id: (team.id).toString()),
+                                      oldEvent: event,
+                                      teamId: (team.id).toString()),
                                 ),
                               );
                             },
@@ -576,9 +582,8 @@ class _EventPageState extends ConsumerState<EventPage> {
                                   title: (event.divisions?[selectedDivison].rankings?[i].team.single
                                           .number)
                                       .toString(),
-                                  event_old: event,
-                                  match_id: event.id.toString(),
-                                  team_id: (event
+                                  oldEvent: event,
+                                  teamId: (event
                                           .divisions?[selectedDivison].rankings?[i].team.single.id)
                                       .toString()),
                             ),
@@ -671,9 +676,8 @@ class _EventPageState extends ConsumerState<EventPage> {
                           CupertinoPageRoute(
                             builder: (context) => TeamPage(
                                 title: (skills[i].teamNumber).toString(),
-                                event_old: event,
-                                match_id: event.id.toString(),
-                                team_id: (skills[i].teamId).toString()),
+                                oldEvent: event,
+                                teamId: (skills[i].teamId).toString()),
                           ),
                         );
                       },

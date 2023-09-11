@@ -1,105 +1,119 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vrc_ranks_app/Schema/MatchListByTeam.dart';
-import 'package:vrc_ranks_app/Schema/Rankings.dart';
-import 'package:vrc_ranks_app/Schema/Team.dart';
-import 'package:vrc_ranks_app/Schema/Events.dart' as Events;
 import 'package:vrc_ranks_app/events.dart';
 import 'package:vrc_ranks_app/teamEvents.dart';
 import 'Request.dart' as Request;
 import 'match.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
-import 'Hive/Event.dart' as hiveEvent;
+import 'Hive/Event.dart';
+import 'Hive/Team.dart';
 
 class TeamPage extends ConsumerStatefulWidget {
-  const TeamPage(
-      {Key? key,
-      required this.title,
-      required this.team_id,
-      required this.match_id,
-      required this.event_old})
+  const TeamPage({Key? key, required this.title, required this.teamId, required this.oldEvent})
       : super(key: key);
 
   final String title;
-  final String team_id;
-  final String match_id;
-  final hiveEvent.Event event_old;
+  final String teamId;
+  final Event oldEvent;
 
   @override
   _TeamPageState createState() => _TeamPageState();
 }
 
 class _TeamPageState extends ConsumerState<TeamPage> {
-  Team _team = Team();
-  Team team = Team();
-  MatchListByTeam _matches = MatchListByTeam();
-  MatchListByTeam matches = MatchListByTeam();
-  List<hiveEvent.Rank>? rankings = [];
+  late Event event;
+  Team? team;
+  late int teamDiv;
+  List<Match> matches = [];
+  List<Rank>? rankings = [];
   int division = 0;
+
+  late Timer timer;
 
   @override
   void initState() {
+    event = widget.oldEvent;
+    teamDiv = event.divisions?.indexWhere((element) =>
+            element.rankings
+                ?.any((team) => team.team.first.id.toString() == widget.teamId.toString()) ??
+            false) ??
+        -1;
+    log(teamDiv.toString());
     super.initState();
+
+    Request.updateHiveEventDetails(event.id.toString());
+
+    Hive.box<Event>('events').watch(key: event.id.toString()).listen((listenerEvent) => {
+          // listen for changes to event in hive db and set state when those changes occur
+          if (this.mounted)
+            {
+              setState(() {
+                log("event changed");
+                event = listenerEvent.value as Event;
+                matches = event.divisions?[teamDiv].matches ?? [];
+              })
+            }
+        });
+
+    timer = Timer.periodic(const Duration(seconds: 15), (t) {
+      // Update event every 15 seconds
+      Request.updateHiveEventDetails(event.id.toString());
+    });
+
     final favoriteTeams = ref.read(favoriteTeamsProvider);
-    Request.getTeamDetails((widget.team_id).toString(), (widget.event_old.id).toString())
-        .then((value) {
-      if (this.mounted) {
+
+    Request.getTeam((widget.teamId).toString()).then((value) {
+      if (mounted) {
         setState(() {
-          _team = value[0];
-          team = value[0];
-          _matches = value[1];
-          matches = value[1];
-
-          division = matches.data?.isNotEmpty ?? false
-              ? widget.event_old.divisions
-                      ?.firstWhereOrNull((element) =>
-                          element.id.toString() == matches.data?[0].division?.id.toString())
-                      ?.order ??
-                  -1
-              : -1;
-
-          if (division != -1) {
-            rankings = widget.event_old.divisions?[division].rankings;
-          }
+          team = value;
         });
       }
     });
+
+    //   Request.getTeamDetails((widget.teamId).toString(), (widget.event_old.id).toString())
+    //       .then((value) {
+    //     if (this.mounted) {
+    //       setState(() {
+    //         team = value[0];
+    //         matches = value[1];
+
+    //         division = matches.data?.isNotEmpty ?? false
+    //             ? widget.event_old.divisions
+    //                     ?.firstWhereOrNull((element) =>
+    //                         element.id.toString() == matches.data?[0].division?.id.toString())
+    //                     ?.order ??
+    //                 -1
+    //             : -1;
+
+    //         if (division != -1) {
+    //           rankings = widget.event_old.divisions?[division].rankings;
+    //         }
+    //       });
+    //     }
+    //   });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    timer.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     final favoriteTeams = ref.watch(favoriteTeamsProvider);
 
-    List list;
-    final getTeamDetailsThrottled = throttle(
+    final refreshDetails = throttle(
       () async => {
-        list = await Request.getTeamDetails(
-            (widget.team_id).toString(), (widget.event_old.id).toString()),
-        if (this.mounted)
-          {
-            setState(() {
-              _team = list[0];
-              team = list[0];
-              _matches = list[1];
-              matches = list[1];
-
-              division = matches.data?.isNotEmpty ?? false
-                  ? widget.event_old.divisions
-                          ?.firstWhereOrNull((element) =>
-                              element.id.toString() == matches.data?[0].division?.id.toString())
-                          ?.order ??
-                      -1
-                  : -1;
-
-              if (division != -1) {
-                rankings = widget.event_old.divisions?[division].rankings;
-              }
-            }),
-          },
+        Request.updateHiveEventDetails(event.id.toString()),
       },
       const Duration(seconds: 0),
     );
@@ -111,15 +125,15 @@ class _TeamPageState extends ConsumerState<TeamPage> {
           title: Text(widget.title),
           actions: [
             IconButton(
-              icon: ref.read(favoriteTeamsProvider.notifier).state.contains(team.id.toString())
+              icon: ref.read(favoriteTeamsProvider.notifier).state.contains(team?.id.toString())
                   ? const Icon(Icons.star)
                   : const Icon(Icons.star_border_outlined),
               onPressed: () {
                 List<String> oldState = ref.read(favoriteTeamsProvider.notifier).state;
-                if (oldState.contains(team.id.toString())) {
-                  oldState.remove(team.id.toString());
+                if (oldState.contains(team?.id.toString())) {
+                  oldState.remove(team?.id.toString());
                 } else {
-                  oldState.add(team.id.toString());
+                  oldState.add(team!.id.toString());
                 }
                 ref.read(favoriteTeamsProvider.notifier).update((state) => oldState.toList());
 
@@ -129,7 +143,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
             ),
           ],
         ),
-        body: (team.teamName).toString() == "null"
+        body: matches.isEmpty
             ? const Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
@@ -157,24 +171,24 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           Padding(
                             padding: const EdgeInsets.only(bottom: 10),
                             child: Text(
-                              team.number.toString(),
+                              team?.number.toString() ?? "",
                               style: const TextStyle(fontSize: 20),
                             ),
                           ),
                           Text(
-                            "Name: ${team.teamName.toString()}",
+                            "Name: ${team?.teamName.toString()}",
                             style: const TextStyle(fontSize: 15),
                           ),
                           Text(
-                            "Organization: ${team.organization.toString()}",
+                            "Organization: ${team?.organization.toString()}",
                             style: const TextStyle(fontSize: 15),
                           ),
                           Text(
-                            "Location: ${team.location?.city.toString()}, ${(team.location?.region ?? team.location?.country).toString()}",
+                            "Location: ${team?.location?.city.toString()}, ${(team?.location?.region ?? team?.location?.country).toString()}",
                             style: const TextStyle(fontSize: 15),
                           ),
                           Text(
-                            "Grade: ${team.grade.toString()}",
+                            "Grade: ${team?.grade.toString()}",
                             style: const TextStyle(fontSize: 15),
                           ),
                           if (rankings?.isNotEmpty ?? false)
@@ -194,29 +208,29 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                       style: const TextStyle(fontSize: 15),
                                     ),
                                     Text(
-                                      "Rank: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.rank.toString()}",
+                                      "Rank: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team?.id)?.rank.toString()}",
                                       style: const TextStyle(fontSize: 15),
                                     ),
                                     Text(
-                                      "Record: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.wins.toString()}-${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.losses.toString()}-${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.ties.toString()}",
+                                      "Record: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team?.id)?.wins.toString()}-${rankings?.firstWhereOrNull((element) => element.team.single.id == team?.id)?.losses.toString()}-${rankings?.firstWhereOrNull((element) => element.team.single.id == team?.id)?.ties.toString()}",
                                       style: const TextStyle(fontSize: 15),
                                     ),
                                     Text(
-                                      "Avg Points: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.averagePoints.toString()}",
+                                      "Avg Points: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team?.id)?.averagePoints.toString()}",
                                       style: const TextStyle(fontSize: 15),
                                     ),
                                     Text(
-                                      "High Score: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.highScore.toString()}",
+                                      "High Score: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team?.id)?.highScore.toString()}",
                                       style: const TextStyle(fontSize: 15),
                                     ),
                                     Text(
-                                      "WP: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.wp.toString()}, AP: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.ap.toString()}, SP: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team.id)?.sp.toString()}",
+                                      "WP: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team?.id)?.wp.toString()}, AP: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team?.id)?.ap.toString()}, SP: ${rankings?.firstWhereOrNull((element) => element.team.single.id == team?.id)?.sp.toString()}",
                                       style: const TextStyle(fontSize: 15),
                                     ),
                                   ],
                                 ),
                               ),
-                          team.id != null
+                          team?.id != null
                               ? Center(
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 10),
@@ -230,8 +244,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) => TeamEventsPage(
-                                                      title: team.teamName.toString(),
-                                                      team_id: team.id!,
+                                                      title: team!.teamName.toString(),
+                                                      team_id: team!.id,
                                                     )),
                                           );
                                         },
@@ -245,17 +259,17 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       )
                     ]),
                   ),
-                  if (matches.data != null)
-                    for (var i = 0; i <= (((matches.data?.length ?? 1) - 1)); i++)
+                  if (matches.isNotEmpty)
+                    for (var i = 0; i <= ((matches.length - 1)); i++)
                       InkWell(
                         onTap: () {
                           Navigator.push(
                             context,
                             CupertinoPageRoute(
                                 builder: (context) => MatchPage(
-                                      title: (matches.data?[i].name).toString(),
-                                      event_old: widget.event_old,
-                                      match_number: (matches.data?[i].id ?? 0).toInt(),
+                                      title: (matches[i].name).toString(),
+                                      event_old: widget.oldEvent,
+                                      match_number: matches[i].id,
                                       division: division,
                                     )),
                           );
@@ -279,7 +293,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                       WidgetSpan(
                                         alignment: PlaceholderAlignment.middle,
                                         child: Text(
-                                          (matches.data?[i].name?.replaceFirst("Qualifier", "Qual"))
+                                          (matches[i].name.replaceFirst("Qualifier", "Qual"))
                                               .toString(),
                                           style: const TextStyle(fontSize: 16),
                                         ),
@@ -301,21 +315,18 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                           ),
                                           children: <TextSpan>[
                                             TextSpan(
-                                                text:
-                                                    "${matches.data?[i].alliances?[0].teams?[0].team?.name}",
+                                                text: matches[i].blueAlliance.teams[0].number,
                                                 style: TextStyle(
-                                                    color: (matches.data?[i].alliances?[0].teams?[0]
-                                                                .team?.id ==
-                                                            team.id)
+                                                    color: (matches[i].blueAlliance.teams[0].id ==
+                                                            team?.id)
                                                         ? Colors.blue
                                                         : null)),
                                             TextSpan(
                                                 text:
-                                                    "\n${matches.data?[i].alliances?[0].teams?[1].team?.name}",
+                                                    "\n${matches[i].blueAlliance.teams[1].number}",
                                                 style: TextStyle(
-                                                    color: (matches.data?[i].alliances?[0].teams?[1]
-                                                                .team?.id ==
-                                                            team.id)
+                                                    color: (matches[i].blueAlliance.teams[1].id ==
+                                                            team?.id)
                                                         ? Colors.blue
                                                         : null)),
                                           ],
@@ -323,8 +334,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                         textAlign: TextAlign.right)),
                               ),
                               const Spacer(),
-                              (matches.data?[i].alliances?[0].score.toString() != "0" ||
-                                      matches.data?[i].alliances?[1].score.toString() != "0")
+                              (matches[i].blueAlliance.score.toString() != "0" ||
+                                      matches[i].redAlliance.score.toString() != "0")
                                   ? SizedBox(
                                       width: 100,
                                       child: Align(
@@ -341,18 +352,17 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                                       ),
                                                       children: <TextSpan>[
                                                         TextSpan(
-                                                            text: matches
-                                                                    .data?[i].alliances?[0].score
-                                                                    .toString() ??
-                                                                "",
+                                                            text: matches[i]
+                                                                .blueAlliance
+                                                                .score
+                                                                .toString(),
                                                             style: TextStyle(
                                                                 color: Colors.blue,
-                                                                fontWeight: (matches.data?[i]
-                                                                            .alliances?[0].teams!
-                                                                            .any((element) =>
-                                                                                element.team?.id ==
-                                                                                team.id) ??
-                                                                        false)
+                                                                fontWeight: (matches[i]
+                                                                        .blueAlliance
+                                                                        .teams
+                                                                        .any((element) =>
+                                                                            element.id == team?.id))
                                                                     ? FontWeight.bold
                                                                     : FontWeight.normal)),
                                                         TextSpan(
@@ -364,18 +374,17 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                                                   ?.color),
                                                         ),
                                                         TextSpan(
-                                                            text: matches
-                                                                    .data?[i].alliances?[1].score
-                                                                    .toString() ??
-                                                                "",
+                                                            text: matches[i]
+                                                                .redAlliance
+                                                                .score
+                                                                .toString(),
                                                             style: TextStyle(
                                                                 color: Colors.red,
-                                                                fontWeight: (matches.data?[i]
-                                                                            .alliances?[1].teams!
-                                                                            .any((element) =>
-                                                                                element.team?.id ==
-                                                                                team.id) ??
-                                                                        false)
+                                                                fontWeight: (matches[i]
+                                                                        .redAlliance
+                                                                        .teams
+                                                                        .any((element) =>
+                                                                            element.id == team?.id))
                                                                     ? FontWeight.bold
                                                                     : FontWeight.normal)),
                                                       ],
@@ -386,9 +395,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                         ),
                                       ),
                                     )
-                                  : Text(((matches.data?[i].scheduled ?? "").isNotEmpty
+                                  : Text(((matches[i].scheduled ?? "").isNotEmpty
                                       ? DateFormat.jm().format(
-                                          DateTime.parse((matches.data?[i].scheduled).toString())
+                                          DateTime.parse((matches[i].scheduled).toString())
                                               .toLocal())
                                       : "N/A")),
                               const Spacer(),
@@ -404,21 +413,17 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                         ),
                                         children: <TextSpan>[
                                           TextSpan(
-                                              text:
-                                                  "${matches.data?[i].alliances?[1].teams?[0].team?.name}",
+                                              text: matches[i].redAlliance.teams[0].number,
                                               style: TextStyle(
-                                                  color: (matches.data?[i].alliances?[1].teams?[0]
-                                                              .team?.id ==
-                                                          team.id)
+                                                  color: (matches[i].redAlliance.teams[0].id ==
+                                                          team?.id)
                                                       ? Colors.red
                                                       : null)),
                                           TextSpan(
-                                              text:
-                                                  "\n${matches.data?[i].alliances?[1].teams?[1].team?.name}",
+                                              text: "\n${matches[i].redAlliance.teams[1].number}",
                                               style: TextStyle(
-                                                  color: (matches.data?[i].alliances?[1].teams?[1]
-                                                              .team?.id ==
-                                                          team.id)
+                                                  color: (matches[i].redAlliance.teams[1].id ==
+                                                          team?.id)
                                                       ? Colors.red
                                                       : null)),
                                         ],
@@ -431,7 +436,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       ),
                 ]),
                 onRefresh: () async {
-                  await getTeamDetailsThrottled();
+                  await refreshDetails();
                 },
               ),
       ),

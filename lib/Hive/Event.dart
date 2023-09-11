@@ -238,7 +238,8 @@ Future<Match> matchToHiveMatch(divschema.Match match, Event e) async {
       scored: match.scored,
       name: match.name!,
       redAlliance: await allianceToHiveAlliance(match.alliances![1], AllianceColor.red, e),
-      blueAlliance: await allianceToHiveAlliance(match.alliances![0], AllianceColor.blue, e));
+      blueAlliance: await allianceToHiveAlliance(match.alliances![0], AllianceColor.blue, e),
+      divisionId: match.division!.id!);
   return hiveMatch;
 }
 
@@ -250,9 +251,17 @@ Future<Alliance> allianceToHiveAlliance(
 
   for (var team in alliance.teams!) {
     // var hiveTeam = await getTeam(team.team!.id.toString());
-    var hiveTeam = e.teams!.firstWhere((element) => element.id == team.team!.id);
+    var hiveTeam;
 
-    teams.add(hiveTeam);
+    try {
+      hiveTeam = e.teams!.firstWhere((element) => element.id == team.team!.id);
+    } catch (e) {
+      hiveTeam = null;
+    }
+
+    if (hiveTeam != null) {
+      teams.add(hiveTeam);
+    }
   }
 
   var hiveAlliance = Alliance(
@@ -327,7 +336,8 @@ class Match extends HiveObject {
       this.scored,
       required this.name,
       required this.redAlliance,
-      required this.blueAlliance});
+      required this.blueAlliance,
+      required this.divisionId});
 
   @HiveField(0)
   int id;
@@ -361,6 +371,9 @@ class Match extends HiveObject {
 
   @HiveField(10)
   Alliance blueAlliance;
+
+  @HiveField(11)
+  int divisionId;
 
   @HiveField(44)
   DateTime lastUpdated = DateTime.now();

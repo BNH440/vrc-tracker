@@ -1,12 +1,14 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:rate_limiter/rate_limiter.dart';
-import 'package:vrc_ranks_app/Schema/Division.dart' as Div;
-import 'package:vrc_ranks_app/Schema/Events.dart';
+import 'Hive/Event.dart' as hive_event;
 import 'package:vrc_ranks_app/team.dart';
 import 'Request.dart' as Request;
-import 'package:collection/collection.dart';
 import 'Hive/Event.dart' as hiveEvent;
 
 class MatchPage extends StatefulWidget {
@@ -19,6 +21,8 @@ class MatchPage extends StatefulWidget {
       : super(key: key);
 
   final String title;
+  final String eventId;
+  final int divId;
   final hiveEvent.Event event_old;
   final int match_number;
   final int division;
@@ -28,58 +32,89 @@ class MatchPage extends StatefulWidget {
 }
 
 class _MatchPageState extends State<MatchPage> {
-  Event _event = Event();
-  Event event = Event();
-  bool loading = false;
+  hive_event.Event event = hive_event.Event.empty();
+  bool initialLoading = true;
+  bool predictionLoading = false;
+
+  // @override
+  // void initState() {
+  //   super.initState();
+
+  //   Request.getEventDetails(widget.event_old.id.toString()).then((value) {
+  //     if (this.mounted) {
+  //       setState(() {
+  //         _event = value;
+  //         event = value;
+  //       });
+  //     }
+  //   });
+  // }
+
+  late Timer timer;
 
   @override
   void initState() {
-    super.initState();
-    Request.getEventDetails(widget.event_old.id.toString()).then((value) {
-      if (this.mounted) {
-        setState(() {
-          _event = value;
-          event = value;
+    Request.updateHiveEventDetails(widget.eventId).then((value) => {
+          if (this.mounted)
+            {
+              setState(() {
+                initialLoading = false;
+              })
+            }
+        }); // TODO Need this to update event on page load (this comment was copied from event.dart)
+
+    Hive.box<hive_event.Event>('events').watch(key: widget.eventId).listen((listenerEvent) => {
+          // listen for changes to event in hive db and set state when those changes occur
+          if (this.mounted)
+            {
+              setState(() {
+                log("event changed");
+                event = listenerEvent.value as hive_event.Event;
+              })
+            }
         });
-      }
+
+    timer = Timer.periodic(const Duration(seconds: 15), (t) {
+      // Update event every 15 seconds
+      Request.updateHiveEventDetails(widget.eventId);
     });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    timer.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     final getEventDetailsThrottled = throttle(
-      () async => {
-        event = await Request.getEventDetails(widget.event_old.id.toString()),
-        if (this.mounted)
-          {
-            setState(() {
-              _event = event;
-              event = event;
-            }),
-          },
+      () => {
+        Request.updateHiveEventDetails(widget.eventId),
       },
       const Duration(seconds: 0),
     );
 
-    Div.Match? match = (event.divisions?[widget.division].data?.data
-        ?.firstWhereOrNull((element) => element.id == widget.match_number));
+    hiveEvent.Match? match = event.divisions?[widget.divId].matches
+        ?.firstWhere((match) => match.matchnum == widget.match_number);
 
     void predictScore() {
-      if (match!.alliances!.isEmpty) return;
+      if (match?.redAlliance == null || match?.blueAlliance == null) return;
       setState(() {
-        loading = true;
+        predictionLoading = true;
       });
       Request.predictMatch(
-              match.alliances![1].teams![0].team!.name!,
-              match.alliances![1].teams![1].team!.name!,
-              match.alliances![0].teams![0].team!.name!,
-              match.alliances![0].teams![1].team!.name!,
+              match!.redAlliance.teams[0].number,
+              match.redAlliance.teams[1].number,
+              match.blueAlliance.teams[0].number,
+              match.blueAlliance.teams[1].number,
               match.id.toString())
           .then((probability) => {
                 if (probability != -1.00)
                   {
                     setState(() {
-                      loading = false;
+                      predictionLoading = false;
                     }),
                     showDialog(
                         context: context,
@@ -120,13 +155,52 @@ class _MatchPageState extends State<MatchPage> {
               });
     }
 
+    Widget teamList() {
+      return ListView(children: [
+            for (var team in alliance.teams) // TODO https://vrc-tracker.atlassian.net/browse/VT-103?focusedCommentId=10170
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                        builder: (context) => TeamPage(
+                            title: (prop2.team?.name).toString(),
+                            oldEvent: widget
+                                .event_old, // TODO this used to be the main event, replace it with that after converting this page
+                            teamId: (prop2.team?.id).toString())),
+                  );
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Theme.of(context).cardColor,
+                    border: Border.all(
+                      color: prop.color == 'red'
+                          ? Colors.red
+                          : prop.color == 'blue'
+                              ? Colors.blue
+                              : Colors.grey,
+                      width: 1,
+                    ),
+                  ),
+                  height: 50,
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  margin: const EdgeInsets.all(4),
+                  child: Center(
+                    child: Text((prop2.team?.name).toString()),
+                  ),
+                ),
+              ),
+      ]);
+    }
+
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
         ),
-        body: (event.divisions?[widget.division].data?.data).toString() == "null"
+        body: (event.divisions?[widget.divId]).toString() == "null"
             ? const Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
@@ -160,9 +234,9 @@ class _MatchPageState extends State<MatchPage> {
                                     style: const TextStyle(fontSize: 20),
                                   ),
                                 ),
-                                if (match.division != null)
+                                if (match.divisionId != null)
                                   Text(
-                                    "Division: ${event.divisions?[widget.division].name.toString()}",
+                                    "Division: ${event.divisions?[match.divisionId].name.toString()}", // TODO check if divisionId is an index or an id...
                                     style: const TextStyle(fontSize: 15),
                                   ),
                                 if (match.field.toString() != "null")
@@ -176,13 +250,12 @@ class _MatchPageState extends State<MatchPage> {
                                     style: const TextStyle(fontSize: 15),
                                   ),
                                 Text(
-                                  "Scored: ${(!(((match.alliances?[0].score ?? 0) & (match.alliances?[0].score ?? 0)) == 0)) ? "Yes" : "No"}",
+                                  "Scored: ${(!(((match.blueAlliance.score ?? 0) & (match.redAlliance.score ?? 0)) == 0)) ? "Yes" : "No"}",
                                   style: const TextStyle(fontSize: 15),
                                 ),
                               ],
                             ),
-                            !(((match.alliances?[0].score ?? 0) &
-                                        (match.alliances?[0].score ?? 0)) ==
+                            !(((match.blueAlliance.score ?? 0) & (match.redAlliance.score ?? 0)) ==
                                     0)
                                 ? RichText(
                                     text: TextSpan(
@@ -191,7 +264,7 @@ class _MatchPageState extends State<MatchPage> {
                                       ),
                                       children: <TextSpan>[
                                         TextSpan(
-                                            text: match.alliances?[0].score.toString() ?? "",
+                                            text: match.blueAlliance.score.toString() ?? "",
                                             style: const TextStyle(color: Colors.blue)),
                                         TextSpan(
                                           text: " - ",
@@ -199,12 +272,12 @@ class _MatchPageState extends State<MatchPage> {
                                               color: Theme.of(context).textTheme.bodyLarge?.color),
                                         ),
                                         TextSpan(
-                                            text: match.alliances?[1].score.toString() ?? "",
+                                            text: match.redAlliance.score.toString() ?? "",
                                             style: const TextStyle(color: Colors.red)),
                                       ],
                                     ),
                                   )
-                                : (loading
+                                : (predictionLoading
                                     ? const Padding(
                                         padding: EdgeInsets.only(bottom: 10),
                                         child: CircularProgressIndicator())
@@ -214,44 +287,43 @@ class _MatchPageState extends State<MatchPage> {
                           ]),
                         ),
                         if (event.divisions != null)
-                          if (match.alliances?.length != null)
-                            for (var prop in (match.alliances!))
-                              if (prop.teams != null)
-                                for (var prop2 in prop.teams!)
-                                  InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        CupertinoPageRoute(
-                                            builder: (context) => TeamPage(
-                                                title: (prop2.team?.name).toString(),
-                                                match_id: event.id.toString(),
-                                                event_old: widget
-                                                    .event_old, // TODO this used to be the main event, replace it with that after converting this page
-                                                team_id: (prop2.team?.id).toString())),
-                                      );
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: Theme.of(context).cardColor,
-                                        border: Border.all(
-                                          color: prop.color == 'red'
-                                              ? Colors.red
-                                              : prop.color == 'blue'
-                                                  ? Colors.blue
-                                                  : Colors.grey,
-                                          width: 1,
-                                        ),
-                                      ),
-                                      height: 50,
-                                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                                      margin: const EdgeInsets.all(4),
-                                      child: Center(
-                                        child: Text((prop2.team?.name).toString()),
+                          // if (match.blueAlliance != null && match.redAlliance != null)
+                          for (var alliance in (match.alliances!))
+                            if (prop.teams != null)
+                              for (var prop2 in prop.teams!)
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      CupertinoPageRoute(
+                                          builder: (context) => TeamPage(
+                                              title: (prop2.team?.name).toString(),
+                                              oldEvent: widget
+                                                  .event_old, // TODO this used to be the main event, replace it with that after converting this page
+                                              teamId: (prop2.team?.id).toString())),
+                                    );
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: Theme.of(context).cardColor,
+                                      border: Border.all(
+                                        color: prop.color == 'red'
+                                            ? Colors.red
+                                            : prop.color == 'blue'
+                                                ? Colors.blue
+                                                : Colors.grey,
+                                        width: 1,
                                       ),
                                     ),
+                                    height: 50,
+                                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                                    margin: const EdgeInsets.all(4),
+                                    child: Center(
+                                      child: Text((prop2.team?.name).toString()),
+                                    ),
                                   ),
+                                ),
                       ]),
                 onRefresh: () async {
                   await getEventDetailsThrottled();
