@@ -29,7 +29,7 @@ function checkPages() {
 async function requests() {
     let last_page = await checkPages();
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     for (let i = 1; i <= last_page; i++) {
         let options = {
@@ -62,7 +62,7 @@ async function requests() {
             console.log(teamList.length);
         });
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1500));
     }
 }
 
