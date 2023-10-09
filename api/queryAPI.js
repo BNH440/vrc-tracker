@@ -8,8 +8,30 @@ dotenv.config();
 
 let teamList = [];
 
+function checkPages() {
+    let options = {
+        method: "GET",
+        url: "https://www.robotevents.com/api/v2/teams?program=1&per_page=250&page=1&sort=team_number",
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${process.env.API_KEY}`,
+        },
+    };
+
+    return new Promise(function (resolve, reject) {
+        request(options, function (error, response) {
+            if (error) reject(error);
+            resolve(parseInt(JSON.parse(response.body).meta.last_page));
+        });
+    });
+}
+
 async function requests() {
-    for (let i = 1; i <= 185; i++) {
+    let last_page = await checkPages();
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    for (let i = 1; i <= last_page; i++) {
         let options = {
             method: "GET",
             url: "https://www.robotevents.com/api/v2/teams?program=1&per_page=250&page=" + i + "&sort=team_number",
