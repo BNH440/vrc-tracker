@@ -103,9 +103,22 @@ Future<events.Event> getEventDetails(String eventId) async {
       var divIndex = i;
       var divId = div.id;
       var divResponse = await Requests.get(
-          "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches?per_page=1000", // events-divisions-matches-divx
+          "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches?per_page=250", // events-divisions-matches-divx
           headers: headers);
       var divDecoded = division.Div.fromJson(jsonDecode(divResponse.body));
+
+      var divDecoded2;
+      // New two page logic
+      if (divDecoded.meta!.total! > 250) {
+        var divResponse2 = await Requests.get(
+            "https://www.robotevents.com/api/v2/events/$eventId/divisions/$divId/matches?per_page=250&page=2", // events-divisions-matches-divx
+            headers: headers);
+        divDecoded2 = division.Div.fromJson(jsonDecode(divResponse2.body));
+      }
+
+      if (divDecoded2 != null) {
+        divDecoded.data!.addAll(divDecoded2!.data);
+      }
 
       divDecoded.data?.sort((a, b) => a.id!.compareTo(b.id!));
 

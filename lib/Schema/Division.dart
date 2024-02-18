@@ -61,7 +61,7 @@ class Meta {
     nextPageUrl = json['next_page_url'];
     path = json['path'];
     perPage = json['per_page'];
-    prevPageUrl = json['prev_page_url'];
+    // prevPageUrl = json['prev_page_url'];
     to = json['to'];
     total = json['total'];
   }
@@ -114,9 +114,7 @@ class Data {
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     event = json['event'] != null ? new Event.fromJson(json['event']) : null;
-    division = json['division'] != null
-        ? new Division.fromJson(json['division'])
-        : null;
+    division = json['division'] != null ? new Division.fromJson(json['division']) : null;
     round = json['round'];
     instance = json['instance'];
     matchnum = json['matchnum'];
