@@ -192,7 +192,7 @@ Future<Team> getTeam(String teamId) async {
 
 Future<List<TeamsSearch.Item>> getTeams(String query, String grade) async {
   var response =
-      await Requests.get("https://api.vrctracker.blakehaug.com/teams?search=$query&grade=$grade");
+      await Requests.get("https://v2.api.vrctracker.blakehaug.com/teams?search=$query&grade=$grade");
 
   List<TeamsSearch.Item> teams = [];
 
