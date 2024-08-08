@@ -9,7 +9,7 @@ export default {
     },
 };
 
-const seasonId = 181; // 173 for spin up
+const seasonId = 190; // 181 for 2023-2024 season
 
 async function handleRequest(request: Request<unknown>, env: Env) {
     const requestHeaders = {
