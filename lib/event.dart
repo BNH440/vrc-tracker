@@ -885,7 +885,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                               borderRadius:
                                                                   BorderRadius.circular(10),
                                                               color:
-                                                                  Theme.of(context).backgroundColor,
+                                                                  Theme.of(context).scaffoldBackgroundColor,
                                                             ),
                                                             padding: const EdgeInsets.all(10),
                                                             margin: const EdgeInsets.symmetric(
@@ -913,7 +913,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                                                               borderRadius:
                                                                   BorderRadius.circular(10),
                                                               color:
-                                                                  Theme.of(context).backgroundColor,
+                                                                  Theme.of(context).scaffoldBackgroundColor,
                                                             ),
                                                             padding: const EdgeInsets.all(10),
                                                             child: const Icon(Icons.link, size: 30),

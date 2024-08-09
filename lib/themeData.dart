@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class Styles {
   static ThemeData themeData(bool isDarkTheme, BuildContext context) {
     return ThemeData(
+      useMaterial3: false,
       primarySwatch: Colors.red,
       colorScheme: isDarkTheme
           ? const ColorScheme.dark(
@@ -10,7 +11,7 @@ class Styles {
           : ColorScheme.light(
               primary: Colors.red, secondary: Colors.red, tertiary: Colors.grey[800]),
       primaryColor: isDarkTheme ? Colors.black : Colors.white,
-      backgroundColor: isDarkTheme ? Colors.black : const Color(0xffF1F5FB),
+      scaffoldBackgroundColor: isDarkTheme ? Colors.black : const Color(0xffF1F5FB),
       indicatorColor: isDarkTheme ? const Color(0xff0E1D36) : const Color(0xffCBDCF8),
       hintColor: isDarkTheme ? const Color(0xff280C0B) : const Color(0xffEECED3),
       highlightColor: isDarkTheme ? const Color(0xff372901) : const Color(0xffFCE192),
