@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"vrc-tracker","appId":"1:276101714218:android:6fb28884a426033b2ece53","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"vrc-tracker","appId":"1:276101714218:ios:74adbf6931801af92ece53","uploadDebugSymbols":true,"fileOutput":"ios/Runner/GoogleService-Info.plist"}}}}}
