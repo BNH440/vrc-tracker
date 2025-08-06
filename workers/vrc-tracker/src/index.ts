@@ -9,7 +9,7 @@ export default {
     },
 };
 
-const seasonId = 190; // 181 for 2023-2024 season
+const seasonId = 197; // 181 for 2023-2024 season, 190 for 2024-2025 season
 
 async function handleRequest(request: Request<unknown>, env: Env) {
     const requestHeaders = {
